@@ -1,0 +1,14 @@
+# Node.js dependencies
+node_modules/
+
+# Local databases and locks
+database.json
+*.db
+*.db-journal
+
+# Environment variables
+.env
+
+# OS files
+.DS_Store
+Thumbs.db

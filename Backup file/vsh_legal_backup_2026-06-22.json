@@ -1,0 +1,475 @@
+{
+  "version": "1.0.0",
+  "settings": {
+    "firmName": "VSH Legal",
+    "lawyerName": "Adv. Vaibhav Sharma",
+    "currency": "INR",
+    "theme": "dark"
+  },
+  "clients": [
+    {
+      "id": "cl_1781788692855",
+      "name": "ARMI",
+      "type": "Individual",
+      "email": "armiindia007@gmail.com",
+      "phone": "9015289566",
+      "address": "New Advance Risk Management India Pvt. Ltd., B-43, Balaji Tower-1st, Vidhyadhar Nagar, VKI Sikar Road No.1, Sikar Road, Jaipur - 302039",
+      "onboardingDate": "2026-06-21",
+      "notes": ""
+    },
+    {
+      "id": "cl_1781790395987",
+      "name": "Ram Prakash Golyan",
+      "type": "Individual",
+      "email": "nehajain@raghavcapital.in",
+      "phone": "9887115678",
+      "address": "501, 506 and 507B, Crystal Mall, Banipark, Jaipur, 302016",
+      "onboardingDate": "2026-06-21",
+      "notes": ""
+    },
+    {
+      "id": "cl_1781786503189",
+      "name": "Vaibhav Sharma",
+      "type": "Individual",
+      "email": "vaibhavsharmarajhc@gmail.com",
+      "phone": "6350241374",
+      "address": "No address logged.",
+      "onboardingDate": "2026-06-21",
+      "notes": ""
+    },
+    {
+      "id": "c_1782042525452",
+      "name": "Akshay Maratha",
+      "type": "Individual",
+      "email": "",
+      "phone": "9887234233",
+      "address": "",
+      "onboardingDate": "2026-06-21",
+      "notes": ""
+    },
+    {
+      "id": "c_1782102223430",
+      "name": "Ram Manohar Agarwal",
+      "type": "Individual",
+      "email": "",
+      "phone": "9829053607",
+      "address": "",
+      "onboardingDate": "2026-06-22",
+      "notes": ""
+    },
+    {
+      "id": "c_1782102426851",
+      "name": "Rasheed Khan",
+      "type": "Individual",
+      "email": "",
+      "phone": "9057219475",
+      "address": "",
+      "onboardingDate": "2026-06-22",
+      "notes": ""
+    },
+    {
+      "id": "c_1782102796944",
+      "name": "RSRTC",
+      "type": "Corporate",
+      "email": "",
+      "phone": "1234567891",
+      "address": "",
+      "onboardingDate": "2026-06-22",
+      "notes": ""
+    }
+  ],
+  "cases": [
+    {
+      "id": "cs_1781788903324",
+      "clientId": "cl_1781788692855",
+      "caseNumber": "Civil Suit/766/2025",
+      "title": "Rudransh Support Society versus ML Spine",
+      "court": "JM - 17 Metro 1, Sanganer",
+      "caseType": "Civil",
+      "status": "Active",
+      "stage": "For providing copy of documents",
+      "nextHearingDate": "2026-08-13",
+      "description": "Purpose: For providing copy of documents",
+      "hearings": [
+        {
+          "id": "h_1781788903324",
+          "date": "2026-05-29",
+          "stage": "For providing copy of documents",
+          "notes": "Next listed stage: For providing copy of documents"
+        }
+      ],
+      "referredBy": "Mr. Girish Khemlani"
+    },
+    {
+      "id": "cs_1781790841020",
+      "clientId": "cl_1781788692855",
+      "caseNumber": "NA",
+      "title": "Legal notice to Subhash Gogia",
+      "court": "Legal notice",
+      "caseType": "Legal Notice",
+      "status": "Active",
+      "stage": "Initial Filing",
+      "nextHearingDate": null,
+      "description": "",
+      "hearings": [],
+      "referredBy": "Mr. Girish Khemlani"
+    },
+    {
+      "id": "cs_1782022203769",
+      "clientId": "cl_1781788692855",
+      "caseNumber": "NA",
+      "title": "Legal notice to KG Digital",
+      "court": "NA",
+      "caseType": "Legal Notice",
+      "status": "Active",
+      "stage": "Initial Filing",
+      "nextHearingDate": null,
+      "description": "",
+      "hearings": [],
+      "referredBy": "Mr. Girish Khemlani"
+    },
+    {
+      "id": "cs_1781790517578",
+      "clientId": "cl_1781790395987",
+      "caseNumber": "S.B. CFA/743/2004",
+      "title": "State versus Ram Prakash",
+      "court": "Rajasthan High Court",
+      "caseType": "Civil",
+      "status": "Active",
+      "stage": "Reply/arguments on application",
+      "nextHearingDate": "2026-08-04",
+      "description": "Purpose: Reply/arguments on application",
+      "hearings": [
+        {
+          "id": "h_1781790606006",
+          "date": "2026-06-21",
+          "stage": "Reply/arguments on application",
+          "notes": "Next listed stage: Reply/arguments on application"
+        }
+      ],
+      "referredBy": "CA Mohit Golyan"
+    },
+    {
+      "id": "case_1782040316078",
+      "clientId": "cl_1781786503189",
+      "caseNumber": "X",
+      "title": "X",
+      "court": "X",
+      "caseType": "Civil",
+      "referredBy": "Self",
+      "status": "Active",
+      "stage": "Register",
+      "nextHearingDate": "2026-06-21",
+      "description": "",
+      "hearings": [
+        {
+          "id": "h_1782040316079",
+          "date": "2026-06-21",
+          "stage": "Register",
+          "notes": "Case registered. First hearing listed on: 2026-06-21"
+        }
+      ]
+    },
+    {
+      "id": "case_1782042525455",
+      "clientId": "c_1782042525452",
+      "caseNumber": "CRLMP/1548/2026",
+      "title": "Akshay Maratha versus State",
+      "court": "Rajasthan High Court",
+      "caseType": "Criminal",
+      "referredBy": "Adv. Amlendu Sharma",
+      "status": "Active",
+      "stage": "Notice served",
+      "nextHearingDate": null,
+      "description": "FIR Quashing",
+      "hearings": []
+    },
+    {
+      "id": "case_1782102223430",
+      "clientId": "c_1782102223430",
+      "caseNumber": "CW/3936/2026",
+      "title": "Shri Narsingh Arcade Vikas Samiti versus JDA",
+      "court": "Rajasthan High Court",
+      "caseType": "Civil",
+      "referredBy": "Hiteshi Agrawal",
+      "status": "Active",
+      "stage": "Notice served",
+      "nextHearingDate": null,
+      "description": "",
+      "hearings": []
+    },
+    {
+      "id": "case_1782102293248",
+      "clientId": "c_1782102223430",
+      "caseNumber": "CRLW/1548/2025",
+      "title": "Tara Chand versus State",
+      "court": "Rajasthan High Court",
+      "caseType": "Criminal",
+      "referredBy": "Hiteshi Agrawal",
+      "status": "Active",
+      "stage": "Register",
+      "nextHearingDate": "2026-06-29",
+      "description": "",
+      "hearings": [
+        {
+          "id": "h_1782102293249",
+          "date": "2026-06-22",
+          "stage": "Register",
+          "notes": "Case registered. First hearing listed on: 2026-06-29"
+        }
+      ]
+    },
+    {
+      "id": "case_1782102426851",
+      "clientId": "c_1782102426851",
+      "caseNumber": "CRLMB/8304/2026",
+      "title": "Sohil versus State",
+      "court": "Rajasthan High Court",
+      "caseType": "Criminal",
+      "referredBy": "Adv. Shaukat Khan",
+      "status": "Active",
+      "stage": "Arguments",
+      "nextHearingDate": null,
+      "description": "",
+      "hearings": []
+    },
+    {
+      "id": "case_1782102481248",
+      "clientId": "c_1782102426851",
+      "caseNumber": "CRLMB/8305/2026",
+      "title": "Asik versus State",
+      "court": "Rajasthan High Court",
+      "caseType": "Criminal",
+      "referredBy": "Adv. Shaukat Khan",
+      "status": "Active",
+      "stage": "Register",
+      "nextHearingDate": "2026-07-03",
+      "description": "",
+      "hearings": [
+        {
+          "id": "h_1782102481249",
+          "date": "2026-06-22",
+          "stage": "Register",
+          "notes": "Case registered. First hearing listed on: 2026-07-03"
+        }
+      ]
+    },
+    {
+      "id": "case_1782102796944",
+      "clientId": "c_1782102796944",
+      "caseNumber": "CW/20771/2025",
+      "title": "Gudli Kanwar versus RSRTC",
+      "court": "Rajasthan High Court",
+      "caseType": "Civil",
+      "referredBy": "Self",
+      "status": "Active",
+      "stage": "Notice served - Reply to be filed",
+      "nextHearingDate": null,
+      "description": "",
+      "hearings": []
+    },
+    {
+      "id": "case_1782102925570",
+      "clientId": "c_1782102796944",
+      "caseNumber": "CW/15819/2024",
+      "title": "Prem Singh versus RSRTC",
+      "court": "Rajasthan High Court",
+      "caseType": "Civil",
+      "referredBy": "Self",
+      "status": "Active",
+      "stage": "Register",
+      "nextHearingDate": "2026-09-02",
+      "description": "",
+      "hearings": [
+        {
+          "id": "h_1782102925571",
+          "date": "2026-06-22",
+          "stage": "Register",
+          "notes": "Case registered. First hearing listed on: 2026-09-02"
+        }
+      ]
+    }
+  ],
+  "transactions": [
+    {
+      "id": "t_billed_cs_1781788903324",
+      "clientId": "cl_1781788692855",
+      "caseId": "cs_1781788903324",
+      "date": "2026-06-18",
+      "amount": 13000,
+      "type": "Billed",
+      "description": "Billed Professional Fees"
+    },
+    {
+      "id": "t_disbursed_cs_1781788903324",
+      "clientId": "cl_1781788692855",
+      "caseId": "cs_1781788903324",
+      "date": "2026-06-18",
+      "amount": 2500,
+      "type": "Disbursed",
+      "description": "Billed Court Expenses (Disbursed)"
+    },
+    {
+      "id": "pay_1781789000022",
+      "clientId": "cl_1781788692855",
+      "caseId": "cs_1781788903324",
+      "date": "2026-06-18",
+      "amount": 2500,
+      "type": "Received",
+      "description": "Custom receipt logged via workspace"
+    },
+    {
+      "id": "pay_1781789256158",
+      "clientId": "cl_1781788692855",
+      "caseId": "cs_1781788903324",
+      "date": "2026-06-18",
+      "amount": 6500,
+      "type": "Received",
+      "description": "Custom receipt logged via workspace"
+    },
+    {
+      "id": "t_billed_cs_1781790841020",
+      "clientId": "cl_1781788692855",
+      "caseId": "cs_1781790841020",
+      "date": "2026-06-17",
+      "amount": 1500,
+      "type": "Billed",
+      "description": "Billed Professional Fees"
+    },
+    {
+      "id": "pay_1781790854030",
+      "clientId": "cl_1781788692855",
+      "caseId": "cs_1781790841020",
+      "date": "2026-06-17",
+      "amount": 1500,
+      "type": "Received",
+      "description": "Custom receipt logged via workspace"
+    },
+    {
+      "id": "t_billed_cs_1782022203769",
+      "clientId": "cl_1781788692855",
+      "caseId": "cs_1782022203769",
+      "date": "2026-06-21",
+      "amount": 1500,
+      "type": "Billed",
+      "description": "Billed Professional Fees"
+    },
+    {
+      "id": "t_billed_cs_1781790517578",
+      "clientId": "cl_1781790395987",
+      "caseId": "cs_1781790517578",
+      "date": "2026-06-17",
+      "amount": 15000,
+      "type": "Billed",
+      "description": "Billed Professional Fees"
+    },
+    {
+      "id": "t_disbursed_cs_1781790517578",
+      "clientId": "cl_1781790395987",
+      "caseId": "cs_1781790517578",
+      "date": "2026-06-17",
+      "amount": 2500,
+      "type": "Disbursed",
+      "description": "Billed Court Expenses (Disbursed)"
+    },
+    {
+      "id": "pay_1781790544789",
+      "clientId": "cl_1781790395987",
+      "caseId": "cs_1781790517578",
+      "date": "2026-06-17",
+      "amount": 2500,
+      "type": "Received",
+      "description": "Custom receipt logged via workspace"
+    },
+    {
+      "id": "pay_1781790549910",
+      "clientId": "cl_1781790395987",
+      "caseId": "cs_1781790517578",
+      "date": "2026-06-17",
+      "amount": 7500,
+      "type": "Received",
+      "description": "Custom receipt logged via workspace"
+    },
+    {
+      "id": "t_1782041057997",
+      "clientId": "cl_1781786503189",
+      "caseId": "case_1782040316078",
+      "date": "2026-06-21",
+      "amount": 1000,
+      "type": "Billed",
+      "description": "abc"
+    },
+    {
+      "id": "t_1782041077273",
+      "clientId": "cl_1781786503189",
+      "caseId": "case_1782040316078",
+      "date": "2026-06-21",
+      "amount": 1000,
+      "type": "WrittenOff",
+      "description": "Write-off bad debt (Client fled: X)"
+    },
+    {
+      "id": "t_1782042525456",
+      "clientId": "c_1782042525452",
+      "caseId": "case_1782042525455",
+      "date": "2026-06-21",
+      "amount": 25000,
+      "type": "Billed",
+      "description": "Complete fee"
+    },
+    {
+      "id": "t_1782042566097",
+      "clientId": "c_1782042525452",
+      "caseId": "case_1782042525455",
+      "date": "2026-05-30",
+      "amount": 25000,
+      "type": "Received",
+      "description": "Complete fee"
+    },
+    {
+      "id": "t_1782102558905",
+      "clientId": "c_1782102426851",
+      "caseId": null,
+      "date": "2026-06-10",
+      "amount": 7500,
+      "type": "Received",
+      "description": "Total fee"
+    },
+    {
+      "id": "t_1782102577244",
+      "clientId": "c_1782102426851",
+      "caseId": "case_1782102481248",
+      "date": "2026-06-22",
+      "amount": 5000,
+      "type": "Disbursed",
+      "description": "Expenses"
+    },
+    {
+      "id": "t_1782102605490",
+      "clientId": "c_1782102426851",
+      "caseId": "case_1782102426851",
+      "date": "2026-06-10",
+      "amount": 7500,
+      "type": "Received",
+      "description": "Total fee"
+    },
+    {
+      "id": "t_1782102625406",
+      "clientId": "c_1782102426851",
+      "caseId": "case_1782102426851",
+      "date": "2026-06-10",
+      "amount": 5000,
+      "type": "Disbursed",
+      "description": "Expenses"
+    },
+    {
+      "id": "t_1782102796945",
+      "clientId": "c_1782102796944",
+      "caseId": "case_1782102796944",
+      "date": "2026-06-22",
+      "amount": 7500,
+      "type": "Billed",
+      "description": "Professional fee"
+    }
+  ]
+}

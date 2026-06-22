@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VSH Legal - Case & Practice Manager</title>
+  <!-- SEO & Styling Meta -->
+  <meta name="description" content="Premium Case Diary, Billing, Client Onboarding, and Practice Management Suite for VSH Legal.">
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar">
+      <div class="brand-section">
+        <div class="brand-logo">V</div>
+        <div class="brand-meta">
+          <span class="brand-name">VSH Legal</span>
+          <span class="brand-subtitle">Practice Manager</span>
+        </div>
+      </div>
+
+      <!-- Lawyer Badge -->
+      <div class="lawyer-profile">
+        <div class="lawyer-avatar">VS</div>
+        <div class="lawyer-info">
+          <span class="lawyer-name">Adv. V. Sharma</span>
+          <span class="lawyer-title">Senior Counsel</span>
+        </div>
+      </div>
+
+      <!-- Main Navigation Menu -->
+      <ul class="sidebar-menu">
+        <li class="menu-item active" data-target="dashboard-page">
+          <a href="#"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+        </li>
+        <li class="menu-item" data-target="clients-page">
+          <a href="#"><i data-lucide="users"></i> Clients Onboarding</a>
+        </li>
+        <li class="menu-item" data-target="cases-page">
+          <a href="#"><i data-lucide="briefcase"></i> Case Registry</a>
+        </li>
+        <li class="menu-item" data-target="diary-page">
+          <a href="#"><i data-lucide="calendar"></i> Daily Diary</a>
+        </li>
+        <li class="menu-item" data-target="accounts-page">
+          <a href="#"><i data-lucide="wallet"></i> Accounts & Income</a>
+        </li>
+        <li class="menu-item" data-target="share-page">
+          <a href="#"><i data-lucide="share-2"></i> Client Share</a>
+        </li>
+        <li class="menu-item" data-target="settings-page">
+          <a href="#"><i data-lucide="settings"></i> System Settings</a>
+        </li>
+      </ul>
+
+      <!-- Sidebar Footer Operations -->
+      <div class="sidebar-footer">
+        <button class="backup-btn" id="sidebar-logout-btn" style="margin-bottom: 0.5rem; background-color: var(--color-danger); color: #fff; border-color: var(--color-danger); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+          <i data-lucide="log-out"></i> Log Out
+        </button>
+        <button class="backup-btn" id="sidebar-backup-btn">
+          <i data-lucide="download"></i> Backup Data (JSON)
+        </button>
+        <div class="theme-toggle-btn">
+          <i data-lucide="sun" id="theme-icon-light" style="display:none;"></i>
+          <i data-lucide="moon" id="theme-icon-dark"></i>
+          <span id="theme-toggle-text">Dark Mode</span>
+          <div class="toggle-switch-wrapper" style="margin-left: auto;">
+            <label class="switch">
+              <input type="checkbox" id="theme-toggle-checkbox" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Canvas -->
+    <main class="app-main">
+      <!-- App Header -->
+      <header class="app-header">
+        <div class="page-title-section">
+          <h2 id="header-page-title">Dashboard</h2>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-primary" id="header-quick-action-btn">
+            <i data-lucide="plus"></i> <span>Quick Action</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Dashboard View Container -->
+      <div id="dashboard-page" class="page-container active">
+        <!-- KPI Row -->
+        <div class="grid-cols-4" id="dashboard-kpis">
+          <!-- Active Cases -->
+          <div class="card kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Active Cases</span>
+              <span class="kpi-value" id="kpi-active-cases">0</span>
+            </div>
+            <div class="kpi-icon-wrapper info"><i data-lucide="gavel"></i></div>
+          </div>
+          <!-- Onboarded Clients -->
+          <div class="card kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Active Clients</span>
+              <span class="kpi-value" id="kpi-active-clients">0</span>
+            </div>
+            <div class="kpi-icon-wrapper"><i data-lucide="users"></i></div>
+          </div>
+          <!-- Monthly Income -->
+          <div class="card kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Monthly Income</span>
+              <span class="kpi-value" id="kpi-monthly-income">₹0</span>
+            </div>
+            <div class="kpi-icon-wrapper success"><i data-lucide="trending-up"></i></div>
+          </div>
+          <!-- Annual Income -->
+          <div class="card kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Annual Income</span>
+              <span class="kpi-value" id="kpi-annual-income">₹0</span>
+            </div>
+            <div class="kpi-icon-wrapper success"><i data-lucide="wallet"></i></div>
+          </div>
+          <!-- Outstanding Fees -->
+          <div class="card kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Outstanding Fees</span>
+              <span class="kpi-value" id="kpi-outstanding-fees">₹0</span>
+            </div>
+            <div class="kpi-icon-wrapper danger"><i data-lucide="alert-circle"></i></div>
+          </div>
+        </div>
+
+        <!-- Charts Layout -->
+        <div class="grid-cols-2">
+          <div class="card">
+            <div class="section-header">
+              <h3>Case Type Breakdown</h3>
+            </div>
+            <canvas id="caseTypeChart" style="max-height: 250px; width: 100%;"></canvas>
+          </div>
+          <div class="card">
+            <div class="section-header">
+              <h3>Revenue by Case Type</h3>
+            </div>
+            <canvas id="revenueByCaseTypeChart" style="max-height: 250px; width: 100%;"></canvas>
+          </div>
+        </div>
+
+        <!-- Today's Schedule & Pending Dues -->
+        <div class="grid-cols-2">
+          <!-- Today's Hearings Diary Peek -->
+          <div class="card">
+            <div class="section-header">
+              <h3>Today's Hearings Diary</h3>
+              <a href="#" class="btn btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;" id="dashboard-view-diary-link">View Full Diary</a>
+            </div>
+            <div class="table-responsive" style="max-height: 250px;">
+              <table class="table-custom">
+                <thead>
+                  <tr>
+                    <th>Case Details</th>
+                    <th>Court</th>
+                    <th>Stage</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboard-hearings-table-body">
+                  <tr><td colspan="3" style="text-align:center;" class="text-muted">No hearings scheduled for today</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Quick High Outstanding Balance Ledger -->
+          <div class="card">
+            <div class="section-header">
+              <h3>High Outstanding Dues</h3>
+              <a href="#" class="btn btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;" id="dashboard-view-accounts-link">View Finances</a>
+            </div>
+            <div class="table-responsive" style="max-height: 250px;">
+              <table class="table-custom">
+                <thead>
+                  <tr>
+                    <th>Client Name</th>
+                    <th>Total Billed</th>
+                    <th>Pending Dues</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboard-dues-table-body">
+                  <tr><td colspan="4" style="text-align:center;" class="text-muted">All balances settled</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Referral Network & Revenue Contributions -->
+        <div class="card" style="margin-top: 1.5rem;">
+          <div class="section-header" style="border-bottom:1px solid var(--border-color); padding-bottom:0.75rem; margin-bottom:1rem;">
+            <div>
+              <h3 style="font-family:'Playfair Display', serif; font-size:1.25rem;">Referral Network & Revenue Contributions</h3>
+              <span style="font-size:0.75rem; color:var(--text-secondary);">Summary of cases referred by contacts and their revenue contributions</span>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table-custom">
+              <thead>
+                <tr>
+                  <th>Referrer Name</th>
+                  <th>Referred Cases Count</th>
+                  <th>Total Revenue Contributed (₹)</th>
+                  <th>Referred Cases List</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-referrals-table-body">
+                <tr><td colspan="4" style="text-align:center;" class="text-muted">No referral details logged in system</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clients Onboarding & Directory View Container -->
+      <div id="clients-page" class="page-container">
+        <div class="grid-cols-3" style="grid-template-columns: 1fr 2fr; gap: 2rem;">
+          
+          <!-- Onboarding Wizard -->
+          <div class="card" style="height: fit-content;">
+            <div class="section-header">
+              <h3>Onboard Client Wizard</h3>
+            </div>
+            
+            <div class="wizard-steps">
+              <div class="wizard-step active" id="wiz-step-1">1</div>
+              <div class="wizard-step" id="wiz-step-2">2</div>
+              <div class="wizard-step" id="wiz-step-3">3</div>
+            </div>
+
+            <form id="onboard-client-form">
+              <!-- Step 1: Client Profile -->
+              <div class="wizard-form-step active" id="wiz-content-1">
+                <h4 style="margin-bottom:1rem; font-size:1rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Client Profile</h4>
+                <div class="form-group">
+                  <label class="form-label">Client Full Name *</label>
+                  <input type="text" class="form-control" id="client-name" required placeholder="Rajesh Kumar, Acme Inc, etc.">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Client Type</label>
+                  <select class="form-control" id="client-type">
+                    <option value="Individual">Individual</option>
+                    <option value="Corporate">Corporate / Organization</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email Address</label>
+                  <input type="email" class="form-control" id="client-email" placeholder="client@example.com">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Phone Number *</label>
+                  <input type="tel" class="form-control" id="client-phone" required placeholder="+91 98765 43210">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Office/Residential Address</label>
+                  <textarea class="form-control" id="client-address" rows="2" placeholder="Enter postal address..."></textarea>
+                </div>
+                <button type="button" class="btn btn-primary" style="width:100%; margin-top:0.5rem;" id="wiz-next-1">Next: Case Setup <i data-lucide="arrow-right"></i></button>
+              </div>
+
+              <!-- Step 2: Linked Case Details -->
+              <div class="wizard-form-step" id="wiz-content-2" style="display:none;">
+                <h4 style="margin-bottom:1rem; font-size:1rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Initial Case Registration</h4>
+                <div class="form-group">
+                  <label class="form-label">Case Title / Reference *</label>
+                  <input type="text" class="form-control" id="case-title" placeholder="Client vs Opponent Name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Case/CNR Number (If Assigned)</label>
+                  <input type="text" class="form-control" id="case-number" placeholder="CS/401/2026 or CNR">
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Court / Forum</label>
+                    <input type="text" class="form-control" id="case-court" placeholder="Saket Court, High Court, etc.">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Case Category</label>
+                    <select class="form-control" id="case-type">
+                      <option value="Civil">Civil</option>
+                      <option value="Criminal">Criminal</option>
+                      <option value="Matrimonial">Matrimonial</option>
+                      <option value="Consumer">Consumer</option>
+                      <option value="Service">Service</option>
+                      <option value="Legal Notice">Legal Notice</option>
+                      <option value="Contracts">Contracts</option>
+                      <option value="Consultation">Consultation</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Current Stage</label>
+                  <input type="text" class="form-control" id="case-stage" value="Filing" placeholder="Evidence, Arguments, Filing, Summons...">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Referred By</label>
+                  <input type="text" class="form-control" id="case-referred-by" list="referral-partners-list" placeholder="e.g. Adv. Gupta, Rohan Mehta, Self">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Brief Case Overview</label>
+                  <textarea class="form-control" id="case-description" rows="2" placeholder="Summary of claims, damages, or defense..."></textarea>
+                </div>
+                <div class="form-row">
+                  <button type="button" class="btn btn-secondary" style="flex:1;" id="wiz-back-2"><i data-lucide="arrow-left"></i> Profile</button>
+                  <button type="button" class="btn btn-primary" style="flex:1;" id="wiz-next-2">Next: Billing <i data-lucide="arrow-right"></i></button>
+                </div>
+              </div>
+
+              <!-- Step 3: Billing Retainer & Conflict Verification -->
+              <div class="wizard-form-step" id="wiz-content-3" style="display:none;">
+                <h4 style="margin-bottom:1rem; font-size:1rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Retainer & Conflict Verification</h4>
+                <div class="form-group">
+                  <label class="form-label">Professional Retainer Fee (₹) *</label>
+                  <input type="number" class="form-control" id="billing-amount" value="50000" min="0">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Retainer Description</label>
+                  <input type="text" class="form-control" id="billing-desc" value="Initial Professional Retainer Fee" placeholder="Retainer details...">
+                </div>
+                <div class="form-group" style="margin-top:1.5rem;">
+                  <label class="form-label" style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                    <input type="checkbox" id="conflict-check" required>
+                    <span>Conflict-of-Interest Check Verified *</span>
+                  </label>
+                  <small style="display:block; color:var(--text-muted); margin-top:0.2rem;">Verify VSH Legal does not represent opponents or conflict with corporate relationships.</small>
+                </div>
+                <div class="form-row" style="margin-top:1.5rem;">
+                  <button type="button" class="btn btn-secondary" style="flex:1;" id="wiz-back-3"><i data-lucide="arrow-left"></i> Case Info</button>
+                  <button type="submit" class="btn btn-primary" style="flex:1;"><i data-lucide="check-circle"></i> Onboard</button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Active Onboarded Clients Directory -->
+          <div class="card" style="display:flex; flex-direction:column; justify-content:space-between; height:100%;">
+            <div class="section-header">
+              <h3>Client Directory</h3>
+              <div class="search-filter-bar" style="margin-bottom: 0;">
+                <div class="search-wrapper">
+                  <i data-lucide="search" class="search-icon"></i>
+                  <input type="text" class="form-control search-input" id="client-search-input" placeholder="Search by name, email or phone...">
+                </div>
+                <select class="form-control" id="client-filter-type" style="width:130px;">
+                  <option value="All">All Types</option>
+                  <option value="Individual">Individual</option>
+                  <option value="Corporate">Corporate</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-responsive" style="flex: 1; min-height: 400px; max-height: 520px; overflow-y:auto;">
+              <table class="table-custom">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Contact Info</th>
+                    <th>Onboarded</th>
+                    <th>Outstanding Balance</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="client-list-table-body">
+                  <!-- Javascript updates -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Case Registry View Container -->
+      <div id="cases-page" class="page-container">
+        <!-- Toolbar & Filter Options -->
+        <div class="card" style="margin-bottom:1.5rem; padding: 1rem;">
+          <div class="search-filter-bar" style="margin-bottom: 0; align-items:center;">
+            <div class="search-wrapper">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" class="form-control search-input" id="case-search-input" placeholder="Search cases by title, court, CNR...">
+            </div>
+            <select class="form-control" id="case-filter-status" style="width:130px;">
+              <option value="All">All Statuses</option>
+              <option value="Active">Active</option>
+              <option value="Closed">Closed</option>
+            </select>
+            <select class="form-control" id="case-filter-category" style="width:150px;">
+              <option value="All">All Categories</option>
+              <option value="Civil">Civil</option>
+              <option value="Criminal">Criminal</option>
+              <option value="Matrimonial">Matrimonial</option>
+              <option value="Consumer">Consumer</option>
+              <option value="Service">Service</option>
+              <option value="Legal Notice">Legal Notice</option>
+              <option value="Contracts">Contracts</option>
+              <option value="Consultation">Consultation</option>
+            </select>
+            <button class="btn btn-primary" id="btn-add-case"><i data-lucide="plus"></i> Register Case</button>
+          </div>
+        </div>
+
+        <!-- Cases Grid -->
+        <div class="grid-cols-3" id="cases-grid-list">
+          <!-- Javascript updates -->
+        </div>
+      </div>
+
+      <!-- Diary Views Container -->
+      <div id="diary-page" class="page-container">
+        <div class="card">
+          <!-- Calendar Controller Interface -->
+          <div class="diary-controls">
+            <!-- Calendar Navigation -->
+            <div class="calendar-navigation">
+              <button class="btn btn-secondary" style="padding:0.4rem 0.8rem;" id="diary-prev-btn"><i data-lucide="chevron-left"></i></button>
+              <button class="btn btn-secondary" style="padding:0.4rem 0.8rem;" id="diary-today-btn">Today</button>
+              <button class="btn btn-secondary" style="padding:0.4rem 0.8rem;" id="diary-next-btn"><i data-lucide="chevron-right"></i></button>
+              <span class="current-view-label" id="diary-current-label">June 2026</span>
+              <button class="btn btn-secondary" style="padding:0.4rem 0.8rem; margin-left:0.5rem;" id="diary-print-btn" title="Print Diary"><i data-lucide="printer"></i> Print</button>
+            </div>
+
+            <!-- View toggle (Day, Week, Month, Year) -->
+            <div class="calendar-view-selector">
+              <button class="view-btn" data-view="day" id="view-day-btn">Day</button>
+              <button class="view-btn" data-view="week" id="view-week-btn">Week</button>
+              <button class="view-btn active" data-view="month" id="view-month-btn">Month</button>
+              <button class="view-btn" data-view="year" id="view-year-btn">Year</button>
+            </div>
+          </div>
+
+          <!-- Dynamic Calendar View Wrapper -->
+          <div id="diary-views-content" style="min-height: 480px;">
+            <!-- Rendering grids dynamically in diary.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Accounts Ledger and professional billing tracker -->
+      <div id="accounts-page" class="page-container">
+        <!-- Account Overview Panel -->
+        <div class="grid-cols-4" style="margin-bottom:1.5rem;">
+          <div class="card kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Cumulative Income</span>
+              <span class="kpi-value" id="ledger-cumulative-income">₹0</span>
+            </div>
+            <div class="kpi-icon-wrapper success"><i data-lucide="wallet"></i></div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Professional Fees Billed</span>
+              <span class="kpi-value" id="ledger-fees-billed">₹0</span>
+            </div>
+            <div class="kpi-icon-wrapper"><i data-lucide="file-text"></i></div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Disbursements Billed</span>
+              <span class="kpi-value" id="ledger-disbursements-billed">₹0</span>
+            </div>
+            <div class="kpi-icon-wrapper info"><i data-lucide="receipt"></i></div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Unpaid Dues</span>
+              <span class="kpi-value" id="ledger-unpaid-dues">₹0</span>
+            </div>
+            <div class="kpi-icon-wrapper danger"><i data-lucide="alert-triangle"></i></div>
+          </div>
+        </div>
+
+        <!-- Professional Income Chart Card -->
+        <div class="card" style="margin-bottom: 1.5rem; padding: 1.25rem;">
+          <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border-color); padding-bottom:0.5rem;">
+            <h3 style="font-family:'Playfair Display', serif; font-size:1.15rem; margin:0;">Professional Income Analysis</h3>
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <span style="font-size:0.8rem; color:var(--text-secondary);">View:</span>
+              <select class="form-control" id="income-chart-view-select" style="width:180px; padding:0.25rem 0.5rem; font-size:0.8rem; height:auto;">
+                <option value="2026">Current Year (2026)</option>
+                <option value="2025">Year 2025</option>
+                <option value="2024">Year 2024</option>
+                <option value="year-wise">Year-Wise Comparison</option>
+              </select>
+            </div>
+          </div>
+          <div style="position: relative; height: 250px; width: 100%;">
+            <canvas id="incomeChart" style="max-height: 250px; width: 100%;"></canvas>
+          </div>
+        </div>
+
+        <!-- Ledger operations and filters -->
+        <div class="card" style="margin-bottom:1.5rem; padding: 1.25rem;">
+          <div class="search-filter-bar" style="margin-bottom:0; align-items:center;">
+            <select class="form-control" id="ledger-filter-client" style="flex:1;">
+              <option value="All">All Clients</option>
+            </select>
+            <select class="form-control" id="ledger-filter-type" style="width:180px;">
+              <option value="All">All Transactions</option>
+              <option value="Billed">Professional Fees (Billed)</option>
+              <option value="Received">Payments Received</option>
+              <option value="Disbursed">Disbursed Expenses</option>
+              <option value="WrittenOff">Written Off / Bad Debt</option>
+            </select>
+            <button class="btn btn-primary" id="btn-log-transaction"><i data-lucide="plus-circle"></i> Log Financial Entry</button>
+          </div>
+        </div>
+
+        <!-- Finances Ledger Table -->
+        <div class="card">
+          <div class="table-responsive">
+            <table class="table-custom">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Client & Case Context</th>
+                  <th>Description</th>
+                  <th>Transaction Category</th>
+                  <th>Debit / Billed (₹)</th>
+                  <th>Credit / Paid (₹)</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ledger-table-body">
+                <!-- Javascript updates -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Share Status Updates and client integration Center -->
+      <div id="share-page" class="page-container">
+        <div class="grid-cols-2">
+          
+          <!-- Sharing Details setup -->
+          <div class="card">
+            <div class="section-header">
+              <h3>Client Intimation Assistant</h3>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Select Client *</label>
+              <select class="form-control" id="share-client-select">
+                <!-- Javascript updates -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Select Linked Case *</label>
+              <select class="form-control" id="share-case-select">
+                <option value="">No cases registered for client</option>
+              </select>
+            </div>
+
+            <!-- Card customization controls -->
+            <div class="form-group">
+              <label class="form-label">Hearing Status Summary / Directives</label>
+              <textarea class="form-control" id="share-status-summary" rows="3" placeholder="e.g. Injunction granted, listed for arguments on evidence. Please ensure files are ready..."></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Confirm Next Date</label>
+                <input type="date" class="form-control" id="share-next-date">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Confirm Outstanding Fees (₹)</label>
+                <input type="number" class="form-control" id="share-fee-confirm" value="0">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
+              <button class="btn btn-primary" style="width:100%;" id="btn-generate-share"><i data-lucide="refresh-cw"></i> Generate Message & Share Card</button>
+            </div>
+          </div>
+
+          <!-- Share card visualizer and dispatch tools -->
+          <div class="card" style="display:flex; flex-direction:column; gap:1.25rem;">
+            <div class="section-header">
+              <h3>Preview Card & Message Templates</h3>
+            </div>
+
+            <!-- Digital Preview -->
+            <div class="card share-preview-card" id="share-preview-card-view">
+              <div class="share-brand">
+                <strong style="color:var(--color-primary); font-family:'Playfair Display', serif;">VSH Legal</strong>
+                <span style="font-size:0.7rem; color:var(--text-muted);">Adv. Vaibhav Sharma</span>
+              </div>
+              <div class="share-body" id="share-card-body-render">
+                <div style="text-align:center; padding:1.5rem 0;" class="text-muted">
+                  <i data-lucide="info" style="width:36px; height:36px; stroke-width:1.5; color:var(--color-primary); margin-bottom:0.5rem; display:inline-block;"></i>
+                  <p>Choose client & case and click 'Generate' to create share templates.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pre-formatted Text for Clipboard copy -->
+            <div class="form-group">
+              <label class="form-label">Generated SMS / WhatsApp Text (Unicode)</label>
+              <textarea class="form-control share-textarea" id="share-text-rendered" readonly></textarea>
+            </div>
+
+            <!-- Actions to share -->
+            <div class="share-actions-group">
+              <button class="btn btn-secondary" id="btn-copy-clipboard"><i data-lucide="copy"></i> Copy Message to Clipboard</button>
+              <div class="form-row">
+                <a href="#" class="share-channel-btn btn-whatsapp" id="btn-share-whatsapp" target="_blank"><i data-lucide="message-square"></i> Send via WhatsApp</a>
+                <a href="#" class="share-channel-btn btn-email-share" id="btn-share-email" target="_blank"><i data-lucide="mail"></i> Send via Email</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings & Backups View Container -->
+      <div id="settings-page" class="page-container">
+        <div class="grid-cols-2">
+          
+          <!-- Practice Branding Customizer -->
+          <div class="card">
+            <div class="section-header">
+              <h3>Practice Customizer & Identity</h3>
+            </div>
+            <form id="settings-profile-form">
+              <div class="form-group">
+                <label class="form-label">Firm Name</label>
+                <input type="text" class="form-control" id="settings-firm-name" value="VSH Legal" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Lead Counsel / Lawyer Name</label>
+                <input type="text" class="form-control" id="settings-lawyer-name" value="Adv. Vaibhav Sharma" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Practice Currency</label>
+                  <select class="form-control" id="settings-currency">
+                    <option value="INR">Indian Rupee (₹)</option>
+                    <option value="USD">US Dollar ($)</option>
+                    <option value="GBP">British Pound (£)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Interface Language</label>
+                  <select class="form-control" id="settings-lang">
+                    <option value="en">English</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" style="margin-top:0.5rem;"><i data-lucide="save"></i> Save Practice Identity</button>
+            </form>
+          </div>
+
+          <!-- Data backup storage import/export -->
+          <div class="card">
+            <div class="section-header">
+              <h3>Database Storage & Backup Manager</h3>
+            </div>
+            
+            <div class="settings-section">
+              <h4 class="settings-section-title">Data Backup (JSON Export)</h4>
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1rem;">
+                Download your complete onboarding details, case notes, diary logs, and income ledgers. 
+                You can save this file securely on your computer as a database snapshot.
+              </p>
+              <button class="btn btn-primary" id="settings-backup-export-btn"><i data-lucide="download"></i> Download Backup File</button>
+            </div>
+
+            <div class="settings-section" style="margin-top:2rem;">
+              <h4 class="settings-section-title">Restore Database (JSON Import)</h4>
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1rem;">
+                Select a previously downloaded `.json` backup file to overwrite/restore the practice database. 
+                <strong style="color:var(--color-danger);">Warning:</strong> This will replace all existing entries.
+              </p>
+              <div style="display:flex; gap:0.5rem; align-items:center;">
+                <input type="file" id="settings-backup-file-input" accept=".json" style="display:none;">
+                <button class="btn btn-secondary" onclick="document.getElementById('settings-backup-file-input').click();">
+                  <i data-lucide="folder-open"></i> Select Backup File
+                </button>
+                <span id="selected-backup-filename" style="font-size:0.8rem; color:var(--text-muted);">No file selected</span>
+                <button class="btn btn-danger" id="settings-backup-import-btn" disabled><i data-lucide="upload-cloud"></i> Restore</button>
+              </div>
+            </div>
+
+            <div class="settings-section" style="margin-top:2.5rem; border-top:1px solid var(--border-color); padding-top:1rem;">
+              <h4 class="settings-section-title" style="color:var(--color-danger);">Factory Reset Practice Data</h4>
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1rem;">
+                Completely erase all clients, cases, diaries, and transactions. Resets the application to fresh mock seed states.
+              </p>
+              <button class="btn btn-danger" id="settings-reset-database-btn"><i data-lucide="refresh-cw"></i> Reset Database</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Global Modal Overlays (Direct Siblings of body for viewport safety) -->
+  
+  <!-- Client Profile Details dossier modal display -->
+  <div id="client-dossier-overlay" class="modal-overlay">
+    <div class="modal-container" style="max-width:800px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="client-dossier-title">Client Dossier</h3>
+        <button class="modal-close" id="client-dossier-close">&times;</button>
+      </div>
+      <div class="modal-body" id="client-dossier-body">
+        <!-- Rendered via JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="client-dossier-edit-btn"><i data-lucide="edit-3"></i> Edit Profile</button>
+        <button class="btn btn-secondary" id="client-dossier-print-btn"><i data-lucide="printer"></i> Print Statement</button>
+        <button class="btn btn-primary" id="client-dossier-close-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Case Registration Modal -->
+  <div id="add-case-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">Register New Case</h3>
+        <button class="modal-close" id="add-case-close">&times;</button>
+      </div>
+      <form id="add-case-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Client *</label>
+            <select class="form-control" id="add-case-client-id" required>
+              <!-- Updated dynamically -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Case Title / Reference Name *</label>
+            <input type="text" class="form-control" id="add-case-title" required placeholder="e.g. Ramesh Kumar vs State">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">CNR/Case Number</label>
+              <input type="text" class="form-control" id="add-case-number" placeholder="CS/102/2026">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-control" id="add-case-type">
+                <option value="Civil">Civil</option>
+                <option value="Criminal">Criminal</option>
+                <option value="Matrimonial">Matrimonial</option>
+                <option value="Consumer">Consumer</option>
+                <option value="Service">Service</option>
+                <option value="Legal Notice">Legal Notice</option>
+                <option value="Contracts">Contracts</option>
+                <option value="Consultation">Consultation</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Court / Forum Name *</label>
+            <input type="text" class="form-control" id="add-case-court" required placeholder="e.g. Supreme Court, Delhi High Court">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Current Stage</label>
+              <input type="text" class="form-control" id="add-case-stage" value="Filing">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Next Hearing Date</label>
+              <input type="date" class="form-control" id="add-case-next-date">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Referred By</label>
+            <input type="text" class="form-control" id="add-case-referred-by" list="referral-partners-list" placeholder="e.g. Adv. Gupta, Rohan Mehta, Self">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Case Details & Description</label>
+            <textarea class="form-control" id="add-case-desc" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="add-case-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary">Register Case</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Case Detail dossier modal with hearings timeline -->
+  <div id="case-dossier-overlay" class="modal-overlay">
+    <div class="modal-container" style="max-width:750px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="case-dossier-title">Case Ledger</h3>
+        <button class="modal-close" id="case-dossier-close">&times;</button>
+      </div>
+      <div class="modal-body" id="case-dossier-body">
+        <!-- Rendered via JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="case-dossier-edit-btn"><i data-lucide="edit-3"></i> Edit Case</button>
+        <button class="btn btn-secondary" id="case-dossier-add-hearing-btn"><i data-lucide="calendar"></i> Record Hearing</button>
+        <button class="btn btn-primary" id="case-dossier-close-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hearing log register modal -->
+  <div id="add-hearing-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">Record Hearing Outcomes</h3>
+        <button class="modal-close" id="add-hearing-close">&times;</button>
+      </div>
+      <form id="add-hearing-form">
+        <input type="hidden" id="add-hearing-case-id">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Date of Hearing *</label>
+              <input type="date" class="form-control" id="add-hearing-date" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Stage during hearing *</label>
+              <input type="text" class="form-control" id="add-hearing-stage" required placeholder="Evidence, Arguments...">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Next Listed Hearing Date</label>
+            <input type="date" class="form-control" id="add-hearing-next-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Daily Notes / Orders Summary</label>
+            <textarea class="form-control" id="add-hearing-notes" rows="4" placeholder="Brief outcome or next directions..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="add-hearing-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Hearing</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Pop up details of selected day -->
+  <div id="day-details-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width:500px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="day-details-title">Hearings Details</h3>
+        <button class="modal-close" id="day-details-close">&times;</button>
+      </div>
+      <div class="modal-body" id="day-details-body">
+        <!-- Rendered list of daily events -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="day-details-close-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transaction Logging Modal -->
+  <div id="log-tx-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title" id="log-tx-title">Log Financial Transaction</h3>
+        <button class="modal-close" id="log-tx-close">&times;</button>
+      </div>
+      <form id="log-tx-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Client *</label>
+            <select class="form-control" id="log-tx-client-id" required>
+              <!-- Updated via JS -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Linked Case (Optional)</label>
+            <select class="form-control" id="log-tx-case-id">
+              <option value="">Standalone Client billing (No Case link)</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Transaction Date *</label>
+              <input type="date" class="form-control" id="log-tx-date" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Entry Category *</label>
+              <select class="form-control" id="log-tx-type" required>
+                <option value="Billed">Professional Fee Billed (Debit)</option>
+                <option value="Received">Payment Received (Credit)</option>
+                <option value="Disbursed">Disbursed Court/Travel Expense (Debit)</option>
+                <option value="WrittenOff">Written Off / Bad Debt (Write-Off)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount (INR ₹) *</label>
+            <input type="number" class="form-control" id="log-tx-amount" min="1" required placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Item / Service Details *</label>
+            <input type="text" class="form-control" id="log-tx-desc" required placeholder="e.g. Advocacy fee for drafting injunction petition">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="log-tx-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Entry</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Printable Invoice Statement Modal -->
+  <div id="invoice-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width:700px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Receipt / Memo Statement</h3>
+        <button class="modal-close" id="invoice-close">&times;</button>
+      </div>
+      <div class="modal-body" id="invoice-modal-body">
+        <!-- Rendered invoice print template -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.print();"><i data-lucide="printer"></i> Print Invoice</button>
+        <button class="btn btn-primary" id="invoice-close-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Client Profile Modal -->
+  <div id="edit-client-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Client Details</h3>
+        <button class="modal-close" id="edit-client-close">&times;</button>
+      </div>
+      <form id="edit-client-form">
+        <div class="modal-body">
+          <input type="hidden" id="edit-client-id">
+          <div class="form-group">
+            <label class="form-label">Client Name *</label>
+            <input type="text" class="form-control" id="edit-client-name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Client Type *</label>
+            <select class="form-control" id="edit-client-type" required>
+              <option value="Individual">Individual</option>
+              <option value="Corporate">Corporate</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Phone Number *</label>
+              <input type="text" class="form-control" id="edit-client-phone" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="edit-client-email">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Address</label>
+            <textarea class="form-control" id="edit-client-address" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Onboarding Date *</label>
+            <input type="date" class="form-control" id="edit-client-date" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Internal Profile Notes</label>
+            <textarea class="form-control" id="edit-client-notes" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="edit-client-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Case Details Modal -->
+  <div id="edit-case-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Case Details</h3>
+        <button class="modal-close" id="edit-case-close">&times;</button>
+      </div>
+      <form id="edit-case-form">
+        <div class="modal-body">
+          <input type="hidden" id="edit-case-id">
+          <div class="form-group">
+            <label class="form-label">Case Title / Reference Name *</label>
+            <input type="text" class="form-control" id="edit-case-title" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">CNR/Case Number</label>
+              <input type="text" class="form-control" id="edit-case-number">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-control" id="edit-case-type">
+                <option value="Civil">Civil</option>
+                <option value="Criminal">Criminal</option>
+                <option value="Matrimonial">Matrimonial</option>
+                <option value="Consumer">Consumer</option>
+                <option value="Service">Service</option>
+                <option value="Legal Notice">Legal Notice</option>
+                <option value="Contracts">Contracts</option>
+                <option value="Consultation">Consultation</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Court / Forum Name *</label>
+            <input type="text" class="form-control" id="edit-case-court" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Current Stage</label>
+              <input type="text" class="form-control" id="edit-case-stage">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Case Status *</label>
+              <select class="form-control" id="edit-case-status" required>
+                <option value="Active">Active</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Referred By</label>
+            <input type="text" class="form-control" id="edit-case-referred-by" list="referral-partners-list" placeholder="e.g. Adv. Gupta, Rohan Mehta, Self">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Case Details & Description</label>
+            <textarea class="form-control" id="edit-case-desc" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer" style="display:flex; justify-content:space-between; width:100%;">
+          <button type="button" class="btn btn-danger" id="edit-case-delete-btn" style="background-color:var(--color-danger); border-color:var(--color-danger); color:#fff;"><i data-lucide="trash-2"></i> Delete Case</button>
+          <div style="display:flex; gap:0.5rem;">
+            <button type="button" class="btn btn-secondary" id="edit-case-cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Authentication (Login / Signup) Modal -->
+  <div id="auth-modal" class="modal-overlay" style="z-index: 100000; background-color: rgba(7, 10, 19, 0.95); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center;">
+    <div class="modal-container" style="max-width: 420px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid var(--border-color);">
+      <div class="modal-header" style="text-align: center; display: block; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+        <h2 class="modal-title" id="auth-modal-title" style="font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--color-primary);">Login to Chambers</h2>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">VSH Legal Practice Manager SaaS</span>
+      </div>
+      
+      <!-- Login View -->
+      <form id="auth-login-form">
+        <div class="modal-body" style="padding: 1.5rem 0;">
+          <div class="form-group">
+            <label class="form-label">Email Address *</label>
+            <input type="email" class="form-control" id="auth-login-email" required placeholder="name@firm.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input type="password" class="form-control" id="auth-login-password" required placeholder="••••••••">
+          </div>
+          <div id="auth-login-error" style="color: var(--color-danger); font-size: 0.8rem; margin-top: 0.5rem; display: none;"></div>
+        </div>
+        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 0.75rem;">
+          <button type="submit" class="btn btn-primary" style="width: 100%;"><i data-lucide="log-in"></i> Sign In</button>
+          <div style="text-align: center; font-size: 0.8rem; margin-top: 0.25rem;">
+            <span style="color: var(--text-secondary);">First time here?</span>
+            <a href="#" id="auth-switch-to-signup" style="color: var(--color-primary); font-weight: 600; text-decoration: none; margin-left: 4px;">Register Chamber</a>
+          </div>
+        </div>
+      </form>
+
+      <!-- Signup View -->
+      <form id="auth-signup-form" style="display: none;">
+        <div class="modal-body" style="padding: 1.5rem 0; max-height: 380px; overflow-y: auto;">
+          <div class="form-group">
+            <label class="form-label">Email Address *</label>
+            <input type="email" class="form-control" id="auth-signup-email" required placeholder="name@firm.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input type="password" class="form-control" id="auth-signup-password" required placeholder="Min 6 characters">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Chamber / Firm Name *</label>
+            <input type="text" class="form-control" id="auth-signup-firm" required placeholder="e.g. VSH Legal">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Lead Advocate Name *</label>
+            <input type="text" class="form-control" id="auth-signup-lawyer" required placeholder="e.g. Adv. Vaibhav Sharma">
+          </div>
+          <div id="auth-signup-error" style="color: var(--color-danger); font-size: 0.8rem; margin-top: 0.5rem; display: none;"></div>
+        </div>
+        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 0.75rem;">
+          <button type="submit" class="btn btn-primary" style="width: 100%;"><i data-lucide="user-plus"></i> Create Chamber Account</button>
+          <div style="text-align: center; font-size: 0.8rem; margin-top: 0.25rem;">
+            <span style="color: var(--text-secondary);">Already have an account?</span>
+            <a href="#" id="auth-switch-to-login" style="color: var(--color-primary); font-weight: 600; text-decoration: none; margin-left: 4px;">Sign In</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Referral Partners Datalist -->
+  <datalist id="referral-partners-list"></datalist>
+
+  <!-- Entry Script Modules -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
