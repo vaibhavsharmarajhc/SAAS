@@ -294,11 +294,13 @@ export function initModals() {
 function showAuthModal() {
   const authModal = document.getElementById('auth-modal');
   authModal.style.display = 'flex';
+  authModal.classList.add('active');
 }
 
 function hideAuthModal() {
   const authModal = document.getElementById('auth-modal');
   authModal.style.display = 'none';
+  authModal.classList.remove('active');
 }
 
 /**
