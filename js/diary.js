@@ -294,8 +294,7 @@ const diaryModule = {
    */
   renderDayView(container, date) {
     const dateStr = this.formatDateStr(date.getFullYear(), date.getMonth(), date.getDate());
-    const cases = db.getCases();
-    const hearings = cases.filter(c => c.status === 'Active' && c.nextHearingDate === dateStr);
+    const hearings = this.getHearingsForDate(dateStr);
 
     let dayHtml = `<div style="display:flex; flex-direction:column; gap:1rem;">`;
 
@@ -310,15 +309,25 @@ const diaryModule = {
       hearings.forEach(h => {
         const client = db.getClient(h.clientId);
         dayHtml += `
-          <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:1.25rem; border-left:4px solid var(--color-primary);">
+          <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:1.25rem; border-left:4px solid ${h.isUpcoming ? 'var(--color-primary)' : 'var(--text-muted)'}; opacity: ${h.isUpcoming ? '1' : '0.85'};">
             <div>
-              <h3 style="font-size:1.15rem; color:var(--text-primary); cursor:pointer;" class="case-link" data-id="${h.id}">${h.title}</h3>
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <h3 style="font-size:1.15rem; color:var(--text-primary); cursor:pointer;" class="case-link" data-id="${h.id}">${h.title}</h3>
+                <span class="badge" style="font-size:0.65rem; padding:0.15rem 0.35rem; background-color:${h.isUpcoming ? 'rgba(217, 119, 6, 0.15)' : 'rgba(255, 255, 255, 0.05)'}; color:${h.isUpcoming ? '#d97706' : 'var(--text-secondary)'};">
+                  ${h.isUpcoming ? 'Upcoming' : 'Past Outcome'}
+                </span>
+              </div>
               <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem;">
                 Client: <strong>${client ? client.name : 'N/A'}</strong> | Case Number: ${h.caseNumber}
               </div>
               <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem;">
-                Court: <strong>${h.court}</strong> | Listed Stage: <strong style="color:var(--text-primary);">${h.stage}</strong>
+                Court: <strong>${h.court}</strong> | Stage: <strong style="color:var(--text-primary);">${h.stage}</strong>
               </div>
+              ${!h.isUpcoming && h.notes ? `
+              <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem; padding:0.4rem 0.65rem; background:rgba(0,0,0,0.15); border-radius:4px; border-left:2px solid var(--border-color); font-style:italic; white-space: pre-wrap;">
+                Outcome: ${h.notes}
+              </div>
+              ` : ''}
             </div>
             <div style="display:flex; gap:0.5rem;">
               <button class="btn btn-secondary btn-dossier" data-id="${h.id}">Details</button>
@@ -382,7 +391,7 @@ const diaryModule = {
       // Month cells
       for (let day = 1; day <= totalDays; day++) {
         const dateStr = this.formatDateStr(year, month, day);
-        const dayHearings = cases.filter(c => c.status === 'Active' && c.nextHearingDate === dateStr);
+        const dayHearings = this.getHearingsForDate(dateStr);
         
         let cellClass = 'mini-day-cell active-day';
         if (dayHearings.length > 0) {
@@ -421,8 +430,7 @@ const diaryModule = {
     
     document.getElementById('day-details-title').textContent = `Diary: ${formattedTitle}`;
 
-    const cases = db.getCases();
-    const hearings = cases.filter(c => c.status === 'Active' && c.nextHearingDate === dateStr);
+    const hearings = this.getHearingsForDate(dateStr);
     
     const body = document.getElementById('day-details-body');
     body.innerHTML = '';
@@ -441,11 +449,18 @@ const diaryModule = {
         item.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:flex-start;">
             <strong style="color:var(--text-primary); font-size:0.95rem; cursor:pointer;" class="popup-case-link" data-id="${h.id}">${h.title}</strong>
-            <span class="badge badge-hearing">${h.stage}</span>
+            <span class="badge" style="background-color: ${h.isUpcoming ? 'var(--color-primary-bg)' : 'rgba(255,255,255,0.06)'}; color: ${h.isUpcoming ? 'var(--color-primary)' : 'var(--text-secondary)'}; font-size:0.7rem; padding:0.15rem 0.35rem; border-radius:4px;">
+              ${h.stage}
+            </span>
           </div>
           <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem;">
             Court: ${h.court} | Client: ${client ? client.name : 'Unknown'}
           </div>
+          ${!h.isUpcoming && h.notes ? `
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem; padding-top:0.5rem; border-top:1px dashed var(--border-color); font-style:italic; white-space: pre-wrap;">
+            Outcome notes: ${h.notes}
+          </div>
+          ` : ''}
         `;
         
         // Link click
@@ -459,6 +474,53 @@ const diaryModule = {
     }
 
     document.getElementById('day-details-modal').classList.add('active');
+  },
+
+  getHearingsForDate(dateStr) {
+    const cases = db.getCases();
+    const list = [];
+
+    cases.forEach(c => {
+      // 1. Check if nextHearingDate matches this date (active upcoming event)
+      if (c.status === 'Active' && c.nextHearingDate === dateStr) {
+        list.push({
+          id: c.id,
+          title: c.title,
+          court: c.court,
+          caseNumber: c.caseNumber,
+          clientId: c.clientId,
+          caseType: c.caseType,
+          status: c.status,
+          stage: c.stage,
+          notes: 'Upcoming scheduled hearing.',
+          isUpcoming: true
+        });
+      }
+
+      // 2. Check if any hearing in c.hearings matches this date (past recorded outcomes)
+      const pastHearings = c.hearings || [];
+      pastHearings.forEach(h => {
+        if (h.date === dateStr) {
+          // Avoid duplicate entries
+          if (!list.some(item => item.id === c.id && !item.isUpcoming)) {
+            list.push({
+              id: c.id,
+              title: c.title,
+              court: c.court,
+              caseNumber: c.caseNumber,
+              clientId: c.clientId,
+              caseType: c.caseType,
+              status: c.status,
+              stage: h.stage,
+              notes: h.notes || '',
+              isUpcoming: false
+            });
+          }
+        }
+      });
+    });
+
+    return list;
   },
 
   /**

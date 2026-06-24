@@ -367,8 +367,22 @@ const casesModule = {
     const sortedHearings = [...hearings].sort((a, b) => new Date(b.date) - new Date(a.date));
 
     let timelineMarkup = '';
-    if (sortedHearings.length === 0) {
-      timelineMarkup = `<p class="text-muted" style="font-size:0.85rem; padding: 1rem 0;">No past hearings recorded in history ledger.</p>`;
+    
+    // Add next scheduled hearing at the top of the timeline if active and defined
+    if (cs.status === 'Active' && cs.nextHearingDate) {
+      timelineMarkup += `
+        <div style="border-left: 2px dashed #f59e0b; padding-left: 1.25rem; position: relative; margin-bottom: 1.25rem;">
+          <!-- timeline dot pointer -->
+          <div style="width: 10px; height: 10px; border-radius:50%; background-color:#f59e0b; border: 2px solid var(--bg-sidebar); position: absolute; left: -6px; top: 4px;"></div>
+          <div style="font-size:0.75rem; color:#f59e0b; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.15rem;">Upcoming Scheduled</div>
+          <div style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">${cs.nextHearingDate}</div>
+          <div style="font-size:0.9rem; font-weight:600; color:var(--text-primary); margin-top:0.15rem;">Stage: ${cs.stage}</div>
+        </div>
+      `;
+    }
+
+    if (sortedHearings.length === 0 && !cs.nextHearingDate) {
+      timelineMarkup = `<p class="text-muted" style="font-size:0.85rem; padding: 1rem 0;">No hearings recorded in history ledger.</p>`;
     } else {
       sortedHearings.forEach(h => {
         timelineMarkup += `

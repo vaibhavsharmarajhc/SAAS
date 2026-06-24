@@ -37,10 +37,10 @@ const dashboardModule = {
     document.getElementById('kpi-active-clients').textContent = clients.length;
 
     // 3. Monthly Professional Income
-    // Current Local Date: 2026-06-21. Let's filter transactions for June 2026
-    const today = new Date("2026-06-21");
-    const currentMonth = today.getMonth(); // 5 (June)
-    const currentYear = today.getFullYear(); // 2026
+    // Current Local Date: Dynamic system date
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
 
     const monthlyIncome = transactions
       .filter(t => {
@@ -73,16 +73,20 @@ const dashboardModule = {
   },
 
   /**
-   * Render schedule for today (June 21, 2026)
+   * Render schedule for today
    */
   renderTodaySchedule() {
     const cases = db.getCases();
     const tableBody = document.getElementById('dashboard-hearings-table-body');
     tableBody.innerHTML = '';
 
-    // Match nextHearingDate to today
-    const todayStr = "2026-06-21";
-    const todaysHearings = cases.filter(c => c.status === 'Active' && c.nextHearingDate === todayStr);
+    // Match nextHearingDate or past hearings to today dynamically
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todaysHearings = cases.filter(c => {
+      const isNext = c.status === 'Active' && c.nextHearingDate === todayStr;
+      const hasHearingToday = (c.hearings || []).some(h => h.date === todayStr);
+      return isNext || hasHearingToday;
+    });
 
     if (todaysHearings.length === 0) {
       tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center;" class="text-muted">No hearings scheduled for today</td></tr>`;
