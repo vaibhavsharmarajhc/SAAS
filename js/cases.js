@@ -462,7 +462,8 @@ const casesModule = {
               <span>Bad Debt Written Off:</span>
               <strong style="color:var(--text-secondary); text-decoration: line-through;">₹${balance.writtenOff.toLocaleString('en-IN')}</strong>
             </div>
-                     <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:700; margin-top:0.25rem;">
+            ` : ''}
+            <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:700; margin-top:0.25rem;">
               <span>Outstanding Fees:</span>
               <span style="color:${balance.outstanding > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">₹${balance.outstanding.toLocaleString('en-IN')}</span>
             </div>
