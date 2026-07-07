@@ -1,24 +1,66 @@
 /**
- * VSH Legal Practice Manager - Multi-Tenant JSON Database Layer
- * Zero-dependency, pure JavaScript file storage engine.
+ * VSH Legal Practice Manager - Multi-Tenant Hybrid Database Layer
+ * Supports MongoDB Cloud connection with automatic fallback to local JSON file.
  */
 
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
+const { MongoClient } = require('mongodb');
 
 const dbPath = path.join(__dirname, 'database.json');
 
-// Default empty schema structure
+// Default empty schema structure for local file database fallback
 const DEFAULT_SCHEMA = {
-  tenants: [],      // { id, email, passwordHash, settings: { firmName, lawyerName, currency, theme } }
-  clients: [],      // { id, tenantId, name, type, email, phone, address, onboardingDate, notes }
-  cases: [],        // { id, tenantId, clientId, caseNumber, title, court, caseType, referredBy, status, stage, nextHearingDate, description, hearings: [] }
-  transactions: []  // { id, tenantId, clientId, caseId, date, amount, type, description }
+  tenants: [],
+  clients: [],
+  cases: [],
+  transactions: []
 };
 
+// MongoDB connection management
+const uri = process.env.MONGODB_URI;
+let client = null;
+let mongoDbInstance = null;
+
+async function getDb() {
+  if (!uri) {
+    return null; // Local JSON file fallback mode
+  }
+  try {
+    if (!client) {
+      client = new MongoClient(uri);
+      await client.connect();
+      mongoDbInstance = client.db();
+      console.log("Connected successfully to MongoDB cloud instance.");
+    }
+    return mongoDbInstance;
+  } catch (err) {
+    console.error("MongoDB Connection failed. Falling back to JSON database file.", err);
+    return null;
+  }
+}
+
+// Map MongoDB _id to standard API id for frontend compatibility
+function mapId(doc) {
+  if (!doc) return null;
+  const { _id, ...rest } = doc;
+  return { id: _id, ...rest };
+}
+
+function mapIds(docs) {
+  return docs.map(mapId);
+}
+
+// Convert standard API id to MongoDB _id key
+function toMongoDoc(obj) {
+  if (!obj) return null;
+  const { id, ...rest } = obj;
+  return { _id: id, ...rest };
+}
+
 /**
- * Load Database from JSON File
+ * File Database Fallback Helpers
  */
 function readDb() {
   try {
@@ -29,23 +71,19 @@ function readDb() {
     const data = fs.readFileSync(dbPath, 'utf8');
     return JSON.parse(data);
   } catch (e) {
-    console.error("Error reading database file. Returning default schema.", e);
+    console.error("Error reading JSON database file. Returning default schema.", e);
     return DEFAULT_SCHEMA;
   }
 }
 
-/**
- * Write Database atomically to JSON File
- */
 function writeDb(data) {
   try {
     const jsonStr = JSON.stringify(data, null, 2);
-    // Write to a temporary file first, then rename (atomic write to prevent corruption)
     const tempPath = dbPath + '.tmp';
     fs.writeFileSync(tempPath, jsonStr, 'utf8');
     fs.renameSync(tempPath, dbPath);
   } catch (e) {
-    console.error("Failed to write to database file.", e);
+    console.error("Failed to write to JSON database file.", e);
   }
 }
 
@@ -53,24 +91,43 @@ function writeDb(data) {
  * Initialize Database
  */
 async function initDatabase() {
-  // Ensure database file exists
-  readDb();
-  console.log("JSON Database file initialized at: " + dbPath);
+  const db = await getDb();
+  if (db) {
+    console.log("Persistence Layer: MongoDB Cloud Active.");
+  } else {
+    readDb();
+    console.log("Persistence Layer: Local JSON Database initialized at: " + dbPath);
+  }
 }
 
 /**
- * Tenant / User authentication helpers
+ * Tenant Account Management
  */
 async function getTenantByEmail(email) {
-  const db = readDb();
-  return db.tenants.find(t => t.email.toLowerCase() === email.toLowerCase()) || null;
+  const db = await getDb();
+  if (db) {
+    const tenant = await db.collection('tenants').findOne({ email: email.toLowerCase() });
+    return mapId(tenant);
+  }
+  
+  const localDb = readDb();
+  return localDb.tenants.find(t => t.email.toLowerCase() === email.toLowerCase()) || null;
 }
 
 async function getTenantById(id) {
-  const db = readDb();
-  const tenant = db.tenants.find(t => t.id === id);
+  const db = await getDb();
+  if (db) {
+    const tenant = await db.collection('tenants').findOne({ _id: id });
+    if (tenant) {
+      const { passwordHash, ...safeTenant } = tenant;
+      return { id: tenant._id, ...safeTenant };
+    }
+    return null;
+  }
+
+  const localDb = readDb();
+  const tenant = localDb.tenants.find(t => t.id === id);
   if (tenant) {
-    // Return without password hash for safety
     const { passwordHash, ...safeTenant } = tenant;
     return safeTenant;
   }
@@ -78,12 +135,6 @@ async function getTenantById(id) {
 }
 
 async function createTenant(email, password, firmName, lawyerName) {
-  const db = readDb();
-  
-  if (db.tenants.some(t => t.email.toLowerCase() === email.toLowerCase())) {
-    throw new Error("A tenant with this email address already exists.");
-  }
-
   const salt = bcrypt.genSaltSync(10);
   const passwordHash = bcrypt.hashSync(password, salt);
   const id = "t_" + Date.now();
@@ -100,42 +151,75 @@ async function createTenant(email, password, firmName, lawyerName) {
     }
   };
 
-  db.tenants.push(newTenant);
-  writeDb(db);
+  const db = await getDb();
+  if (db) {
+    const existing = await db.collection('tenants').findOne({ email: email.toLowerCase() });
+    if (existing) {
+      throw new Error("A tenant with this email address already exists.");
+    }
+    await db.collection('tenants').insertOne(toMongoDoc(newTenant));
+    await seedTenantData(id);
+    const { passwordHash: _, ...safeTenant } = newTenant;
+    return safeTenant;
+  }
 
-  // Automatically seed the new tenant with demo data so they have a working view
+  const localDb = readDb();
+  if (localDb.tenants.some(t => t.email.toLowerCase() === email.toLowerCase())) {
+    throw new Error("A tenant with this email address already exists.");
+  }
+  localDb.tenants.push(newTenant);
+  writeDb(localDb);
   await seedTenantData(id);
-
   const { passwordHash: _, ...safeTenant } = newTenant;
   return safeTenant;
 }
 
 async function updateTenantSettings(tenantId, settingsData) {
-  const db = readDb();
-  const idx = db.tenants.findIndex(t => t.id === tenantId);
+  const db = await getDb();
+  if (db) {
+    const tenant = await db.collection('tenants').findOne({ _id: tenantId });
+    if (!tenant) throw new Error("Tenant settings update failed: Tenant not found.");
+    const newSettings = { ...tenant.settings, ...settingsData };
+    await db.collection('tenants').updateOne({ _id: tenantId }, { $set: { settings: newSettings } });
+    return newSettings;
+  }
+
+  const localDb = readDb();
+  const idx = localDb.tenants.findIndex(t => t.id === tenantId);
   if (idx !== -1) {
-    db.tenants[idx].settings = { ...db.tenants[idx].settings, ...settingsData };
-    writeDb(db);
-    return db.tenants[idx].settings;
+    localDb.tenants[idx].settings = { ...localDb.tenants[idx].settings, ...settingsData };
+    writeDb(localDb);
+    return localDb.tenants[idx].settings;
   }
   throw new Error("Tenant settings update failed: Tenant not found.");
 }
 
 /**
- * Client CRUD
+ * Client Management
  */
 async function getClients(tenantId) {
-  const db = readDb();
-  return db.clients.filter(c => c.tenantId === tenantId);
+  const db = await getDb();
+  if (db) {
+    const clients = await db.collection('clients').find({ tenantId }).toArray();
+    return mapIds(clients);
+  }
+
+  const localDb = readDb();
+  return localDb.clients.filter(c => c.tenantId === tenantId);
 }
 
 async function getClient(tenantId, id) {
-  const db = readDb();
-  return db.clients.find(c => c.tenantId === tenantId && c.id === id) || null;
+  const db = await getDb();
+  if (db) {
+    const client = await db.collection('clients').findOne({ tenantId, _id: id });
+    return mapId(client);
+  }
+
+  const localDb = readDb();
+  return localDb.clients.find(c => c.tenantId === tenantId && c.id === id) || null;
 }
 
 async function addClient(tenantId, clientData) {
-  const db = readDb();
   const newClient = {
     id: "c_" + Date.now(),
     tenantId,
@@ -147,46 +231,82 @@ async function addClient(tenantId, clientData) {
     onboardingDate: clientData.onboardingDate || new Date().toISOString().split('T')[0],
     notes: clientData.notes || ""
   };
-  db.clients.push(newClient);
-  writeDb(db);
+
+  const db = await getDb();
+  if (db) {
+    await db.collection('clients').insertOne(toMongoDoc(newClient));
+    return newClient;
+  }
+
+  const localDb = readDb();
+  localDb.clients.push(newClient);
+  writeDb(localDb);
   return newClient;
 }
 
 async function updateClient(tenantId, id, clientData) {
-  const db = readDb();
-  const idx = db.clients.findIndex(c => c.tenantId === tenantId && c.id === id);
+  const db = await getDb();
+  if (db) {
+    const client = await db.collection('clients').findOne({ tenantId, _id: id });
+    if (!client) return null;
+    const { id: _, tenantId: __, ...updData } = clientData;
+    const updatedClient = { ...client, ...updData };
+    await db.collection('clients').updateOne({ tenantId, _id: id }, { $set: toMongoDoc(updatedClient) });
+    return mapId(toMongoDoc(updatedClient));
+  }
+
+  const localDb = readDb();
+  const idx = localDb.clients.findIndex(c => c.tenantId === tenantId && c.id === id);
   if (idx !== -1) {
-    db.clients[idx] = { ...db.clients[idx], ...clientData, id, tenantId }; // Retain IDs
-    writeDb(db);
-    return db.clients[idx];
+    localDb.clients[idx] = { ...localDb.clients[idx], ...clientData, id, tenantId };
+    writeDb(localDb);
+    return localDb.clients[idx];
   }
   return null;
 }
 
 async function deleteClient(tenantId, id) {
-  const db = readDb();
-  db.clients = db.clients.filter(c => !(c.tenantId === tenantId && c.id === id));
-  // Cascade delete client's cases and transactions
-  db.cases = db.cases.filter(c => !(c.tenantId === tenantId && c.clientId === id));
-  db.transactions = db.transactions.filter(t => !(t.tenantId === tenantId && t.clientId === id));
-  writeDb(db);
+  const db = await getDb();
+  if (db) {
+    await db.collection('clients').deleteOne({ tenantId, _id: id });
+    await db.collection('cases').deleteMany({ tenantId, clientId: id });
+    await db.collection('transactions').deleteMany({ tenantId, clientId: id });
+    return;
+  }
+
+  const localDb = readDb();
+  localDb.clients = localDb.clients.filter(c => !(c.tenantId === tenantId && c.id === id));
+  localDb.cases = localDb.cases.filter(c => !(c.tenantId === tenantId && c.clientId === id));
+  localDb.transactions = localDb.transactions.filter(t => !(t.tenantId === tenantId && t.clientId === id));
+  writeDb(localDb);
 }
 
 /**
- * Case CRUD
+ * Case Management
  */
 async function getCases(tenantId) {
-  const db = readDb();
-  return db.cases.filter(c => c.tenantId === tenantId);
+  const db = await getDb();
+  if (db) {
+    const cases = await db.collection('cases').find({ tenantId }).toArray();
+    return mapIds(cases);
+  }
+
+  const localDb = readDb();
+  return localDb.cases.filter(c => c.tenantId === tenantId);
 }
 
 async function getCase(tenantId, id) {
-  const db = readDb();
-  return db.cases.find(c => c.tenantId === tenantId && c.id === id) || null;
+  const db = await getDb();
+  if (db) {
+    const cs = await db.collection('cases').findOne({ tenantId, _id: id });
+    return mapId(cs);
+  }
+
+  const localDb = readDb();
+  return localDb.cases.find(c => c.tenantId === tenantId && c.id === id) || null;
 }
 
 async function addCase(tenantId, caseObj) {
-  const db = readDb();
   const newCase = {
     id: "case_" + Date.now(),
     tenantId,
@@ -202,67 +322,117 @@ async function addCase(tenantId, caseObj) {
     description: caseObj.description || "",
     hearings: caseObj.hearings || []
   };
-  db.cases.push(newCase);
-  writeDb(db);
+
+  const db = await getDb();
+  if (db) {
+    await db.collection('cases').insertOne(toMongoDoc(newCase));
+    return newCase;
+  }
+
+  const localDb = readDb();
+  localDb.cases.push(newCase);
+  writeDb(localDb);
   return newCase;
 }
 
 async function updateCase(tenantId, id, caseData) {
-  const db = readDb();
-  const idx = db.cases.findIndex(c => c.tenantId === tenantId && c.id === id);
-  if (idx !== -1) {
-    const existingHearings = db.cases[idx].hearings || [];
-    db.cases[idx] = { ...db.cases[idx], ...caseData, id, tenantId };
+  const db = await getDb();
+  if (db) {
+    const cs = await db.collection('cases').findOne({ tenantId, _id: id });
+    if (!cs) return null;
+    const { id: _, tenantId: __, ...updData } = caseData;
+    const updatedCase = { ...cs, ...updData };
     if (!caseData.hearings) {
-      db.cases[idx].hearings = existingHearings;
+      updatedCase.hearings = cs.hearings || [];
     }
-    writeDb(db);
-    return db.cases[idx];
+    await db.collection('cases').updateOne({ tenantId, _id: id }, { $set: toMongoDoc(updatedCase) });
+    return mapId(toMongoDoc(updatedCase));
+  }
+
+  const localDb = readDb();
+  const idx = localDb.cases.findIndex(c => c.tenantId === tenantId && c.id === id);
+  if (idx !== -1) {
+    const existingHearings = localDb.cases[idx].hearings || [];
+    localDb.cases[idx] = { ...localDb.cases[idx], ...caseData, id, tenantId };
+    if (!caseData.hearings) {
+      localDb.cases[idx].hearings = existingHearings;
+    }
+    writeDb(localDb);
+    return localDb.cases[idx];
   }
   return null;
 }
 
 async function deleteCase(tenantId, id) {
-  const db = readDb();
-  db.cases = db.cases.filter(c => !(c.tenantId === tenantId && c.id === id));
-  // Cascade delete transactions linked to this case
-  db.transactions = db.transactions.filter(t => !(t.tenantId === tenantId && t.caseId === id));
-  writeDb(db);
+  const db = await getDb();
+  if (db) {
+    await db.collection('cases').deleteOne({ tenantId, _id: id });
+    await db.collection('transactions').deleteMany({ tenantId, caseId: id });
+    return;
+  }
+
+  const localDb = readDb();
+  localDb.cases = localDb.cases.filter(c => !(c.tenantId === tenantId && c.id === id));
+  localDb.transactions = localDb.transactions.filter(t => !(t.tenantId === tenantId && t.caseId === id));
+  writeDb(localDb);
 }
 
 async function addHearing(tenantId, caseId, hearingData) {
-  const db = readDb();
-  const idx = db.cases.findIndex(c => c.tenantId === tenantId && c.id === caseId);
+  const newHearing = {
+    id: "h_" + Date.now(),
+    date: hearingData.date || new Date().toISOString().split('T')[0],
+    stage: hearingData.stage || "Hearing",
+    notes: hearingData.notes || ""
+  };
+
+  const db = await getDb();
+  if (db) {
+    const cs = await db.collection('cases').findOne({ tenantId, _id: caseId });
+    if (!cs) return null;
+    const hearings = cs.hearings || [];
+    hearings.push(newHearing);
+    await db.collection('cases').updateOne(
+      { tenantId, _id: caseId },
+      { 
+        $set: { 
+          hearings,
+          stage: hearingData.stage,
+          nextHearingDate: hearingData.nextHearingDate || null
+        } 
+      }
+    );
+    const updated = await db.collection('cases').findOne({ tenantId, _id: caseId });
+    return mapId(updated);
+  }
+
+  const localDb = readDb();
+  const idx = localDb.cases.findIndex(c => c.tenantId === tenantId && c.id === caseId);
   if (idx !== -1) {
-    const newHearing = {
-      id: "h_" + Date.now(),
-      date: hearingData.date || new Date().toISOString().split('T')[0],
-      stage: hearingData.stage || "Hearing",
-      notes: hearingData.notes || ""
-    };
-    db.cases[idx].hearings = db.cases[idx].hearings || [];
-    db.cases[idx].hearings.push(newHearing);
-    
-    // Update case details
-    db.cases[idx].stage = hearingData.stage;
-    db.cases[idx].nextHearingDate = hearingData.nextHearingDate || null;
-    
-    writeDb(db);
-    return db.cases[idx];
+    localDb.cases[idx].hearings = localDb.cases[idx].hearings || [];
+    localDb.cases[idx].hearings.push(newHearing);
+    localDb.cases[idx].stage = hearingData.stage;
+    localDb.cases[idx].nextHearingDate = hearingData.nextHearingDate || null;
+    writeDb(localDb);
+    return localDb.cases[idx];
   }
   return null;
 }
 
 /**
- * Transaction CRUD
+ * Transaction Management
  */
 async function getTransactions(tenantId) {
-  const db = readDb();
-  return db.transactions.filter(t => t.tenantId === tenantId);
+  const db = await getDb();
+  if (db) {
+    const transactions = await db.collection('transactions').find({ tenantId }).toArray();
+    return mapIds(transactions);
+  }
+
+  const localDb = readDb();
+  return localDb.transactions.filter(t => t.tenantId === tenantId);
 }
 
 async function addTransaction(tenantId, tx) {
-  const db = readDb();
   const newTx = {
     id: "t_" + Date.now(),
     tenantId,
@@ -273,24 +443,35 @@ async function addTransaction(tenantId, tx) {
     type: tx.type || "Billed",
     description: tx.description || ""
   };
-  db.transactions.push(newTx);
-  writeDb(db);
+
+  const db = await getDb();
+  if (db) {
+    await db.collection('transactions').insertOne(toMongoDoc(newTx));
+    return newTx;
+  }
+
+  const localDb = readDb();
+  localDb.transactions.push(newTx);
+  writeDb(localDb);
   return newTx;
 }
 
 async function deleteTransaction(tenantId, id) {
-  const db = readDb();
-  db.transactions = db.transactions.filter(t => !(t.tenantId === tenantId && t.id === id));
-  writeDb(db);
+  const db = await getDb();
+  if (db) {
+    await db.collection('transactions').deleteOne({ tenantId, _id: id });
+    return;
+  }
+
+  const localDb = readDb();
+  localDb.transactions = localDb.transactions.filter(t => !(t.tenantId === tenantId && t.id === id));
+  writeDb(localDb);
 }
 
 /**
- * Seed Database for a Tenant (Original seed data from client)
+ * Database Seeder
  */
 async function seedTenantData(tenantId) {
-  const db = readDb();
-  
-  // Seed Clients
   const clients = [
     {
       id: "c_1",
@@ -349,9 +530,6 @@ async function seedTenantData(tenantId) {
     }
   ];
 
-  db.clients.push(...clients);
-
-  // Seed Cases
   const cases = [
     {
       id: "case_1",
@@ -467,9 +645,6 @@ async function seedTenantData(tenantId) {
     }
   ];
 
-  db.cases.push(...cases);
-
-  // Seed Transactions
   const transactions = [
     { id: "t_1", tenantId, clientId: "c_1", caseId: "case_1", date: "2026-01-16", amount: 150000, type: "Billed", description: "Arbitration Drafting Retainer Fee" },
     { id: "t_2", tenantId, clientId: "c_1", caseId: "case_1", date: "2026-01-20", amount: 100000, type: "Received", description: "Payment for Arbitration Drafting Retainer" },
@@ -488,32 +663,54 @@ async function seedTenantData(tenantId) {
     { id: "t_15", tenantId, clientId: "c_1", caseId: "case_1", date: "2026-06-15", amount: 190000, type: "Received", description: "Payment for evidence hearings" }
   ];
 
-  db.transactions.push(...transactions);
+  const db = await getDb();
+  if (db) {
+    await db.collection('clients').insertMany(clients.map(toMongoDoc));
+    await db.collection('cases').insertMany(cases.map(toMongoDoc));
+    await db.collection('transactions').insertMany(transactions.map(toMongoDoc));
+    return;
+  }
 
-  writeDb(db);
+  const localDb = readDb();
+  localDb.clients.push(...clients);
+  localDb.cases.push(...cases);
+  localDb.transactions.push(...transactions);
+  writeDb(localDb);
 }
 
 /**
- * Import a full backup for a tenant, replacing existing data
+ * Backup Snapshot Restore
  */
 async function importTenantBackup(tenantId, backupData) {
-  const db = readDb();
-  
-  // Clean out existing data for this tenant
-  db.clients = db.clients.filter(c => c.tenantId !== tenantId);
-  db.cases = db.cases.filter(c => c.tenantId !== tenantId);
-  db.transactions = db.transactions.filter(t => t.tenantId !== tenantId);
+  const db = await getDb();
+  if (db) {
+    await db.collection('clients').deleteMany({ tenantId });
+    await db.collection('cases').deleteMany({ tenantId });
+    await db.collection('transactions').deleteMany({ tenantId });
 
-  // Map and push new records
+    const clients = (backupData.clients || []).map(c => toMongoDoc({ ...c, tenantId }));
+    const cases = (backupData.cases || []).map(c => toMongoDoc({ ...c, tenantId }));
+    const transactions = (backupData.transactions || []).map(t => toMongoDoc({ ...t, tenantId }));
+
+    if (clients.length > 0) await db.collection('clients').insertMany(clients);
+    if (cases.length > 0) await db.collection('cases').insertMany(cases);
+    if (transactions.length > 0) await db.collection('transactions').insertMany(transactions);
+    return;
+  }
+
+  const localDb = readDb();
+  localDb.clients = localDb.clients.filter(c => c.tenantId !== tenantId);
+  localDb.cases = localDb.cases.filter(c => c.tenantId !== tenantId);
+  localDb.transactions = localDb.transactions.filter(t => t.tenantId !== tenantId);
+
   const clients = (backupData.clients || []).map(c => ({ ...c, tenantId }));
   const cases = (backupData.cases || []).map(c => ({ ...c, tenantId }));
   const transactions = (backupData.transactions || []).map(t => ({ ...t, tenantId }));
 
-  db.clients.push(...clients);
-  db.cases.push(...cases);
-  db.transactions.push(...transactions);
-
-  writeDb(db);
+  localDb.clients.push(...clients);
+  localDb.cases.push(...cases);
+  localDb.transactions.push(...transactions);
+  writeDb(localDb);
 }
 
 module.exports = {
