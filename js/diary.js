@@ -8,7 +8,7 @@ import casesModule from './cases.js';
 
 // Calendar State
 const calendarState = {
-  currentDate: new Date("2026-06-21"), // Default start point
+  currentDate: new Date(), // Default start point (dynamic system date)
   activeView: 'month' // month, week, day, year
 };
 
@@ -66,7 +66,7 @@ const diaryModule = {
 
     todayBtn.addEventListener('click', () => {
       console.log("Diary: Today button clicked");
-      calendarState.currentDate = new Date("2026-06-21"); // Reset to today
+      calendarState.currentDate = new Date(); // Reset to today (dynamic system date)
       this.renderActiveView();
     });
 
@@ -151,7 +151,7 @@ const diaryModule = {
     });
 
     const cases = db.getCases();
-    const todayStr = "2026-06-21";
+    const todayStr = new Date().toISOString().split('T')[0];
 
     // 1. Render previous month padding cells
     for (let i = firstDayIndex - 1; i >= 0; i--) {
@@ -193,8 +193,8 @@ const diaryModule = {
     if (isOtherMonth) classNames.push('other-month');
     if (isToday) classNames.push('today');
 
-    // Filter active hearings on this day
-    const hearings = cases.filter(c => c.status === 'Active' && c.nextHearingDate === dateStr);
+    // Filter hearings on this day (both upcoming and past history)
+    const hearings = this.getHearingsForDate(dateStr);
 
     let eventsHtml = '';
     hearings.slice(0, 3).forEach(h => {
@@ -235,7 +235,7 @@ const diaryModule = {
 
     let weekHtml = `<div class="week-grid">`;
     const cases = db.getCases();
-    const todayStr = "2026-06-21";
+    const todayStr = new Date().toISOString().split('T')[0];
 
     for (let i = 0; i < 7; i++) {
       const currentDay = new Date(startOfWeek);
@@ -246,7 +246,7 @@ const diaryModule = {
       const dayNum = currentDay.getDate();
       const dayName = currentDay.toLocaleDateString('en-US', { weekday: 'short' });
       
-      const hearings = cases.filter(c => c.status === 'Active' && c.nextHearingDate === dateStr);
+      const hearings = this.getHearingsForDate(dateStr);
       
       let eventsHtml = '';
       if (hearings.length === 0) {
