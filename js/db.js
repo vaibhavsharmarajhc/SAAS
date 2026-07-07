@@ -11,10 +11,10 @@ class LegalDB {
     this.cache = {
       user: null,
       settings: {
-        firmName: "VSH Legal",
+        firmName: "CounselAI",
         lawyerName: "Adv. Vaibhav Sharma",
         currency: "INR",
-        theme: "dark"
+        theme: "light"
       },
       clients: [],
       cases: [],
@@ -257,10 +257,10 @@ class LegalDB {
     const emptyBackup = {
       version: "1.0.0",
       settings: {
-        firmName: "VSH Legal",
+        firmName: "CounselAI",
         lawyerName: "Adv. Vaibhav Sharma",
         currency: "INR",
-        theme: "dark"
+        theme: "light"
       },
       clients: [],
       cases: [],

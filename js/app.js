@@ -207,7 +207,7 @@ async function refreshPageView(viewId) {
  */
 function initTheme() {
   const settings = db.getSettings();
-  const initialTheme = settings.theme || 'dark';
+  const initialTheme = settings.theme || 'light';
   setTheme(initialTheme);
 
   themeToggleCheckbox.checked = initialTheme === 'dark';
@@ -236,7 +236,7 @@ function setTheme(theme) {
  */
 function loadSettingsForm() {
   const settings = db.getSettings();
-  document.getElementById('settings-firm-name').value = settings.firmName || 'VSH Legal';
+  document.getElementById('settings-firm-name').value = settings.firmName || 'CounselAI';
   document.getElementById('settings-lawyer-name').value = settings.lawyerName || 'Adv. Vaibhav Sharma';
   document.getElementById('settings-currency').value = settings.currency || 'INR';
   updateBrandingHeaders();
@@ -248,7 +248,7 @@ export function updateBrandingHeaders() {
   const lawyerName = document.querySelector('.lawyer-name');
   const avatar = document.querySelector('.lawyer-avatar');
 
-  if (brandName) brandName.textContent = settings.firmName || 'VSH Legal';
+  if (brandName) brandName.textContent = settings.firmName || 'CounselAI';
   if (lawyerName) lawyerName.textContent = settings.lawyerName || 'Adv. Vaibhav Sharma';
   
   if (avatar && settings.lawyerName) {
