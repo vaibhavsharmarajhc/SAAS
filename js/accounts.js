@@ -134,6 +134,9 @@ const accountsModule = {
 
       await db.addTransaction({ clientId, caseId, date, type, amount, description });
       
+      // Dispatch a custom event to notify other modules to refresh
+      document.dispatchEvent(new CustomEvent('transactionLogged', { detail: { clientId, caseId } }));
+      
       alert("Financial transaction logged.");
       form.reset();
       caseSelect.innerHTML = '<option value="">Standalone Client billing (No Case link)</option>';
@@ -146,6 +149,25 @@ const accountsModule = {
       caseSelect.innerHTML = '<option value="">Standalone Client billing (No Case link)</option>';
       modal.classList.remove('active');
     });
+  },
+
+  showLogTransactionModal(clientId, caseId) {
+    this.populateClientDropdowns();
+    const modal = document.getElementById('log-tx-modal');
+    const clientSelect = document.getElementById('log-tx-client-id');
+    const caseSelect = document.getElementById('log-tx-case-id');
+
+    if (clientId) {
+      clientSelect.value = clientId;
+      clientSelect.dispatchEvent(new Event('change'));
+      
+      if (caseId) {
+        caseSelect.value = caseId;
+      }
+    }
+
+    document.getElementById('log-tx-date').value = new Date().toISOString().split('T')[0];
+    modal.classList.add('active');
   },
 
   /**

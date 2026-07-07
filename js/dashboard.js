@@ -187,9 +187,8 @@ const dashboardModule = {
     const gridColor = theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)';
 
     // --- Chart 2: Case Categories (Doughnut Chart) ---
-    const activeCases = cases.filter(c => c.status === 'Active');
     const categoriesCount = {};
-    activeCases.forEach(c => {
+    cases.forEach(c => {
       categoriesCount[c.caseType] = (categoriesCount[c.caseType] || 0) + 1;
     });
 
@@ -206,7 +205,7 @@ const dashboardModule = {
       caseTypeChartInstance = new Chart(ctx2, {
         type: 'doughnut',
         data: {
-          labels: ['No Active Cases'],
+          labels: ['No Cases Registered'],
           datasets: [{
             data: [1],
             backgroundColor: [theme === 'dark' ? '#1e293b' : '#cbd5e1']

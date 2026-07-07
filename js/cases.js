@@ -4,6 +4,7 @@
  */
 
 import db from './db.js';
+import accountsModule from './accounts.js';
 
 const casesModule = {
   init() {
@@ -12,6 +13,15 @@ const casesModule = {
     this.setupHearingForm();
     this.setupCaseDossierEvents();
     this.populateReferralDatalist();
+
+    // Listen for custom logged transaction events to refresh views in real-time
+    document.addEventListener('transactionLogged', (e) => {
+      this.renderCaseGrid();
+      const overlay = document.getElementById('case-dossier-overlay');
+      if (overlay.classList.contains('active') && this.currentCaseId === e.detail.caseId) {
+        this.showCaseDossier(this.currentCaseId);
+      }
+    });
   },
 
   render() {
@@ -452,13 +462,16 @@ const casesModule = {
               <span>Bad Debt Written Off:</span>
               <strong style="color:var(--text-secondary); text-decoration: line-through;">₹${balance.writtenOff.toLocaleString('en-IN')}</strong>
             </div>
-            ` : ''}
-            <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:700; margin-top:0.25rem;">
+                     <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:700; margin-top:0.25rem;">
               <span>Outstanding Fees:</span>
               <span style="color:${balance.outstanding > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">₹${balance.outstanding.toLocaleString('en-IN')}</span>
             </div>
             
-            <button class="btn btn-secondary" style="width:100%; margin-top:1rem; font-size:0.75rem; padding:0.4rem;" id="case-ledger-go-accounts-btn">
+            <button class="btn btn-primary" style="width:100%; margin-top:1rem; font-size:0.75rem; padding:0.4rem;" id="case-ledger-log-tx-btn">
+              <i data-lucide="plus-circle" style="width:12px; height:12px; margin-right:4px; vertical-align:middle;"></i> Log Financial Entry
+            </button>
+
+            <button class="btn btn-secondary" style="width:100%; margin-top:0.5rem; font-size:0.75rem; padding:0.4rem;" id="case-ledger-go-accounts-btn">
               Go to Financial Ledger
             </button>
 
@@ -471,6 +484,11 @@ const casesModule = {
         </div>
       </div>
     `;
+
+    // Event listener to open Log Transaction modal pre-filled
+    body.querySelector('#case-ledger-log-tx-btn').addEventListener('click', () => {
+      accountsModule.showLogTransactionModal(cs.clientId, cs.id);
+    });
 
     // Event link inside case ledger to jump directly to Accounts
     body.querySelector('#case-ledger-go-accounts-btn').addEventListener('click', () => {

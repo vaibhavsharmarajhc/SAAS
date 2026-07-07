@@ -13,6 +13,15 @@ const clientsModule = {
     this.setupWizard();
     this.setupSearchAndFilters();
     this.setupDossierEvents();
+
+    // Listen for custom logged transaction events to refresh views in real-time
+    document.addEventListener('transactionLogged', (e) => {
+      this.renderClientList();
+      const overlay = document.getElementById('client-dossier-overlay');
+      if (overlay.classList.contains('active') && this.currentClientId === e.detail.clientId) {
+        this.showClientDossier(this.currentClientId);
+      }
+    });
   },
 
   render() {
