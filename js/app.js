@@ -313,22 +313,156 @@ async function updateDbStatusBadge() {
   }
 }
 
-function showAuthModal() {
-  const authModal = document.getElementById('auth-modal');
-  authModal.style.display = 'flex';
-  authModal.classList.add('active');
-  updateDbStatusBadge();
+function showAuthView(viewName) {
+  const loginForm = document.getElementById('auth-login-form');
+  const signupForm = document.getElementById('auth-signup-form');
+  const forgotForm = document.getElementById('auth-forgot-form');
+  const resetForm = document.getElementById('auth-reset-form');
+  const modalTitle = document.getElementById('auth-modal-title');
+
+  if (!loginForm || !signupForm || !forgotForm || !resetForm) return;
+
+  loginForm.style.display = 'none';
+  signupForm.style.display = 'none';
+  forgotForm.style.display = 'none';
+  resetForm.style.display = 'none';
+
+  // Clear inputs error state
+  const inputs = document.querySelectorAll('#auth-page .form-control');
+  inputs.forEach(i => i.classList.remove('auth-input-error'));
+  const errorContainers = document.querySelectorAll('#auth-page [id$="-error"]');
+  errorContainers.forEach(c => {
+    c.style.display = 'none';
+    c.innerHTML = '';
+  });
+
+  if (viewName === 'login') {
+    loginForm.style.display = 'block';
+    modalTitle.textContent = "Login to Chambers";
+  } else if (viewName === 'signup') {
+    signupForm.style.display = 'block';
+    modalTitle.textContent = "Register Chamber";
+  } else if (viewName === 'forgot') {
+    forgotForm.style.display = 'block';
+    modalTitle.textContent = "Forgot Password";
+  } else if (viewName === 'reset') {
+    resetForm.style.display = 'block';
+    modalTitle.textContent = "Reset Password";
+  }
 }
 
-function hideAuthModal() {
-  const authModal = document.getElementById('auth-modal');
-  authModal.style.display = 'none';
-  authModal.classList.remove('active');
+let appInitialized = false;
+
+async function router() {
+  const path = window.location.pathname;
+  console.log("Routing to path:", path);
+
+  const marketingPage = document.getElementById('marketing-page');
+  const authPage = document.getElementById('auth-page');
+  const dashboardApp = document.getElementById('dashboard-app-container');
+
+  // Hide everything first
+  if (marketingPage) marketingPage.style.display = 'none';
+  if (authPage) authPage.style.display = 'none';
+  if (dashboardApp) dashboardApp.style.display = 'none';
+
+  // Check auth
+  let isAuthenticated = false;
+  try {
+    isAuthenticated = await db.loadAll();
+  } catch (err) {
+    console.error("Auth check failed:", err);
+  }
+
+  // Handle routing matching
+  if (path === '/' || path === '/index.html') {
+    if (marketingPage) {
+      marketingPage.style.display = 'block';
+      lucide.createIcons();
+    }
+  } else if (path === '/login' || path === '/register') {
+    if (isAuthenticated) {
+      window.history.pushState({}, '', '/dashboard');
+      router();
+    } else {
+      if (authPage) {
+        authPage.style.display = 'flex';
+        const targetView = (path === '/login') ? 'login' : 'signup';
+        showAuthView(targetView);
+        updateDbStatusBadge();
+      }
+    }
+  } else if (path === '/dashboard' || path.startsWith('/dashboard-page') || path.startsWith('/clients-page') || path.startsWith('/cases-page') || path.startsWith('/diary-page') || path.startsWith('/accounts-page') || path.startsWith('/share-page') || path.startsWith('/settings-page')) {
+    if (!isAuthenticated) {
+      window.history.pushState({}, '', '/login');
+      router();
+    } else {
+      if (dashboardApp) {
+        dashboardApp.style.display = 'flex';
+        
+        // Initialize dashboard modules once
+        if (!appInitialized) {
+          initTheme();
+          updateBrandingHeaders();
+          dashboard.init();
+          clients.init();
+          cases.init();
+          diary.init();
+          accounts.init();
+          share.init();
+          appInitialized = true;
+        }
+
+        // Determine view from path
+        let targetView = 'dashboard-page';
+        if (path !== '/dashboard') {
+          targetView = path.substring(1);
+        }
+        await switchView(targetView);
+      }
+    }
+  } else {
+    // Fallback
+    if (isAuthenticated) {
+      window.history.pushState({}, '', '/dashboard');
+    } else {
+      window.history.pushState({}, '', '/');
+    }
+    router();
+  }
 }
 
-/**
- * Setup Authentication (Login/Signup) Event Listeners
- */
+function initPasswordToggleHandlers() {
+  const toggles = document.querySelectorAll('.password-toggle-btn');
+  toggles.forEach(btn => {
+    // Remove previous listeners if any to prevent duplicate fires
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+
+    newBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = newBtn.getAttribute('data-toggle-target');
+      const input = document.getElementById(targetId);
+      if (!input) return;
+
+      const icon = newBtn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        if (icon) {
+          icon.setAttribute('data-lucide', 'eye-off');
+          lucide.createIcons();
+        }
+      } else {
+        input.type = 'password';
+        if (icon) {
+          icon.setAttribute('data-lucide', 'eye');
+          lucide.createIcons();
+        }
+      }
+    });
+  });
+}
+
 function initAuthenticationHandlers() {
   const loginForm = document.getElementById('auth-login-form');
   const signupForm = document.getElementById('auth-signup-form');
@@ -345,7 +479,6 @@ function initAuthenticationHandlers() {
   
   const switchToSignup = document.getElementById('auth-switch-to-signup');
   const switchToLogin = document.getElementById('auth-switch-to-login');
-  const modalTitle = document.getElementById('auth-modal-title');
 
   const forgotForm = document.getElementById('auth-forgot-form');
   const resetForm = document.getElementById('auth-reset-form');
@@ -364,120 +497,123 @@ function initAuthenticationHandlers() {
   const switchToForgot = document.getElementById('auth-switch-to-forgot');
   const backToLoginLinks = document.querySelectorAll('.auth-back-to-login');
 
-  // Toggle views
+  // Toggle views using URL states
   switchToSignup.addEventListener('click', (e) => {
     e.preventDefault();
-    loginForm.style.display = 'none';
-    signupForm.style.display = 'block';
-    forgotForm.style.display = 'none';
-    resetForm.style.display = 'none';
-    modalTitle.textContent = "Register Chamber";
+    window.history.pushState({}, '', '/register');
+    router();
   });
 
   switchToLogin.addEventListener('click', (e) => {
     e.preventDefault();
-    signupForm.style.display = 'none';
-    loginForm.style.display = 'block';
-    forgotForm.style.display = 'none';
-    resetForm.style.display = 'none';
-    modalTitle.textContent = "Login to Chambers";
+    window.history.pushState({}, '', '/login');
+    router();
   });
 
   switchToForgot.addEventListener('click', (e) => {
     e.preventDefault();
-    loginForm.style.display = 'none';
-    signupForm.style.display = 'none';
-    resetForm.style.display = 'none';
-    forgotForm.style.display = 'block';
-    forgotError.style.display = 'none';
-    forgotSuccessBanner.style.display = 'none';
-    forgotGoResetBtn.style.display = 'none';
-    forgotSubmitBtn.style.display = 'block';
-    modalTitle.textContent = "Forgot Password";
+    showAuthView('forgot');
   });
 
   backToLoginLinks.forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      forgotForm.style.display = 'none';
-      signupForm.style.display = 'none';
-      resetForm.style.display = 'none';
-      loginForm.style.display = 'block';
-      modalTitle.textContent = "Login to Chambers";
+      window.history.pushState({}, '', '/login');
+      router();
     });
   });
 
   forgotGoResetBtn.addEventListener('click', () => {
-    forgotForm.style.display = 'none';
-    resetForm.style.display = 'block';
-    resetError.style.display = 'none';
+    showAuthView('reset');
     resetEmail.value = forgotEmail.value;
-    modalTitle.textContent = "Reset Password";
   });
 
   // Form submits
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     loginError.style.display = 'none';
+    loginError.innerHTML = '';
+    loginEmail.classList.remove('auth-input-error');
+    loginPass.classList.remove('auth-input-error');
+
+    const submitBtn = loginForm.querySelector('button[type="submit"]');
+    const originalBtnHtml = submitBtn.innerHTML;
+
     try {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Signing In...`;
+      lucide.createIcons();
+
       await api.auth.login(loginEmail.value, loginPass.value);
-      hideAuthModal();
       loginForm.reset();
       
-      // Load modules
-      await db.loadAll();
-      initTheme();
-      updateBrandingHeaders();
-      
-      // Initialize view modules
-      dashboard.init();
-      clients.init();
-      cases.init();
-      diary.init();
-      accounts.init();
-      share.init();
-      
-      await switchView('dashboard-page');
+      window.history.pushState({}, '', '/dashboard');
+      await router();
     } catch (err) {
-      loginError.textContent = err.message || "Invalid credentials.";
-      loginError.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnHtml;
+      
+      loginEmail.classList.add('auth-input-error');
+      loginPass.classList.add('auth-input-error');
+      
+      loginError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Invalid credentials."}`;
+      loginError.style.display = 'flex';
+      lucide.createIcons();
     }
   });
 
   signupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     signupError.style.display = 'none';
+    signupError.innerHTML = '';
+    
+    const inputs = signupForm.querySelectorAll('.form-control');
+    inputs.forEach(i => i.classList.remove('auth-input-error'));
+
+    const submitBtn = signupForm.querySelector('button[type="submit"]');
+    const originalBtnHtml = submitBtn.innerHTML;
+
     try {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Creating Account...`;
+      lucide.createIcons();
+
       await api.auth.signup(signupEmail.value, signupPass.value, signupFirm.value, signupLawyer.value);
-      hideAuthModal();
       signupForm.reset();
       
-      // Load modules
-      await db.loadAll();
-      initTheme();
-      updateBrandingHeaders();
-      
-      // Initialize view modules
-      dashboard.init();
-      clients.init();
-      cases.init();
-      diary.init();
-      accounts.init();
-      share.init();
-      
-      await switchView('dashboard-page');
+      window.history.pushState({}, '', '/dashboard');
+      await router();
     } catch (err) {
-      signupError.textContent = err.message || "Signup failed.";
-      signupError.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnHtml;
+      
+      inputs.forEach(i => i.classList.add('auth-input-error'));
+      
+      signupError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Signup failed."}`;
+      signupError.style.display = 'flex';
+      lucide.createIcons();
     }
   });
 
   forgotForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     forgotError.style.display = 'none';
+    forgotError.innerHTML = '';
+    forgotEmail.classList.remove('auth-input-error');
     forgotSuccessBanner.style.display = 'none';
+
+    const submitBtn = forgotForm.querySelector('button[type="submit"]');
+    const originalBtnHtml = submitBtn.innerHTML;
+
     try {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Sending Code...`;
+      lucide.createIcons();
+
       const res = await api.auth.forgotPassword(forgotEmail.value);
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnHtml;
+
       if (res && res.code) {
         forgotSuccessBanner.innerHTML = `
           <strong>Verification Code Generated:</strong><br>
@@ -489,34 +625,55 @@ function initAuthenticationHandlers() {
         forgotGoResetBtn.style.display = 'block';
       }
     } catch (err) {
-      forgotError.textContent = err.message || "Failed to process request.";
-      forgotError.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnHtml;
+      forgotEmail.classList.add('auth-input-error');
+      forgotError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Failed to process request."}`;
+      forgotError.style.display = 'flex';
+      lucide.createIcons();
     }
   });
 
   resetForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     resetError.style.display = 'none';
+    resetError.innerHTML = '';
+
+    const inputs = resetForm.querySelectorAll('.form-control');
+    inputs.forEach(i => i.classList.remove('auth-input-error'));
+
+    const submitBtn = resetForm.querySelector('button[type="submit"]');
+    const originalBtnHtml = submitBtn.innerHTML;
+
     try {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Updating Password...`;
+      lucide.createIcons();
+
       await api.auth.resetPassword(resetEmail.value, resetCode.value, resetPass.value);
       alert("Password updated successfully! Please login with your new credentials.");
-      resetForm.style.display = 'none';
-      loginForm.style.display = 'block';
-      loginPass.value = '';
-      modalTitle.textContent = "Login to Chambers";
+      window.history.pushState({}, '', '/login');
+      router();
     } catch (err) {
-      resetError.textContent = err.message || "Reset failed. Verify email and code.";
-      resetError.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnHtml;
+      inputs.forEach(i => i.classList.add('auth-input-error'));
+      resetError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Reset failed. Verify email and code."}`;
+      resetError.style.display = 'flex';
+      lucide.createIcons();
     }
   });
 
   // Logout trigger
-  sidebarLogoutBtn.addEventListener('click', async () => {
-    if (confirm("Are you sure you want to log out of your chamber account?")) {
-      await api.auth.logout();
-      location.reload();
-    }
-  });
+  const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
+  if (sidebarLogoutBtn) {
+    sidebarLogoutBtn.addEventListener('click', async () => {
+      if (confirm("Are you sure you want to log out of your chamber account?")) {
+        await api.auth.logout();
+        location.reload();
+      }
+    });
+  }
 }
 
 /**
@@ -529,12 +686,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 2. Initialize common modal click behaviors
   initModals();
 
-  // 3. Setup routing events
+  // 3. Setup routing events for sidebar items (HTML5 history)
   sidebarMenuItems.forEach(item => {
     item.addEventListener('click', async (e) => {
       e.preventDefault();
       const target = item.getAttribute('data-target');
-      await switchView(target);
+      window.history.pushState({}, '', '/' + target);
+      await router();
     });
   });
 
@@ -562,7 +720,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         const authOk = await db.loadAll();
         if (authOk) {
-          // Re-render current active view
           await switchView(state.activeView);
           updateBrandingHeaders();
         } else {
@@ -580,11 +737,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 6. Dashboard links
   document.getElementById('dashboard-view-diary-link').addEventListener('click', async (e) => {
     e.preventDefault();
-    await switchView('diary-page');
+    window.history.pushState({}, '', '/diary-page');
+    await router();
   });
   document.getElementById('dashboard-view-accounts-link').addEventListener('click', async (e) => {
     e.preventDefault();
-    await switchView('accounts-page');
+    window.history.pushState({}, '', '/accounts-page');
+    await router();
   });
 
   // 7. Settings form save
@@ -646,26 +805,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     reader.readAsText(file);
   });
 
-  // 10. Init Auth Event Handlers
+  // 10. Init Auth Event Handlers & password eye toggles
   initAuthenticationHandlers();
+  initPasswordToggleHandlers();
 
-  // 11. Run Authentication Session Check
-  const authOk = await db.loadAll();
-  if (authOk) {
-    hideAuthModal();
-    initTheme();
-    updateBrandingHeaders();
-
-    // Kickoff the modules
-    dashboard.init();
-    clients.init();
-    cases.init();
-    diary.init();
-    accounts.init();
-    share.init();
-
-    await switchView('dashboard-page');
-  } else {
-    showAuthModal();
-  }
+  // 11. Run router to handle initial page load route
+  await router();
 });

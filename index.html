@@ -14,7 +14,162 @@
 </head>
 <body>
 
-  <div class="app-container">
+  <!-- Public Marketing Landing Page -->
+  <div id="marketing-page" class="public-container" style="display: none;">
+    <!-- Navbar -->
+    <nav class="marketing-nav">
+      <a href="#" class="marketing-logo" data-link="/">
+        <i data-lucide="scale"></i> Chambers<span>.</span>
+      </a>
+      <ul class="marketing-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+      </ul>
+      <div class="marketing-actions">
+        <a href="/login" class="btn-nav-login" data-link="/login">Login</a>
+        <a href="/register" class="btn-nav-register" data-link="/register">Register Chamber</a>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero-section">
+      <div class="hero-content">
+        <span class="section-tag">CHAMBERS Practice Manager</span>
+        <h1 class="hero-headline">The all-in-one practice manager built for <span>modern law chambers</span>.</h1>
+        <p class="hero-subheadline">
+          Log case briefs, schedule timelines, track financial ledgers, and manage daily diaries in a single, secure multi-tenant cloud database workspace designed for senior counsel.
+        </p>
+        <div class="hero-ctas">
+          <a href="/register" class="hero-cta-primary" data-link="/register">Register Your Chamber</a>
+          <a href="/login" class="hero-cta-secondary" data-link="/login">Login to Chamber &rarr;</a>
+        </div>
+      </div>
+      <div class="hero-showcase">
+        <img src="/images/dashboard_mockup.png" alt="Chambers Practice Dashboard Mockup">
+      </div>
+    </header>
+
+    <!-- Trust Section -->
+    <section class="trust-section">
+      <h2 class="trust-title">Trusted by leading law chambers and senior advocates</h2>
+      <div class="trust-logos">
+        <div class="trust-logo-item"><i data-lucide="scale"></i> Supreme Court Chambers</div>
+        <div class="trust-logo-item"><i data-lucide="landmark"></i> V. Sharma & Partners</div>
+        <div class="trust-logo-item"><i data-lucide="shield"></i> Apex Legal Firm</div>
+        <div class="trust-logo-item"><i data-lucide="briefcase"></i> High Court Registry</div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+      <span class="section-tag">Powerful Modules</span>
+      <h2 class="section-title">Everything you need to run a modern chamber</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-wrapper"><i data-lucide="briefcase"></i></div>
+          <h3>Case Tracking & Registry</h3>
+          <p>Maintain case dossiers, details, historical listings, and next hearing timelines for every court registry.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrapper"><i data-lucide="calendar"></i></div>
+          <h3>Daily Diary & Listings</h3>
+          <p>View daily listings dynamically with calendar state and sidebar alerts showing cases that lack scheduled next dates.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrapper"><i data-lucide="users"></i></div>
+          <h3>Client Onboarding</h3>
+          <p>Track client contact sheets, addresses, onboardings, and reference client details instantly within case profiles.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrapper"><i data-lucide="wallet"></i></div>
+          <h3>Advocate Ledger & Billings</h3>
+          <p>Create invoice billings, track cash and bank payments, and view real-time income summaries of outstanding dues.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrapper"><i data-lucide="share-2"></i></div>
+          <h3>Secure Client Share</h3>
+          <p>Generate shareable encrypted tokens for clients to track their case status and history in a read-only portal.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrapper"><i data-lucide="shield-check"></i></div>
+          <h3>Multi-Tenant Cloud Sync</h3>
+          <p>Securely isolated schemas per chamber, run entirely on Atlas Cloud with options for manual JSON data backups.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="about" class="how-it-works-section">
+      <span class="section-tag">Simple Setup</span>
+      <h2 class="section-title">Streamline your practice in minutes</h2>
+      <div class="steps-container">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <h3>Register Chamber</h3>
+          <p>Create your secure multi-tenant firm workspace and lead advocate account in seconds.</p>
+        </div>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <h3>Onboard Cases</h3>
+          <p>Log your active briefs, clients, and history timelines using our intuitive registry sheets.</p>
+        </div>
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <h3>Manage Practice</h3>
+          <p>Track your daily diary, log hearing outcomes, record next dates, and view client billing ledgers.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="features-section" style="background: rgba(17, 24, 39, 0.25); border-top: 1px solid rgba(255, 255, 255, 0.02);">
+      <span class="section-tag">Flexible Plans</span>
+      <h2 class="section-title">Chamber Pricing Plans</h2>
+      <div class="features-grid" style="max-width: 900px; margin: 0 auto;">
+        <div class="feature-card" style="border: 2px solid #701a27; background: rgba(17, 24, 39, 0.75);">
+          <div class="section-tag" style="text-align: right; font-weight: 700; color: #d97706;">PRO</div>
+          <h3>Advocate Chamber</h3>
+          <h2 style="font-size: 2.5rem; color: #fff; margin: 1rem 0;">₹1,499<span style="font-size: 1rem; color: #94a3b8;">/month</span></h2>
+          <p style="margin-bottom: 2rem;">Full multi-tenant cloud storage, unlimited cases, advocate ledger invoicing, and client share portals.</p>
+          <a href="/register" class="btn-nav-register" style="width: 100%; text-align: center;" data-link="/register">Start Free Trial</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="marketing-footer">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h4>Chambers<span>.</span></h4>
+          <p>Sophisticated multi-tenant practice manager for senior counsel and advocates. Practice management, simplified.</p>
+        </div>
+        <div class="footer-links-col">
+          <h5>Product</h5>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+          </ul>
+        </div>
+        <div class="footer-links-col">
+          <h5>Support</h5>
+          <ul>
+            <li><a href="#about">How it Works</a></li>
+            <li><a href="#">Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 CounselAI Systems. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="app-container" id="dashboard-app-container" style="display: none;">
     <!-- Sidebar Navigation -->
     <aside class="app-sidebar">
       <div class="brand-section">
@@ -1122,30 +1277,35 @@
     </div>
   </div>
 
-  <!-- Authentication (Login / Signup) Modal -->
-  <div id="auth-modal" class="modal-overlay" style="z-index: 100000; background-color: rgba(7, 10, 19, 0.95); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center;">
-    <div class="modal-container" style="max-width: 420px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid var(--border-color);">
-      <div class="modal-header" style="text-align: center; display: block; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
-        <h2 class="modal-title" id="auth-modal-title" style="font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--color-primary);">Login to Chambers</h2>
+  <!-- Authentication Dedicated Page Container (Clean standalone layout, no background bleed) -->
+  <div id="auth-page" class="public-container" style="display: none; min-height: 100vh; align-items: center; justify-content: center; padding: 2rem 1rem;">
+    <div class="modal-container" style="max-width: 420px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid var(--border-color); background: var(--bg-sidebar); border-radius: var(--radius-md); padding: 2rem;">
+      <div class="modal-header" style="text-align: center; display: block; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+        <h2 class="modal-title" id="auth-modal-title" style="font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--color-primary); font-weight: 700;">Login to Chambers</h2>
         <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">CounselAI Practice Manager SaaS</span>
         <div id="auth-db-status-badge" style="display: inline-block;"></div>
       </div>
       
       <!-- Login View -->
       <form id="auth-login-form">
-        <div class="modal-body" style="padding: 1.5rem 0;">
+        <div class="modal-body" style="padding: 1rem 0;">
           <div class="form-group">
             <label class="form-label">Email Address *</label>
             <input type="email" class="form-control" id="auth-login-email" required placeholder="name@firm.com">
           </div>
           <div class="form-group">
             <label class="form-label">Password *</label>
-            <input type="password" class="form-control" id="auth-login-password" required placeholder="••••••••">
-            <div style="text-align: right; margin-top: 0.25rem;">
+            <div class="password-input-container">
+              <input type="password" class="form-control" id="auth-login-password" required placeholder="••••••••" style="padding-right: 2.5rem;">
+              <button type="button" class="password-toggle-btn" data-toggle-target="auth-login-password">
+                <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
+              </button>
+            </div>
+            <div style="text-align: right; margin-top: 0.4rem;">
               <a href="#" id="auth-switch-to-forgot" style="font-size: 0.75rem; color: var(--text-secondary); text-decoration: none;">Forgot Password?</a>
             </div>
           </div>
-          <div id="auth-login-error" style="color: var(--color-danger); font-size: 0.8rem; margin-top: 0.5rem; display: none;"></div>
+          <div id="auth-login-error" style="color: var(--color-danger); font-size: 0.8rem; margin-top: 0.5rem; display: none; align-items: center; gap: 4px;"></div>
         </div>
         <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 0.75rem;">
           <button type="submit" class="btn btn-primary" style="width: 100%;"><i data-lucide="log-in"></i> Sign In</button>
@@ -1158,14 +1318,19 @@
 
       <!-- Signup View -->
       <form id="auth-signup-form" style="display: none;">
-        <div class="modal-body" style="padding: 1.5rem 0; max-height: 380px; overflow-y: auto;">
+        <div class="modal-body" style="padding: 1rem 0; max-height: 380px; overflow-y: auto;">
           <div class="form-group">
             <label class="form-label">Email Address *</label>
             <input type="email" class="form-control" id="auth-signup-email" required placeholder="name@firm.com">
           </div>
           <div class="form-group">
             <label class="form-label">Password *</label>
-            <input type="password" class="form-control" id="auth-signup-password" required placeholder="Min 6 characters">
+            <div class="password-input-container">
+              <input type="password" class="form-control" id="auth-signup-password" required placeholder="Min 6 characters" style="padding-right: 2.5rem;">
+              <button type="button" class="password-toggle-btn" data-toggle-target="auth-signup-password">
+                <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
+              </button>
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label">Chamber / Firm Name *</label>
@@ -1175,7 +1340,7 @@
             <label class="form-label">Lead Advocate Name *</label>
             <input type="text" class="form-control" id="auth-signup-lawyer" required placeholder="e.g. Adv. Vaibhav Sharma">
           </div>
-          <div id="auth-signup-error" style="color: var(--color-danger); font-size: 0.8rem; margin-top: 0.5rem; display: none;"></div>
+          <div id="auth-signup-error" style="color: var(--color-danger); font-size: 0.8rem; margin-top: 0.5rem; display: none; align-items: center; gap: 4px;"></div>
         </div>
         <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 0.75rem;">
           <button type="submit" class="btn btn-primary" style="width: 100%;"><i data-lucide="user-plus"></i> Create Chamber Account</button>
@@ -1188,7 +1353,7 @@
 
       <!-- Forgot Password View -->
       <form id="auth-forgot-form" style="display: none;">
-        <div class="modal-body" style="padding: 1.5rem 0;">
+        <div class="modal-body" style="padding: 1rem 0;">
           <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.4;">
             Enter your registered email address. We will generate a verification recovery code to reset your chamber password.
           </p>
@@ -1196,7 +1361,7 @@
             <label class="form-label">Email Address *</label>
             <input type="email" class="form-control" id="auth-forgot-email" required placeholder="name@firm.com">
           </div>
-          <div id="auth-forgot-error" style="color: var(--color-danger); font-size: 0.8rem; margin-top: 0.5rem; display: none;"></div>
+          <div id="auth-forgot-error" style="color: var(--color-danger); font-size: 0.8rem; margin-top: 0.5rem; display: none; align-items: center; gap: 4px;"></div>
           <div id="auth-forgot-success-banner" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm); padding: 0.75rem; margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-primary); display: none; line-height: 1.4;">
             <!-- Recovery Code displays here for testing -->
           </div>
@@ -1212,7 +1377,7 @@
 
       <!-- Reset Password View -->
       <form id="auth-reset-form" style="display: none;">
-        <div class="modal-body" style="padding: 1.5rem 0;">
+        <div class="modal-body" style="padding: 1rem 0;">
           <div class="form-group">
             <label class="form-label">Email Address *</label>
             <input type="email" class="form-control" id="auth-reset-email" required placeholder="name@firm.com">
@@ -1223,9 +1388,14 @@
           </div>
           <div class="form-group">
             <label class="form-label">New Password *</label>
-            <input type="password" class="form-control" id="auth-reset-password" required placeholder="Min 6 characters">
+            <div class="password-input-container">
+              <input type="password" class="form-control" id="auth-reset-password" required placeholder="Min 6 characters" style="padding-right: 2.5rem;">
+              <button type="button" class="password-toggle-btn" data-toggle-target="auth-reset-password">
+                <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
+              </button>
+            </div>
           </div>
-          <div id="auth-reset-error" style="color: var(--color-danger); font-size: 0.8rem; margin-top: 0.5rem; display: none;"></div>
+          <div id="auth-reset-error" style="color: var(--color-danger); font-size: 0.8rem; margin-top: 0.5rem; display: none; align-items: center; gap: 4px;"></div>
         </div>
         <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 0.75rem;">
           <button type="submit" class="btn btn-primary" style="width: 100%;"><i data-lucide="lock"></i> Reset & Update Password</button>

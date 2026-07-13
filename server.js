@@ -385,6 +385,9 @@ app.use('/css', express.static(path.join(__dirname, 'css')));
 // Serve modules from /js
 app.use('/js', express.static(path.join(__dirname, 'js')));
 
+// Serve images from /images
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
 // Serve index.html as main entry route with diagnostic error logging
 app.get('*', (req, res) => {
   const indexPath = path.join(__dirname, 'index.html');
