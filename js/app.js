@@ -365,6 +365,7 @@ async function router() {
   if (marketingPage) marketingPage.style.display = 'none';
   if (authPage) authPage.style.display = 'none';
   if (dashboardApp) dashboardApp.style.display = 'none';
+  document.body.classList.remove('app-active');
 
   // Check auth
   let isAuthenticated = false;
@@ -399,6 +400,7 @@ async function router() {
     } else {
       if (dashboardApp) {
         dashboardApp.style.display = 'flex';
+        document.body.classList.add('app-active');
         
         // Initialize dashboard modules once
         if (!appInitialized) {
