@@ -14,23 +14,25 @@
 </head>
 <body>
 
+  <!-- Shared Marketing Navbar -->
+  <nav class="marketing-nav" id="marketing-nav" style="display: none;">
+    <a href="/" class="marketing-logo" data-link="/">
+      <i data-lucide="scale"></i> Chambers<span>.</span>
+    </a>
+    <ul class="marketing-links">
+      <li><a href="/features" data-link="/features">Features</a></li>
+      <li><a href="/about" data-link="/about">About</a></li>
+      <li><a href="/pricing" data-link="/pricing">Pricing</a></li>
+      <li><a href="/faqs" data-link="/faqs">FAQs</a></li>
+    </ul>
+    <div class="marketing-actions">
+      <a href="/login" class="btn-nav-login" data-link="/login">Login</a>
+      <a href="/register" class="btn-nav-register" data-link="/register">Register Chamber</a>
+    </div>
+  </nav>
+
   <!-- Public Marketing Landing Page -->
   <div id="marketing-page" class="public-container" style="display: none;">
-    <!-- Navbar -->
-    <nav class="marketing-nav">
-      <a href="#" class="marketing-logo" data-link="/">
-        <i data-lucide="scale"></i> Chambers<span>.</span>
-      </a>
-      <ul class="marketing-links">
-        <li><a href="#features">Features</a></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#pricing">Pricing</a></li>
-      </ul>
-      <div class="marketing-actions">
-        <a href="/login" class="btn-nav-login" data-link="/login">Login</a>
-        <a href="/register" class="btn-nav-register" data-link="/register">Register Chamber</a>
-      </div>
-    </nav>
 
     <!-- Hero Section -->
     <header class="hero-section">
@@ -250,6 +252,186 @@
         
         <h3 style="color: #fff; font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-top: 1rem; font-weight: 600;">3. Fair Use & Fees</h3>
         <p>Chambers is billed on a monthly subscription model. We reserve the right to suspend access to your cloud dashboard in the event of continuous unpaid billing statements.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features Page -->
+  <div id="features-page" class="public-container" style="display: none; padding-top: 5rem; padding-bottom: 5rem;">
+    <div style="max-width: 1100px; margin: 0 auto; padding: 0 1.5rem;">
+      <span class="section-tag" style="display: block; text-align: center; margin-bottom: 0.5rem;">Core Modules</span>
+      <h1 style="font-family: 'Playfair Display', serif; font-size: 2.8rem; color: #fff; margin-bottom: 1.5rem; text-align: center; font-weight: 700;">Chambers Feature Suite</h1>
+      <p style="color: var(--text-secondary); text-align: center; max-width: 600px; margin: 0 auto 3rem auto; font-size: 1rem; line-height: 1.6;">
+        Explore the built-in practice modules designed to streamline operations, automate client notifications, and secure your advocate ledger.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-top: 3rem;">
+        <!-- Card 1 -->
+        <div class="card" style="padding: 2rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 1rem;">
+          <div style="background: rgba(59, 130, 246, 0.1); width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #3b82f6;">
+            <i data-lucide="briefcase" style="width: 24px; height: 24px;"></i>
+          </div>
+          <h3 style="color: #fff; font-size: 1.25rem; font-family: 'Playfair Display', serif; font-weight: 600;">Case Tracking & Registry</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0;">
+            Maintain comprehensive case briefs, historical hearing timelines, case stages, CNR numbers, and court registries in a single unified docket sheets view.
+          </p>
+        </div>
+        <!-- Card 2 -->
+        <div class="card" style="padding: 2rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 1rem;">
+          <div style="background: rgba(16, 185, 129, 0.1); width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #10b981;">
+            <i data-lucide="calendar" style="width: 24px; height: 24px;"></i>
+          </div>
+          <h3 style="color: #fff; font-size: 1.25rem; font-family: 'Playfair Display', serif; font-weight: 600;">Daily Diary & Listings</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0;">
+            Automatically filter court listings for the day, check next listed dates, and receive prompt visual alerts for cases missing a next scheduled date.
+          </p>
+        </div>
+        <!-- Card 3 -->
+        <div class="card" style="padding: 2rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 1rem;">
+          <div style="background: rgba(245, 158, 11, 0.1); width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #f59e0b;">
+            <i data-lucide="users" style="width: 24px; height: 24px;"></i>
+          </div>
+          <h3 style="color: #fff; font-size: 1.25rem; font-family: 'Playfair Display', serif; font-weight: 600;">Client Onboarding Wizard</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0;">
+            A step-by-step onboarding wizard to register new clients, set up initial retainers, and log core case briefs concurrently in minutes.
+          </p>
+        </div>
+        <!-- Card 4 -->
+        <div class="card" style="padding: 2rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 1rem;">
+          <div style="background: rgba(239, 68, 68, 0.1); width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ef4444;">
+            <i data-lucide="wallet" style="width: 24px; height: 24px;"></i>
+          </div>
+          <h3 style="color: #fff; font-size: 1.25rem; font-family: 'Playfair Display', serif; font-weight: 600;">Advocate Ledger & Billings</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0;">
+            Track invoice balances, register professional receipts, manage disbursements, and check high outstanding dues from a secure financial ledger.
+          </p>
+        </div>
+        <!-- Card 5 -->
+        <div class="card" style="padding: 2rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 1rem;">
+          <div style="background: rgba(139, 92, 246, 0.1); width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #8b5cf6;">
+            <i data-lucide="message-square" style="width: 24px; height: 24px;"></i>
+          </div>
+          <h3 style="color: #fff; font-size: 1.25rem; font-family: 'Playfair Display', serif; font-weight: 600;">Client Intimation Assistant</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0;">
+            Generate ready-to-share summaries of daily orders, next hearing dates, or payment reminders, and share instantly via WhatsApp or Email.
+          </p>
+        </div>
+        <!-- Card 6 -->
+        <div class="card" style="padding: 2rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 1rem;">
+          <div style="background: rgba(6, 182, 212, 0.1); width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #06b6d4;">
+            <i data-lucide="search" style="width: 24px; height: 24px;"></i>
+          </div>
+          <h3 style="color: #fff; font-size: 1.25rem; font-family: 'Playfair Display', serif; font-weight: 600;">Global Header Search</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0;">
+            A fast, dashboard-wide search bar that dynamically parses case names, case numbers, CNR tags, client names, and phone records.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Page -->
+  <div id="about-page" class="public-container" style="display: none; padding-top: 5rem; padding-bottom: 5rem;">
+    <div style="max-width: 900px; margin: 0 auto; padding: 0 1.5rem;">
+      <span class="section-tag" style="display: block; text-align: center; margin-bottom: 0.5rem;">Our Mission</span>
+      <h1 style="font-family: 'Playfair Display', serif; font-size: 2.8rem; color: #fff; margin-bottom: 2rem; text-align: center; font-weight: 700;">Scaling Law Practice with Intelligence</h1>
+      
+      <div style="display: flex; flex-direction: column; gap: 2.5rem; line-height: 1.7; color: #94a3b8; font-size: 1rem;">
+        <!-- Highlight Quote Block -->
+        <blockquote style="border-left: 4px solid var(--color-primary); padding: 1rem 1.5rem; background: rgba(112, 26, 39, 0.15); color: #fff; font-size: 1.1rem; font-style: italic; border-radius: 0 var(--radius-md) var(--radius-md) 0; margin: 0 0 1rem 0;">
+          "Most lawyers lack data about the growth of their own practice and thus struggle to scale it to top-tier law firms. Chambers bridges this analytics gap to help you build a data-driven chamber."
+        </blockquote>
+
+        <p>In the legal profession, managing caseloads manually creates an operational ceiling. Advocates spend hours parsing physical listing boards, tracking outstanding billing ledgers, and manually copying case briefs for client updates. This manual administrative overhead locks lawyers in a loop of administrative friction, preventing them from growing their practice.</p>
+        
+        <h3 style="color: #fff; font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-top: 1rem; font-weight: 600; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">How Chambers Powers Practice Scaling</h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+          <div style="display: flex; gap: 1rem;">
+            <div style="color: var(--color-primary); font-weight: 700; font-size: 1.25rem;">01</div>
+            <div>
+              <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.25rem; font-weight: 600;">Data-Driven Client Growth & Referrals</h4>
+              <p style="margin: 0; font-size: 0.95rem;">By recording referral sources for every case, Chambers tracks exactly which channels bring in your highest-yielding litigation work. This visibility allows advocates to target business relationships and networking efforts where they yield the maximum return.</p>
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 1rem;">
+            <div style="color: var(--color-primary); font-weight: 700; font-size: 1.25rem;">02</div>
+            <div>
+              <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.25rem; font-weight: 600;">Plugging Revenue Leakage with Ledgers</h4>
+              <p style="margin: 0; font-size: 0.95rem;">Chambers categorizes payment statuses (Billed, Received, Outstanding, Disbursed, WrittenOff). The dashboard flags high outstanding accounts instantly, enabling prompt billing collection reminders. This structured approach helps advocates reduce outstanding dues by up to 35% in the first quarter.</p>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 1rem;">
+            <div style="color: var(--color-primary); font-weight: 700; font-size: 1.25rem;">03</div>
+            <div>
+              <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.25rem; font-weight: 600;">Operational Leverage through Delegation</h4>
+              <p style="margin: 0; font-size: 0.95rem;">Instead of storing case updates in a physical diary, Chambers puts everything in a secure multi-tenant cloud workspace. Senior counsel can easily delegate diary entries, listings, and invoicing work to junior associates, allowing the firm to scale and handle larger case volumes effortlessly.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pricing Page -->
+  <div id="pricing-page-standalone" class="public-container" style="display: none; padding-top: 5rem; padding-bottom: 5rem;">
+    <div style="max-width: 800px; margin: 0 auto; padding: 0 1.5rem;">
+      <span class="section-tag" style="display: block; text-align: center; margin-bottom: 0.5rem;">Pricing Plans</span>
+      <h1 style="font-family: 'Playfair Display', serif; font-size: 2.8rem; color: #fff; margin-bottom: 1.5rem; text-align: center; font-weight: 700;">Simple, Flat-Rate Pricing</h1>
+      <p style="color: var(--text-secondary); text-align: center; max-width: 600px; margin: 0 auto 3rem auto; font-size: 1rem; line-height: 1.6;">
+        No hidden fees. Pay a flat monthly fee for complete access to the Chambers practice manager tools.
+      </p>
+
+      <div class="card" style="border: 2px solid #701a27; background: rgba(17, 24, 39, 0.6); padding: 3rem; border-radius: var(--radius-md); max-width: 500px; margin: 0 auto; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #fff; margin-bottom: 1rem;">Advocate Chamber</h3>
+        <h2 style="font-size: 3rem; color: #fff; margin: 1rem 0; font-weight: 700;">₹1,499<span style="font-size: 1rem; color: #94a3b8;">/month</span></h2>
+        <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 2rem;">Includes unlimited cases, clients, financial ledgers, WhatsApp intimation tools, and cloud backups.</p>
+        <a href="/register" class="btn-nav-register" style="width: 100%; text-align: center; padding: 0.75rem 1.5rem; font-size: 0.95rem; display: block; text-decoration: none;" data-link="/register">Start 14-Day Free Trial</a>
+        
+        <p style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 0;">
+          <i data-lucide="lock" style="width: 12px; height: 12px; color: var(--color-success);"></i> Data encrypted at rest and in transit (SSL/TLS)
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQs Page -->
+  <div id="faqs-page" class="public-container" style="display: none; padding-top: 5rem; padding-bottom: 5rem;">
+    <div style="max-width: 900px; margin: 0 auto; padding: 0 1.5rem;">
+      <span class="section-tag" style="display: block; text-align: center; margin-bottom: 0.5rem;">In-Depth FAQs</span>
+      <h1 style="font-family: 'Playfair Display', serif; font-size: 2.8rem; color: #fff; margin-bottom: 1.5rem; text-align: center; font-weight: 700;">Frequently Asked Questions</h1>
+      <p style="color: var(--text-secondary); text-align: center; max-width: 600px; margin: 0 auto 3rem auto; font-size: 1rem; line-height: 1.6;">
+        Everything you need to know about database hosting security, data backups, history logs, and operational features.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 2rem;">
+        <!-- Q1 -->
+        <div class="card" style="padding: 1.5rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+          <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif; font-weight: 600;">How is my data secured and isolated from other chambers?</h4>
+          <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin: 0;">Chambers uses a multi-tenant cloud logical isolation architecture. Your account documents are tagged with your unique tenant ID (e.g. `c_1_t_12345`), and query scoping enforces that no other firm can view, query, or modify your registries. We host records on MongoDB Atlas with logical partition whitelists, end-to-end TLS encryption in transit, and AES-256 volume encryption at rest.</p>
+        </div>
+        <!-- Q2 -->
+        <div class="card" style="padding: 1.5rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+          <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif; font-weight: 600;">Can I export my cases, clients, and billing records to local storage?</h4>
+          <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin: 0;">Yes. Under the System Settings page, you can click "Export Backup" at any time. This downloads a complete JSON structured snapshot of your chamber's databases to your device. You can use this snapshot as a local archive or import it to overwrite/restore your practice workspace if needed.</p>
+        </div>
+        <!-- Q3 -->
+        <div class="card" style="padding: 1.5rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+          <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif; font-weight: 600;">What is the Client Intimation Assistant and how does it share?</h4>
+          <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin: 0;">The Client Intimation Assistant is a widget inside the case profiles. It automatically compiles your latest case notes, listed court, and next scheduled hearing dates into a pre-formatted message block. With one click, it triggers a custom link to launch WhatsApp Web/App, Email, or SMS to send updates to your clients instantly.</p>
+        </div>
+        <!-- Q4 -->
+        <div class="card" style="padding: 1.5rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+          <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif; font-weight: 600;">How does the Daily Diary warn me about missing hearing dates?</h4>
+          <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin: 0;">On the Daily Diary screen, Chambers lists active litigation cases. If a case is listed for a hearing date but has not been updated with a next listing date, the calendar view flags it in the "Unscheduled Cases" list. This visual guardrail helps you ensure no case falls through the cracks.</p>
+        </div>
+        <!-- Q5 -->
+        <div class="card" style="padding: 1.5rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+          <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif; font-weight: 600;">Can I correct a wrongly recorded case hearing date?</h4>
+          <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin: 0;">Yes. Under the Case Registry view, select the case to open its dossier timeline. In the hearing history panel, you can click "Edit" on any past hearing logs to correct dates, outcomes, stages, or orders summaries, keeping your docket timeline perfectly accurate.</p>
+        </div>
       </div>
     </div>
   </div>

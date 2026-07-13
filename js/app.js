@@ -357,18 +357,28 @@ async function router() {
   const path = window.location.pathname;
   console.log("Routing to path:", path);
 
+  const marketingNav = document.getElementById('marketing-nav');
   const marketingPage = document.getElementById('marketing-page');
   const authPage = document.getElementById('auth-page');
   const dashboardApp = document.getElementById('dashboard-app-container');
   const privacyPage = document.getElementById('privacy-page');
   const termsPage = document.getElementById('terms-page');
+  const featuresPage = document.getElementById('features-page');
+  const aboutPage = document.getElementById('about-page');
+  const pricingPage = document.getElementById('pricing-page-standalone');
+  const faqsPage = document.getElementById('faqs-page');
 
   // Hide everything first
+  if (marketingNav) marketingNav.style.display = 'none';
   if (marketingPage) marketingPage.style.display = 'none';
   if (authPage) authPage.style.display = 'none';
   if (dashboardApp) dashboardApp.style.display = 'none';
   if (privacyPage) privacyPage.style.display = 'none';
   if (termsPage) termsPage.style.display = 'none';
+  if (featuresPage) featuresPage.style.display = 'none';
+  if (aboutPage) aboutPage.style.display = 'none';
+  if (pricingPage) pricingPage.style.display = 'none';
+  if (faqsPage) faqsPage.style.display = 'none';
   document.body.classList.remove('app-active');
 
   // Check auth
@@ -382,6 +392,15 @@ async function router() {
     }
   } catch (err) {
     console.error("Auth check failed:", err);
+  }
+
+  const publicRoutes = ['/', '/index.html', '/privacy', '/terms', '/login', '/register', '/features', '/about', '/pricing', '/faqs'];
+  const isPublicRoute = publicRoutes.includes(path);
+
+  if (isPublicRoute) {
+    if (marketingNav) {
+      marketingNav.style.display = 'flex';
+    }
   }
 
   // Handle routing matching
@@ -398,6 +417,26 @@ async function router() {
   } else if (path === '/terms') {
     if (termsPage) {
       termsPage.style.display = 'block';
+      lucide.createIcons();
+    }
+  } else if (path === '/features') {
+    if (featuresPage) {
+      featuresPage.style.display = 'block';
+      lucide.createIcons();
+    }
+  } else if (path === '/about') {
+    if (aboutPage) {
+      aboutPage.style.display = 'block';
+      lucide.createIcons();
+    }
+  } else if (path === '/pricing') {
+    if (pricingPage) {
+      pricingPage.style.display = 'block';
+      lucide.createIcons();
+    }
+  } else if (path === '/faqs') {
+    if (faqsPage) {
+      faqsPage.style.display = 'block';
       lucide.createIcons();
     }
   } else if (path === '/login' || path === '/register') {
@@ -834,6 +873,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.history.pushState({}, '', '/' + target);
       await router();
     });
+  });
+
+  // Global click interceptor for client-side routing (Features, About, Pricing, FAQs, Privacy, Terms)
+  document.addEventListener('click', async (e) => {
+    const link = e.target.closest('a[data-link]');
+    if (link) {
+      e.preventDefault();
+      const targetPath = link.getAttribute('data-link');
+      window.history.pushState({}, '', targetPath);
+      await router();
+    }
   });
 
   // 4. Setup quick action button click
