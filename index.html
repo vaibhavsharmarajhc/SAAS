@@ -124,40 +124,196 @@
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="features-section">
-      <span class="section-tag">Powerful Modules</span>
-      <h2 class="section-title">Everything you need to run a modern chamber</h2>
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon-wrapper"><i data-lucide="briefcase"></i></div>
-          <h3>Case Tracking & Registry</h3>
-          <p>Maintain case dossiers, details, historical listings, and next hearing timelines for every court registry.</p>
+    <section id="features" class="features-section" style="padding: 6rem 5%; background: rgba(17, 24, 39, 0.2); border-bottom: 1px solid rgba(255, 255, 255, 0.02);">
+      <span class="section-tag" style="margin-bottom: 0.5rem; display: inline-block;">Powerful Modules</span>
+      <h2 class="section-title" style="margin-bottom: 4rem;">Everything you need to run a modern chamber</h2>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3.5rem; max-width: 1200px; margin: 0 auto; align-items: stretch;">
+        
+        <!-- COLUMN 1: LAW PRACTICE SUITE -->
+        <div class="card" style="padding: 3rem 2rem; background: rgba(17, 24, 39, 0.6); border: 2px solid #701a27; border-radius: var(--radius-md); box-shadow: 0 20px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; gap: 2.5rem; text-align: left;">
+          <div>
+            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #fff; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 2rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem;">Law Practice Suite</h3>
+            
+            <div style="position: relative; padding: 1.5rem 0;">
+              <!-- Central Line -->
+              <div style="position: absolute; left: 22px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, #d97706, rgba(217,119,6,0.15));"></div>
+              
+              <!-- 1. Case Tracking & Registry -->
+              <div style="display: flex; gap: 1.5rem; position: relative; margin-bottom: 3rem;">
+                <div style="position: relative; z-index: 2; background: #0f172a; border: 2px solid #d97706; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #d97706; flex-shrink: 0; box-shadow: 0 0 15px rgba(217,119,6,0.2);">
+                  <i data-lucide="briefcase" style="width: 20px; height: 20px;"></i>
+                </div>
+                <div>
+                  <h4 style="font-family: 'Playfair Display', serif; color: #fff; font-size: 1.15rem; margin: 0 0 0.35rem 0; font-weight: 600;">Case Tracking & Registry</h4>
+                  <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0;">Maintain case dossiers, details, historical listings, and next hearing timelines for every court registry.</p>
+                </div>
+              </div>
+
+              <!-- 2. Daily Diary & Listings -->
+              <div style="display: flex; gap: 1.5rem; position: relative; margin-bottom: 3rem;">
+                <div style="position: relative; z-index: 2; background: #0f172a; border: 2px solid #d97706; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #d97706; flex-shrink: 0; box-shadow: 0 0 15px rgba(217,119,6,0.2);">
+                  <i data-lucide="calendar" style="width: 20px; height: 20px;"></i>
+                </div>
+                <div>
+                  <h4 style="font-family: 'Playfair Display', serif; color: #fff; font-size: 1.15rem; margin: 0 0 0.35rem 0; font-weight: 600;">Daily Diary & Listings</h4>
+                  <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">View daily listings dynamically with calendar state and sidebar alerts showing cases that lack scheduled next dates.</p>
+                  
+                  <!-- Mini Calendar Mockup -->
+                  <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 0.75rem; max-width: 260px; font-family: sans-serif; font-size: 0.7rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; color: #fff; font-weight: 600;">
+                      <span>August 2026</span>
+                      <div style="display: flex; gap: 0.25rem;">
+                        <span style="cursor: pointer; opacity: 0.6;">&lt;</span>
+                        <span style="cursor: pointer; opacity: 0.6;">&gt;</span>
+                      </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 4px; color: var(--text-muted); font-size: 0.6rem; font-weight: 600; margin-bottom: 0.25rem;">
+                      <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 4px; color: #fff;">
+                      <span style="opacity:0.3;">28</span><span style="opacity:0.3;">29</span><span style="opacity:0.3;">30</span><span style="opacity:0.3;">31</span><span>1</span><span>2</span><span>3</span>
+                      <span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                      <span>11</span><span>12</span><span>13</span><span>14</span><span style="background:#d97706; color:#fff; border-radius:3px; font-weight:700;">15</span><span>16</span><span>17</span>
+                      <span>18</span><span>19</span><span>20</span><span>21</span><span>22</span><span>23</span><span>24</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. Client Onboarding -->
+              <div style="display: flex; gap: 1.5rem; position: relative;">
+                <div style="position: relative; z-index: 2; background: #0f172a; border: 2px solid #d97706; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #d97706; flex-shrink: 0; box-shadow: 0 0 15px rgba(217,119,6,0.2);">
+                  <i data-lucide="users" style="width: 20px; height: 20px;"></i>
+                </div>
+                <div>
+                  <h4 style="font-family: 'Playfair Display', serif; color: #fff; font-size: 1.15rem; margin: 0 0 0.35rem 0; font-weight: 600;">Client Onboarding</h4>
+                  <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0;">Track client contact sheets, addresses, onboardings, and reference client details instantly within case profiles.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          
+          <!-- Mini Screenshots -->
+          <div style="display: flex; gap: 1rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem; justify-content: center; align-items: center;">
+            <div style="background: rgba(15, 23, 42, 0.8); padding: 0.4rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; flex: 1; max-width: 170px;">
+              <img src="images/dashboard_empty.png" style="width: 100%; border-radius: 4px; filter: brightness(0.9); display: block;" alt="Dashboard View" />
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.8); padding: 0.4rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; flex: 1; max-width: 170px;">
+              <img src="images/dashboard_mockup.png" style="width: 100%; border-radius: 4px; filter: brightness(0.9); display: block;" alt="Cases View" />
+            </div>
+          </div>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon-wrapper"><i data-lucide="calendar"></i></div>
-          <h3>Daily Diary & Listings</h3>
-          <p>View daily listings dynamically with calendar state and sidebar alerts showing cases that lack scheduled next dates.</p>
+
+        <!-- COLUMN 2: CLIENT & FINANCIAL PARTNER & NETWORKING HUB -->
+        <div class="card" style="padding: 3rem 2rem; background: rgba(17, 24, 39, 0.6); border: 2px solid #701a27; border-radius: var(--radius-md); box-shadow: 0 20px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; gap: 2.5rem; text-align: left;">
+          <div>
+            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #fff; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 1.5rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem;">Client, Financial & Referral Hub</h3>
+            
+            <!-- Network Web Graphic in Header -->
+            <div style="display: flex; justify-content: center; align-items: center; margin: 1.5rem 0 2rem 0;">
+              <div style="position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center;">
+                <!-- SVG Network Grid -->
+                <svg style="position: absolute; width: 140px; height: 140px; z-index: 1;" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(217, 119, 6, 0.15)" stroke-width="1" />
+                  <line x1="50" y1="12" x2="50" y2="88" stroke="rgba(217, 119, 6, 0.2)" stroke-width="0.75" />
+                  <line x1="12" y1="50" x2="88" y2="50" stroke="rgba(217, 119, 6, 0.2)" stroke-width="0.75" />
+                  <line x1="23" y1="23" x2="77" y2="77" stroke="rgba(217, 119, 6, 0.2)" stroke-width="0.75" />
+                  <line x1="23" y1="77" x2="77" y2="23" stroke="rgba(217, 119, 6, 0.2)" stroke-width="0.75" />
+                  <circle cx="50" cy="12" r="3" fill="#d97706" />
+                  <circle cx="88" cy="50" r="3" fill="#d97706" />
+                  <circle cx="50" cy="88" r="3" fill="#d97706" />
+                  <circle cx="12" cy="50" r="3" fill="#d97706" />
+                  <circle cx="23" cy="23" r="3" fill="#d97706" />
+                  <circle cx="77" cy="23" r="3" fill="#d97706" />
+                  <circle cx="23" cy="77" r="3" fill="#d97706" />
+                  <circle cx="77" cy="77" r="3" fill="#d97706" />
+                </svg>
+                <!-- Central Node -->
+                <div style="position: relative; z-index: 3; background: #0f172a; border: 2px solid #d97706; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #d97706; box-shadow: 0 0 15px rgba(217,119,6,0.3);">
+                  <i data-lucide="network" style="width: 22px; height: 22px;"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Features Grid inside Hub -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+              
+              <!-- 1. Referral Partner Tracking -->
+              <div style="display: flex; gap: 1.25rem;">
+                <div style="background: rgba(217, 119, 6, 0.15); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #d97706; flex-shrink: 0;">
+                  <i data-lucide="handshake" style="width: 16px; height: 16px;"></i>
+                </div>
+                <div>
+                  <h4 style="font-family: 'Playfair Display', serif; color: #fff; font-size: 1.1rem; margin: 0 0 0.35rem 0; font-weight: 600;">Referral Partner Tracking</h4>
+                  <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; margin: 0;">Easily register and categorize referral partners. Monitor references, conflicts, and contact info, ensuring smooth communication. Set reminders, email updates, and track performance to monitor connections.</p>
+                </div>
+              </div>
+
+              <!-- 2. Structured Networking -->
+              <div style="display: flex; gap: 1.25rem;">
+                <div style="background: rgba(217, 119, 6, 0.15); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #d97706; flex-shrink: 0;">
+                  <i data-lucide="network" style="width: 16px; height: 16px;"></i>
+                </div>
+                <div>
+                  <h4 style="font-family: 'Playfair Display', serif; color: #fff; font-size: 1.1rem; margin: 0 0 0.35rem 0; font-weight: 600;">Structured Networking</h4>
+                  <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; margin: 0;">Leverage data-driven insights to prioritize contacts with maximum conversion rates. View case flow metrics, monitor networking results, and measure ROI to turn contacts into a business engine.</p>
+                </div>
+              </div>
+
+              <!-- 3. Advocate Ledger & Billings -->
+              <div style="display: flex; gap: 1.25rem;">
+                <div style="background: rgba(217, 119, 6, 0.15); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #d97706; flex-shrink: 0;">
+                  <i data-lucide="wallet" style="width: 16px; height: 16px;"></i>
+                </div>
+                <div>
+                  <h4 style="font-family: 'Playfair Display', serif; color: #fff; font-size: 1.1rem; margin: 0 0 0.35rem 0; font-weight: 600;">Advocate Ledger & Billings</h4>
+                  <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1rem;">Create invoice billings, track cash and bank payments, and view real-time income summaries of outstanding dues.</p>
+                  
+                  <!-- Mini Bar Chart Mockup -->
+                  <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 0.75rem; max-width: 240px; font-family: sans-serif; font-size: 0.65rem;">
+                    <div style="color: #94a3b8; margin-bottom: 0.5rem; font-weight: 600;">Monthly Revenue</div>
+                    <div style="display: flex; align-items: flex-end; gap: 10px; height: 50px; padding-top: 0.25rem;">
+                      <div style="background: rgba(217,119,6,0.3); width: 18px; height: 20%; border-radius: 2px;"></div>
+                      <div style="background: rgba(217,119,6,0.3); width: 18px; height: 45%; border-radius: 2px;"></div>
+                      <div style="background: rgba(217,119,6,0.3); width: 18px; height: 30%; border-radius: 2px;"></div>
+                      <div style="background: #d97706; width: 18px; height: 85%; border-radius: 2px; box-shadow: 0 0 8px rgba(217,119,6,0.4);"></div>
+                      <div style="background: rgba(217,119,6,0.5); width: 18px; height: 60%; border-radius: 2px;"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4. Client Intimation Assistant -->
+              <div style="display: flex; gap: 1.25rem;">
+                <div style="background: rgba(217, 119, 6, 0.15); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #d97706; flex-shrink: 0;">
+                  <i data-lucide="message-square" style="width: 16px; height: 16px;"></i>
+                </div>
+                <div>
+                  <h4 style="font-family: 'Playfair Display', serif; color: #fff; font-size: 1.1rem; margin: 0 0 0.35rem 0; font-weight: 600;">Client Intimation Assistant</h4>
+                  <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1rem;">Instantly generate formatted WhatsApp, email, or SMS intimation summaries to notify clients of upcoming hearing dates and court directions.</p>
+                  
+                  <!-- Mini Chat Mockup -->
+                  <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 0.5rem; max-width: 240px; font-family: sans-serif; font-size: 0.6rem;">
+                    <div style="background: #0f172a; padding: 0.4rem; border-radius: 4px; color: #fff; width: 85%; border-left: 2px solid #d97706; line-height:1.3;">
+                      <strong>Chambers Update</strong><br>Next Date of Hearing: <strong>Aug 15, 2026</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          
+          <!-- Referral Dashboard Mockup -->
+          <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem; display: flex; justify-content: center;">
+            <div style="background: rgba(15, 23, 42, 0.8); padding: 0.4rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; width: 100%; max-width: 360px;">
+              <img src="images/referral_mockup.png" style="width: 100%; border-radius: 4px; filter: brightness(0.9); display: block;" alt="Referral Dashboard View" />
+            </div>
+          </div>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon-wrapper"><i data-lucide="users"></i></div>
-          <h3>Client Onboarding</h3>
-          <p>Track client contact sheets, addresses, onboardings, and reference client details instantly within case profiles.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon-wrapper"><i data-lucide="wallet"></i></div>
-          <h3>Advocate Ledger & Billings</h3>
-          <p>Create invoice billings, track cash and bank payments, and view real-time income summaries of outstanding dues.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon-wrapper"><i data-lucide="share-2"></i></div>
-          <h3>Secure Client Share</h3>
-          <p>Generate shareable encrypted tokens for clients to track their case status and history in a read-only portal.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon-wrapper"><i data-lucide="message-square"></i></div>
-          <h3>Client Intimation Assistant</h3>
-          <p>Instantly generate formatted WhatsApp, email, or SMS intimation summaries to notify clients of upcoming hearing dates and court directions.</p>
-        </div>
+
       </div>
     </section>
 
