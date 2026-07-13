@@ -1780,3 +1780,13 @@ input:checked + .slider:before {
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25) !important;
 }
 
+/* Chrome/Safari Autofill color override to maintain premium dark themes */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 100px #1e293b inset !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
