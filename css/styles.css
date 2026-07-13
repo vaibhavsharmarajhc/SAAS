@@ -1279,3 +1279,25 @@ input:checked + .slider:before {
     display: none;
   }
 }
+
+/* Sidebar Spin Animation */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.spin-animation {
+  animation: spin 0.8s linear infinite;
+}
+
+/* Daily Diary Layout Grid */
+.diary-layout {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (max-width: 1024px) {
+  .diary-layout {
+    grid-template-columns: 1fr;
+  }
+}

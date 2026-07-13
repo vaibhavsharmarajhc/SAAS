@@ -141,6 +141,13 @@ const api = {
         method: 'POST',
         body: hearingData
       });
+    },
+
+    async updateHearing(caseId, hearingId, hearingData) {
+      return await fetchAPI(`/api/cases/${caseId}/hearings/${hearingId}`, {
+        method: 'PUT',
+        body: hearingData
+      });
     }
   },
 

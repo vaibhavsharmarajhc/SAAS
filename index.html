@@ -64,6 +64,9 @@
         <button class="backup-btn" id="sidebar-logout-btn" style="margin-bottom: 0.5rem; background-color: var(--color-danger); color: #fff; border-color: var(--color-danger); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
           <i data-lucide="log-out"></i> Log Out
         </button>
+        <button class="backup-btn" id="sidebar-refresh-btn" style="margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+          <i data-lucide="rotate-cw" id="refresh-icon"></i> Refresh App
+        </button>
         <button class="backup-btn" id="sidebar-backup-btn">
           <i data-lucide="download"></i> Backup Data (JSON)
         </button>
@@ -426,30 +429,44 @@
 
       <!-- Diary Views Container -->
       <div id="diary-page" class="page-container">
-        <div class="card">
-          <!-- Calendar Controller Interface -->
-          <div class="diary-controls">
-            <!-- Calendar Navigation -->
-            <div class="calendar-navigation">
-              <button class="btn btn-secondary" style="padding:0.4rem 0.8rem;" id="diary-prev-btn"><i data-lucide="chevron-left"></i></button>
-              <button class="btn btn-secondary" style="padding:0.4rem 0.8rem;" id="diary-today-btn">Today</button>
-              <button class="btn btn-secondary" style="padding:0.4rem 0.8rem;" id="diary-next-btn"><i data-lucide="chevron-right"></i></button>
-              <span class="current-view-label" id="diary-current-label">June 2026</span>
-              <button class="btn btn-secondary" style="padding:0.4rem 0.8rem; margin-left:0.5rem;" id="diary-print-btn" title="Print Diary"><i data-lucide="printer"></i> Print</button>
+        <div class="diary-layout">
+          <!-- Calendar Card -->
+          <div class="card" style="margin-bottom: 0;">
+            <!-- Calendar Controller Interface -->
+            <div class="diary-controls">
+              <!-- Calendar Navigation -->
+              <div class="calendar-navigation">
+                <button class="btn btn-secondary" style="padding:0.4rem 0.8rem;" id="diary-prev-btn"><i data-lucide="chevron-left"></i></button>
+                <button class="btn btn-secondary" style="padding:0.4rem 0.8rem;" id="diary-today-btn">Today</button>
+                <button class="btn btn-secondary" style="padding:0.4rem 0.8rem;" id="diary-next-btn"><i data-lucide="chevron-right"></i></button>
+                <span class="current-view-label" id="diary-current-label">June 2026</span>
+                <button class="btn btn-secondary" style="padding:0.4rem 0.8rem; margin-left:0.5rem;" id="diary-print-btn" title="Print Diary"><i data-lucide="printer"></i> Print</button>
+              </div>
+
+              <!-- View toggle (Day, Week, Month, Year) -->
+              <div class="calendar-view-selector">
+                <button class="view-btn" data-view="day" id="view-day-btn">Day</button>
+                <button class="view-btn" data-view="week" id="view-week-btn">Week</button>
+                <button class="view-btn active" data-view="month" id="view-month-btn">Month</button>
+                <button class="view-btn" data-view="year" id="view-year-btn">Year</button>
+              </div>
             </div>
 
-            <!-- View toggle (Day, Week, Month, Year) -->
-            <div class="calendar-view-selector">
-              <button class="view-btn" data-view="day" id="view-day-btn">Day</button>
-              <button class="view-btn" data-view="week" id="view-week-btn">Week</button>
-              <button class="view-btn active" data-view="month" id="view-month-btn">Month</button>
-              <button class="view-btn" data-view="year" id="view-year-btn">Year</button>
+            <!-- Dynamic Calendar View Wrapper -->
+            <div id="diary-views-content" style="min-height: 480px;">
+              <!-- Rendering grids dynamically in diary.js -->
             </div>
           </div>
 
-          <!-- Dynamic Calendar View Wrapper -->
-          <div id="diary-views-content" style="min-height: 480px;">
-            <!-- Rendering grids dynamically in diary.js -->
+          <!-- Unscheduled Cases Sidebar Card -->
+          <div class="card" id="diary-unscheduled-cases-card" style="margin-bottom: 0;">
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+              <i data-lucide="alert-circle" style="color: var(--color-warning); width: 18px; height: 18px; display: inline-block; vertical-align: middle;"></i>
+              <h3 style="font-size: 1rem; margin: 0; display: inline-block; vertical-align: middle;">Unscheduled Cases</h3>
+            </div>
+            <div id="diary-unscheduled-list" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 520px; overflow-y: auto;">
+              <!-- Dynamic List of Unscheduled Cases -->
+            </div>
           </div>
         </div>
       </div>
@@ -836,13 +853,19 @@
               <input type="date" class="form-control" id="add-hearing-date" required>
             </div>
             <div class="form-group">
-              <label class="form-label">Stage during hearing *</label>
+              <label class="form-label">Purpose/Stage for Today's Date *</label>
               <input type="text" class="form-control" id="add-hearing-stage" required placeholder="Evidence, Arguments...">
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Next Listed Hearing Date</label>
-            <input type="date" class="form-control" id="add-hearing-next-date">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Next Listed Hearing Date</label>
+              <input type="date" class="form-control" id="add-hearing-next-date">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Purpose/Stage for Next Date</label>
+              <input type="text" class="form-control" id="add-hearing-next-stage" placeholder="Evidence, Written Statement...">
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label">Daily Notes / Orders Summary</label>
@@ -852,6 +875,40 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" id="add-hearing-cancel">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Hearing</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Hearing log edit modal -->
+  <div id="edit-hearing-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Hearing Details</h3>
+        <button class="modal-close" id="edit-hearing-close">&times;</button>
+      </div>
+      <form id="edit-hearing-form">
+        <input type="hidden" id="edit-hearing-case-id">
+        <input type="hidden" id="edit-hearing-id">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Date of Hearing *</label>
+              <input type="date" class="form-control" id="edit-hearing-date" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Stage during hearing *</label>
+              <input type="text" class="form-control" id="edit-hearing-stage" required placeholder="Evidence, Arguments...">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Daily Notes / Orders Summary</label>
+            <textarea class="form-control" id="edit-hearing-notes" rows="4" placeholder="Brief outcome or next directions..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="edit-hearing-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
         </div>
       </form>
     </div>
@@ -1083,6 +1140,9 @@
           <div class="form-group">
             <label class="form-label">Password *</label>
             <input type="password" class="form-control" id="auth-login-password" required placeholder="••••••••">
+            <div style="text-align: right; margin-top: 0.25rem;">
+              <a href="#" id="auth-switch-to-forgot" style="font-size: 0.75rem; color: var(--text-secondary); text-decoration: none;">Forgot Password?</a>
+            </div>
           </div>
           <div id="auth-login-error" style="color: var(--color-danger); font-size: 0.8rem; margin-top: 0.5rem; display: none;"></div>
         </div>
@@ -1121,6 +1181,55 @@
           <div style="text-align: center; font-size: 0.8rem; margin-top: 0.25rem;">
             <span style="color: var(--text-secondary);">Already have an account?</span>
             <a href="#" id="auth-switch-to-login" style="color: var(--color-primary); font-weight: 600; text-decoration: none; margin-left: 4px;">Sign In</a>
+          </div>
+        </div>
+      </form>
+
+      <!-- Forgot Password View -->
+      <form id="auth-forgot-form" style="display: none;">
+        <div class="modal-body" style="padding: 1.5rem 0;">
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.4;">
+            Enter your registered email address. We will generate a verification recovery code to reset your chamber password.
+          </p>
+          <div class="form-group">
+            <label class="form-label">Email Address *</label>
+            <input type="email" class="form-control" id="auth-forgot-email" required placeholder="name@firm.com">
+          </div>
+          <div id="auth-forgot-error" style="color: var(--color-danger); font-size: 0.8rem; margin-top: 0.5rem; display: none;"></div>
+          <div id="auth-forgot-success-banner" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm); padding: 0.75rem; margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-primary); display: none; line-height: 1.4;">
+            <!-- Recovery Code displays here for testing -->
+          </div>
+        </div>
+        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 0.75rem;">
+          <button type="submit" class="btn btn-primary" style="width: 100%;" id="auth-forgot-submit-btn"><i data-lucide="mail"></i> Get Reset Code</button>
+          <button type="button" class="btn btn-secondary" style="width: 100%; display: none;" id="auth-forgot-go-reset-btn">Proceed to Reset Password</button>
+          <div style="text-align: center; font-size: 0.8rem; margin-top: 0.25rem;">
+            <a href="#" class="auth-back-to-login" style="color: var(--color-primary); font-weight: 600; text-decoration: none;">Back to Login</a>
+          </div>
+        </div>
+      </form>
+
+      <!-- Reset Password View -->
+      <form id="auth-reset-form" style="display: none;">
+        <div class="modal-body" style="padding: 1.5rem 0;">
+          <div class="form-group">
+            <label class="form-label">Email Address *</label>
+            <input type="email" class="form-control" id="auth-reset-email" required placeholder="name@firm.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">6-Digit Recovery Code *</label>
+            <input type="text" class="form-control" id="auth-reset-code" required placeholder="123456" maxlength="6">
+          </div>
+          <div class="form-group">
+            <label class="form-label">New Password *</label>
+            <input type="password" class="form-control" id="auth-reset-password" required placeholder="Min 6 characters">
+          </div>
+          <div id="auth-reset-error" style="color: var(--color-danger); font-size: 0.8rem; margin-top: 0.5rem; display: none;"></div>
+        </div>
+        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 0.75rem;">
+          <button type="submit" class="btn btn-primary" style="width: 100%;"><i data-lucide="lock"></i> Reset & Update Password</button>
+          <div style="text-align: center; font-size: 0.8rem; margin-top: 0.25rem;">
+            <a href="#" class="auth-back-to-login" style="color: var(--color-primary); font-weight: 600; text-decoration: none;">Back to Login</a>
           </div>
         </div>
       </form>

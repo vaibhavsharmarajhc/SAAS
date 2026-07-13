@@ -104,6 +104,7 @@ class LegalDB {
   async addCase(caseObj) {
     const newCase = await api.cases.create(caseObj);
     this.cache.cases.push(newCase);
+    document.dispatchEvent(new CustomEvent('casesUpdated'));
     return newCase;
   }
 
@@ -112,6 +113,7 @@ class LegalDB {
     const idx = this.cache.cases.findIndex(c => c.id === id);
     if (idx !== -1 && updated) {
       this.cache.cases[idx] = updated;
+      document.dispatchEvent(new CustomEvent('casesUpdated'));
     }
     return updated;
   }
@@ -120,6 +122,7 @@ class LegalDB {
     await api.cases.delete(id);
     this.cache.cases = this.cache.cases.filter(c => c.id !== id);
     this.cache.transactions = this.cache.transactions.filter(t => t.caseId !== id);
+    document.dispatchEvent(new CustomEvent('casesUpdated'));
   }
 
   async addHearing(caseId, hearing) {
@@ -127,6 +130,17 @@ class LegalDB {
     const idx = this.cache.cases.findIndex(c => c.id === caseId);
     if (idx !== -1 && updatedCase) {
       this.cache.cases[idx] = updatedCase;
+      document.dispatchEvent(new CustomEvent('casesUpdated'));
+    }
+    return updatedCase;
+  }
+
+  async updateHearing(caseId, hearingId, hearingData) {
+    const updatedCase = await api.cases.updateHearing(caseId, hearingId, hearingData);
+    const idx = this.cache.cases.findIndex(c => c.id === caseId);
+    if (idx !== -1 && updatedCase) {
+      this.cache.cases[idx] = updatedCase;
+      document.dispatchEvent(new CustomEvent('casesUpdated'));
     }
     return updatedCase;
   }

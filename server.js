@@ -116,6 +116,66 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 /**
+ * Forgot Password (Code Generation)
+ */
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: "Email address is required." });
+  }
+
+  try {
+    const tenant = await db.getTenantByEmail(email);
+    if (!tenant) {
+      return res.status(404).json({ error: "No chamber is registered with this email address." });
+    }
+
+    // Generate random 6-digit recovery code
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = Date.now() + 15 * 60 * 1000; // 15 minutes from now
+
+    await db.setTenantResetCode(email, resetCode, expires);
+
+    res.json({ 
+      success: true, 
+      code: resetCode, 
+      message: "A verification code has been generated. For testing, it is displayed below." 
+    });
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    res.status(500).json({ error: "Failed to process forgot password request." });
+  }
+});
+
+/**
+ * Reset Password (Verification and Update)
+ */
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { email, code, newPassword } = req.body;
+  if (!email || !code || !newPassword) {
+    return res.status(400).json({ error: "All fields are required (email, verification code, new password)." });
+  }
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: "New password must be at least 6 characters." });
+  }
+
+  try {
+    const salt = bcrypt.genSaltSync(10);
+    const newPasswordHash = bcrypt.hashSync(newPassword, salt);
+
+    const success = await db.resetTenantPassword(email, code, newPasswordHash);
+    if (!success) {
+      return res.status(400).json({ error: "Invalid verification code or code has expired. Please try again." });
+    }
+
+    res.json({ success: true, message: "Password updated successfully. You can now log in." });
+  } catch (err) {
+    console.error("Reset password error:", err);
+    res.status(500).json({ error: "Failed to update password. Please try again." });
+  }
+});
+
+/**
  * Log Out (Session Clear)
  */
 app.post('/api/auth/logout', (req, res) => {
@@ -245,6 +305,19 @@ app.post('/api/cases/:id/hearings', authenticateToken, async (req, res) => {
     res.status(201).json(updatedCase);
   } catch (err) {
     res.status(500).json({ error: "Failed to log case hearing outcome." });
+  }
+});
+
+app.put('/api/cases/:id/hearings/:hearingId', authenticateToken, async (req, res) => {
+  try {
+    const updatedCase = await db.updateHearing(req.user.id, req.params.id, req.params.hearingId, req.body);
+    if (!updatedCase) {
+      return res.status(404).json({ error: "Case or hearing not found or access denied." });
+    }
+    res.json(updatedCase);
+  } catch (err) {
+    console.error("Update hearing error:", err);
+    res.status(500).json({ error: "Failed to update case hearing details." });
   }
 });
 

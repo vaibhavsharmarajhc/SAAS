@@ -11,6 +11,7 @@ const casesModule = {
     this.setupFilters();
     this.setupRegisterCaseForm();
     this.setupHearingForm();
+    this.setupEditHearingForm();
     this.setupCaseDossierEvents();
     this.populateReferralDatalist();
 
@@ -237,10 +238,11 @@ const casesModule = {
       const date = document.getElementById('add-hearing-date').value;
       const stage = document.getElementById('add-hearing-stage').value.trim();
       const nextHearingDate = document.getElementById('add-hearing-next-date').value || null;
+      const nextStage = document.getElementById('add-hearing-next-stage').value.trim() || null;
       const notes = document.getElementById('add-hearing-notes').value.trim();
 
       // Register Hearing
-      await db.addHearing(caseId, { date, stage, nextHearingDate, notes });
+      await db.addHearing(caseId, { date, stage, nextHearingDate, nextStage, notes });
 
       alert("Hearing history logged.");
       form.reset();
@@ -269,8 +271,59 @@ const casesModule = {
     // Set default date to today
     document.getElementById('add-hearing-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('add-hearing-stage').value = cs.stage || '';
+    document.getElementById('add-hearing-next-stage').value = '';
+    document.getElementById('add-hearing-next-date').value = '';
     
     const modal = document.getElementById('add-hearing-modal');
+    modal.classList.add('active');
+  },
+
+  setupEditHearingForm() {
+    const form = document.getElementById('edit-hearing-form');
+    const modal = document.getElementById('edit-hearing-modal');
+    const closeBtn = document.getElementById('edit-hearing-close');
+    const cancelBtn = document.getElementById('edit-hearing-cancel');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const caseId = document.getElementById('edit-hearing-case-id').value;
+      const hearingId = document.getElementById('edit-hearing-id').value;
+      const date = document.getElementById('edit-hearing-date').value;
+      const stage = document.getElementById('edit-hearing-stage').value.trim();
+      const notes = document.getElementById('edit-hearing-notes').value.trim();
+
+      await db.updateHearing(caseId, hearingId, { date, stage, notes });
+
+      alert("Hearing entry updated.");
+      form.reset();
+      modal.classList.remove('active');
+
+      // Refresh dossier
+      this.showCaseDossier(caseId);
+      this.render();
+    });
+
+    const hide = () => {
+      form.reset();
+      modal.classList.remove('active');
+    };
+    closeBtn.addEventListener('click', hide);
+    cancelBtn.addEventListener('click', hide);
+  },
+
+  showEditHearingModal(caseId, hearingId) {
+    const cs = db.getCase(caseId);
+    if (!cs) return;
+    const hearing = (cs.hearings || []).find(h => h.id === hearingId);
+    if (!hearing) return;
+
+    document.getElementById('edit-hearing-case-id').value = caseId;
+    document.getElementById('edit-hearing-id').value = hearingId;
+    document.getElementById('edit-hearing-date').value = hearing.date;
+    document.getElementById('edit-hearing-stage').value = hearing.stage || '';
+    document.getElementById('edit-hearing-notes').value = hearing.notes || '';
+
+    const modal = document.getElementById('edit-hearing-modal');
     modal.classList.add('active');
   },
 
@@ -399,8 +452,14 @@ const casesModule = {
           <div style="border-left: 2px solid var(--color-primary); padding-left: 1.25rem; position: relative; margin-bottom: 1.25rem;">
             <!-- timeline dot pointer -->
             <div style="width: 10px; height: 10px; border-radius:50%; background-color:var(--color-primary); border: 2px solid var(--bg-sidebar); position: absolute; left: -6px; top: 4px;"></div>
-            <div style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">${h.date}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">${h.date}</div>
+              <button class="btn btn-secondary btn-edit-hearing" data-hearing-id="${h.id}" data-case-id="${cs.id}" style="padding: 2px 6px; font-size: 0.65rem; border-radius: var(--radius-xs); line-height: 1;" title="Edit Hearing Details">
+                <i data-lucide="pencil" style="width:10px; height:10px;"></i> Edit
+              </button>
+            </div>
             <div style="font-size:0.9rem; font-weight:600; color:var(--text-primary); margin-top:0.15rem;">Stage: ${h.stage}</div>
+            ${h.nextStage ? `<div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.1rem;">Next Purpose/Stage: <strong>${h.nextStage}</strong></div>` : ''}
             <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem; white-space: pre-wrap;">${h.notes || 'No hearing notes provided.'}</p>
           </div>
         `;
@@ -489,6 +548,16 @@ const casesModule = {
     // Event listener to open Log Transaction modal pre-filled
     body.querySelector('#case-ledger-log-tx-btn').addEventListener('click', () => {
       accountsModule.showLogTransactionModal(cs.clientId, cs.id);
+    });
+
+    // Event listeners to edit specific past hearings
+    body.querySelectorAll('.btn-edit-hearing').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const caseId = btn.getAttribute('data-case-id');
+        const hearingId = btn.getAttribute('data-hearing-id');
+        this.showEditHearingModal(caseId, hearingId);
+      });
     });
 
     // Event link inside case ledger to jump directly to Accounts

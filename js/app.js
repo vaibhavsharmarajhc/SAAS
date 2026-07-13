@@ -324,11 +324,30 @@ function initAuthenticationHandlers() {
   const switchToLogin = document.getElementById('auth-switch-to-login');
   const modalTitle = document.getElementById('auth-modal-title');
 
+  const forgotForm = document.getElementById('auth-forgot-form');
+  const resetForm = document.getElementById('auth-reset-form');
+
+  const forgotEmail = document.getElementById('auth-forgot-email');
+  const forgotError = document.getElementById('auth-forgot-error');
+  const forgotSuccessBanner = document.getElementById('auth-forgot-success-banner');
+  const forgotSubmitBtn = document.getElementById('auth-forgot-submit-btn');
+  const forgotGoResetBtn = document.getElementById('auth-forgot-go-reset-btn');
+
+  const resetEmail = document.getElementById('auth-reset-email');
+  const resetCode = document.getElementById('auth-reset-code');
+  const resetPass = document.getElementById('auth-reset-password');
+  const resetError = document.getElementById('auth-reset-error');
+
+  const switchToForgot = document.getElementById('auth-switch-to-forgot');
+  const backToLoginLinks = document.querySelectorAll('.auth-back-to-login');
+
   // Toggle views
   switchToSignup.addEventListener('click', (e) => {
     e.preventDefault();
     loginForm.style.display = 'none';
     signupForm.style.display = 'block';
+    forgotForm.style.display = 'none';
+    resetForm.style.display = 'none';
     modalTitle.textContent = "Register Chamber";
   });
 
@@ -336,7 +355,41 @@ function initAuthenticationHandlers() {
     e.preventDefault();
     signupForm.style.display = 'none';
     loginForm.style.display = 'block';
+    forgotForm.style.display = 'none';
+    resetForm.style.display = 'none';
     modalTitle.textContent = "Login to Chambers";
+  });
+
+  switchToForgot.addEventListener('click', (e) => {
+    e.preventDefault();
+    loginForm.style.display = 'none';
+    signupForm.style.display = 'none';
+    resetForm.style.display = 'none';
+    forgotForm.style.display = 'block';
+    forgotError.style.display = 'none';
+    forgotSuccessBanner.style.display = 'none';
+    forgotGoResetBtn.style.display = 'none';
+    forgotSubmitBtn.style.display = 'block';
+    modalTitle.textContent = "Forgot Password";
+  });
+
+  backToLoginLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      forgotForm.style.display = 'none';
+      signupForm.style.display = 'none';
+      resetForm.style.display = 'none';
+      loginForm.style.display = 'block';
+      modalTitle.textContent = "Login to Chambers";
+    });
+  });
+
+  forgotGoResetBtn.addEventListener('click', () => {
+    forgotForm.style.display = 'none';
+    resetForm.style.display = 'block';
+    resetError.style.display = 'none';
+    resetEmail.value = forgotEmail.value;
+    modalTitle.textContent = "Reset Password";
   });
 
   // Form submits
@@ -396,6 +449,44 @@ function initAuthenticationHandlers() {
     }
   });
 
+  forgotForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    forgotError.style.display = 'none';
+    forgotSuccessBanner.style.display = 'none';
+    try {
+      const res = await api.auth.forgotPassword(forgotEmail.value);
+      if (res && res.code) {
+        forgotSuccessBanner.innerHTML = `
+          <strong>Verification Code Generated:</strong><br>
+          Your recovery code is: <strong style="font-size: 1.1rem; color: var(--color-primary);">${res.code}</strong><br>
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">* In production, this code is delivered to your email inbox.</span>
+        `;
+        forgotSuccessBanner.style.display = 'block';
+        forgotSubmitBtn.style.display = 'none';
+        forgotGoResetBtn.style.display = 'block';
+      }
+    } catch (err) {
+      forgotError.textContent = err.message || "Failed to process request.";
+      forgotError.style.display = 'block';
+    }
+  });
+
+  resetForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    resetError.style.display = 'none';
+    try {
+      await api.auth.resetPassword(resetEmail.value, resetCode.value, resetPass.value);
+      alert("Password updated successfully! Please login with your new credentials.");
+      resetForm.style.display = 'none';
+      loginForm.style.display = 'block';
+      loginPass.value = '';
+      modalTitle.textContent = "Login to Chambers";
+    } catch (err) {
+      resetError.textContent = err.message || "Reset failed. Verify email and code.";
+      resetError.style.display = 'block';
+    }
+  });
+
   // Logout trigger
   sidebarLogoutBtn.addEventListener('click', async () => {
     if (confirm("Are you sure you want to log out of your chamber account?")) {
@@ -436,6 +527,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   sidebarBackupBtn.addEventListener('click', () => {
     db.exportBackup();
   });
+
+  // Sidebar refresh trigger
+  const sidebarRefreshBtn = document.getElementById('sidebar-refresh-btn');
+  if (sidebarRefreshBtn) {
+    sidebarRefreshBtn.addEventListener('click', async () => {
+      const icon = sidebarRefreshBtn.querySelector('i');
+      if (icon) icon.classList.add('spin-animation');
+      sidebarRefreshBtn.disabled = true;
+
+      try {
+        const authOk = await db.loadAll();
+        if (authOk) {
+          // Re-render current active view
+          await switchView(state.activeView);
+          updateBrandingHeaders();
+        } else {
+          location.reload();
+        }
+      } catch (err) {
+        console.error("Refresh failed:", err);
+      } finally {
+        if (icon) icon.classList.remove('spin-animation');
+        sidebarRefreshBtn.disabled = false;
+      }
+    });
+  }
 
   // 6. Dashboard links
   document.getElementById('dashboard-view-diary-link').addEventListener('click', async (e) => {

@@ -134,6 +134,68 @@ async function getTenantById(id) {
   return null;
 }
 
+async function setTenantResetCode(email, code, expires) {
+  const db = await getDb();
+  if (db) {
+    await db.collection('tenants').updateOne(
+      { email: email.toLowerCase() },
+      { 
+        $set: { 
+          resetCode: code,
+          resetCodeExpires: expires
+        } 
+      }
+    );
+    return true;
+  }
+
+  const localDb = readDb();
+  const idx = localDb.tenants.findIndex(t => t.email.toLowerCase() === email.toLowerCase());
+  if (idx !== -1) {
+    localDb.tenants[idx].resetCode = code;
+    localDb.tenants[idx].resetCodeExpires = expires;
+    writeDb(localDb);
+    return true;
+  }
+  return false;
+}
+
+async function resetTenantPassword(email, code, newPasswordHash) {
+  const db = await getDb();
+  if (db) {
+    const tenant = await db.collection('tenants').findOne({ email: email.toLowerCase() });
+    if (!tenant) return false;
+    
+    if (tenant.resetCode !== code || tenant.resetCodeExpires < Date.now()) {
+      return false;
+    }
+
+    await db.collection('tenants').updateOne(
+      { email: email.toLowerCase() },
+      { 
+        $set: { passwordHash: newPasswordHash },
+        $unset: { resetCode: "", resetCodeExpires: "" }
+      }
+    );
+    return true;
+  }
+
+  const localDb = readDb();
+  const idx = localDb.tenants.findIndex(t => t.email.toLowerCase() === email.toLowerCase());
+  if (idx !== -1) {
+    const tenant = localDb.tenants[idx];
+    if (tenant.resetCode !== code || tenant.resetCodeExpires < Date.now()) {
+      return false;
+    }
+    localDb.tenants[idx].passwordHash = newPasswordHash;
+    delete localDb.tenants[idx].resetCode;
+    delete localDb.tenants[idx].resetCodeExpires;
+    writeDb(localDb);
+    return true;
+  }
+  return false;
+}
+
 async function createTenant(email, password, firmName, lawyerName) {
   const salt = bcrypt.genSaltSync(10);
   const passwordHash = bcrypt.hashSync(password, salt);
@@ -382,6 +444,7 @@ async function addHearing(tenantId, caseId, hearingData) {
     id: "h_" + Date.now(),
     date: hearingData.date || new Date().toISOString().split('T')[0],
     stage: hearingData.stage || "Hearing",
+    nextStage: hearingData.nextStage || null,
     notes: hearingData.notes || ""
   };
 
@@ -396,7 +459,7 @@ async function addHearing(tenantId, caseId, hearingData) {
       { 
         $set: { 
           hearings,
-          stage: hearingData.stage,
+          stage: hearingData.nextStage || hearingData.stage,
           nextHearingDate: hearingData.nextHearingDate || null
         } 
       }
@@ -410,10 +473,56 @@ async function addHearing(tenantId, caseId, hearingData) {
   if (idx !== -1) {
     localDb.cases[idx].hearings = localDb.cases[idx].hearings || [];
     localDb.cases[idx].hearings.push(newHearing);
-    localDb.cases[idx].stage = hearingData.stage;
+    localDb.cases[idx].stage = hearingData.nextStage || hearingData.stage;
     localDb.cases[idx].nextHearingDate = hearingData.nextHearingDate || null;
     writeDb(localDb);
     return localDb.cases[idx];
+  }
+  return null;
+}
+
+async function updateHearing(tenantId, caseId, hearingId, hearingData) {
+  const db = await getDb();
+  if (db) {
+    const cs = await db.collection('cases').findOne({ tenantId, _id: caseId });
+    if (!cs) return null;
+
+    const hearings = cs.hearings || [];
+    const idx = hearings.findIndex(h => h.id === hearingId);
+    if (idx !== -1) {
+      hearings[idx] = {
+        ...hearings[idx],
+        date: hearingData.date || hearings[idx].date,
+        stage: hearingData.stage || hearings[idx].stage,
+        notes: hearingData.notes !== undefined ? hearingData.notes : hearings[idx].notes
+      };
+
+      await db.collection('cases').updateOne(
+        { tenantId, _id: caseId },
+        { $set: { hearings } }
+      );
+      
+      const updated = await db.collection('cases').findOne({ tenantId, _id: caseId });
+      return mapId(updated);
+    }
+    return null;
+  }
+
+  const localDb = readDb();
+  const idx = localDb.cases.findIndex(c => c.tenantId === tenantId && c.id === caseId);
+  if (idx !== -1) {
+    localDb.cases[idx].hearings = localDb.cases[idx].hearings || [];
+    const hIdx = localDb.cases[idx].hearings.findIndex(h => h.id === hearingId);
+    if (hIdx !== -1) {
+      localDb.cases[idx].hearings[hIdx] = {
+        ...localDb.cases[idx].hearings[hIdx],
+        date: hearingData.date || localDb.cases[idx].hearings[hIdx].date,
+        stage: hearingData.stage || localDb.cases[idx].hearings[hIdx].stage,
+        notes: hearingData.notes !== undefined ? hearingData.notes : localDb.cases[idx].hearings[hIdx].notes
+      };
+      writeDb(localDb);
+      return localDb.cases[idx];
+    }
   }
   return null;
 }
@@ -717,6 +826,8 @@ module.exports = {
   initDatabase,
   getTenantByEmail,
   getTenantById,
+  setTenantResetCode,
+  resetTenantPassword,
   createTenant,
   updateTenantSettings,
   getClients,
@@ -730,6 +841,7 @@ module.exports = {
   updateCase,
   deleteCase,
   addHearing,
+  updateHearing,
   getTransactions,
   addTransaction,
   deleteTransaction,

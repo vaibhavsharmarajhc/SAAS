@@ -18,12 +18,22 @@ const diaryModule = {
     this.setupViewSelector();
     this.setupNavigation();
     this.setupModal();
+
+    // Listen for case updates to refresh the unscheduled list in real-time
+    document.addEventListener('casesUpdated', () => {
+      const diaryPage = document.getElementById('diary-page');
+      if (diaryPage && diaryPage.classList.contains('active')) {
+        this.renderUnscheduledCases();
+      }
+    });
+
     console.log("Diary: Initialization complete.");
   },
 
   render() {
     console.log("Diary: Rendering active view: " + calendarState.activeView);
     this.renderActiveView();
+    this.renderUnscheduledCases();
   },
 
   /**
@@ -533,6 +543,74 @@ const diaryModule = {
     const mStr = String(d.getMonth() + 1).padStart(2, '0');
     const dStr = String(d.getDate()).padStart(2, '0');
     return `${yStr}-${mStr}-${dStr}`;
+  },
+
+  renderUnscheduledCases() {
+    const listContainer = document.getElementById('diary-unscheduled-list');
+    if (!listContainer) return;
+
+    const cases = db.getCases();
+    // Filter active cases for which nextHearingDate is null or empty
+    const unscheduledCases = cases.filter(c => c.status === 'Active' && !c.nextHearingDate);
+
+    listContainer.innerHTML = '';
+
+    if (unscheduledCases.length === 0) {
+      listContainer.innerHTML = `
+        <div style="text-align:center; padding:2rem 1rem; color: var(--text-muted);">
+          <i data-lucide="check-circle" style="width:28px; height:28px; color:var(--color-success); margin-bottom:0.5rem; display:inline-block;"></i>
+          <p style="font-size:0.8rem; margin:0;">All active cases have next hearing dates scheduled!</p>
+        </div>
+      `;
+      lucide.createIcons();
+      return;
+    }
+
+    unscheduledCases.forEach(c => {
+      const client = db.getClient(c.clientId);
+      const item = document.createElement('div');
+      item.style.backgroundColor = 'rgba(239, 68, 68, 0.03)';
+      item.style.border = '1px solid rgba(239, 68, 68, 0.15)';
+      item.style.borderRadius = 'var(--radius-sm)';
+      item.style.padding = '0.75rem';
+      item.style.display = 'flex';
+      item.style.flexDirection = 'column';
+      item.style.gap = '0.25rem';
+      item.style.cursor = 'pointer';
+      item.style.transition = 'all var(--transition-fast)';
+
+      // Hover effects
+      item.addEventListener('mouseenter', () => {
+        item.style.backgroundColor = 'rgba(239, 68, 68, 0.06)';
+        item.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+      });
+      item.addEventListener('mouseleave', () => {
+        item.style.backgroundColor = 'rgba(239, 68, 68, 0.03)';
+        item.style.borderColor = 'rgba(239, 68, 68, 0.15)';
+      });
+
+      item.innerHTML = `
+        <div style="font-size:0.7rem; text-transform:uppercase; color:var(--text-muted); font-weight:600; display:flex; justify-content:space-between;">
+          <span>${c.caseType}</span>
+          <span style="color:var(--color-danger); font-weight:700;">No Next Date</span>
+        </div>
+        <strong style="font-size:0.85rem; color:var(--text-primary); line-height:1.2; margin-top:0.15rem;">${c.title}</strong>
+        <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.15rem;">
+          CNR/Ref: ${c.caseNumber}
+        </div>
+        <div style="font-size:0.75rem; color:var(--text-secondary);">
+          Client: ${client ? client.name : 'Unknown'}
+        </div>
+      `;
+
+      item.addEventListener('click', () => {
+        casesModule.showCaseDossier(c.id);
+      });
+
+      listContainer.appendChild(item);
+    });
+    
+    lucide.createIcons();
   }
 };
 
