@@ -23,7 +23,6 @@
       <li><a href="/features" data-link="/features">Features</a></li>
       <li><a href="/about" data-link="/about">About</a></li>
       <li><a href="/pricing" data-link="/pricing">Pricing</a></li>
-      <li><a href="/faqs" data-link="/faqs">FAQs</a></li>
     </ul>
     <div class="marketing-actions">
       <a href="/login" class="btn-nav-login" data-link="/login">Login</a>
@@ -190,29 +189,6 @@
       </div>
     </section>
 
-    <!-- FAQ Section -->
-    <section class="faq-section" style="padding: 5rem 5%; background: transparent; border-top: 1px solid rgba(255, 255, 255, 0.02);">
-      <div style="max-width: 800px; margin: 0 auto;">
-        <span class="section-tag" style="display: block; text-align: center; margin-bottom: 0.5rem;">FAQ</span>
-        <h2 class="section-title" style="text-align: center; margin-bottom: 3rem;">Frequently Asked Questions</h2>
-        
-        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-          <div class="card" style="padding: 1.5rem; background: rgba(17, 24, 39, 0.5); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-            <h4 style="color: #fff; font-size: 1rem; margin-bottom: 0.5rem; font-weight: 600;">Where is my data stored?</h4>
-            <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; margin: 0;">All advocate records and court case diaries are hosted on MongoDB Atlas cloud servers with encrypted storage volumes, ensuring security and maximum availability.</p>
-          </div>
-          <div class="card" style="padding: 1.5rem; background: rgba(17, 24, 39, 0.5); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-            <h4 style="color: #fff; font-size: 1rem; margin-bottom: 0.5rem; font-weight: 600;">Can I export my data?</h4>
-            <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; margin: 0;">Yes. You have 100% data ownership. You can download a complete backup of your cases, clients, and financial logs as a standard JSON snapshot at any time from System Settings.</p>
-          </div>
-          <div class="card" style="padding: 1.5rem; background: rgba(17, 24, 39, 0.5); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-            <h4 style="color: #fff; font-size: 1rem; margin-bottom: 0.5rem; font-weight: 600;">Is client data encrypted?</h4>
-            <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; margin: 0;">Yes. All passwords, database credentials, case details, and billing ledgers are encrypted in transit via SSL/TLS and at rest within our cloud servers.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Pricing Section -->
     <section id="pricing" class="features-section" style="background: rgba(17, 24, 39, 0.25); border-top: 1px solid rgba(255, 255, 255, 0.02);">
       <span class="section-tag">Flexible Plans</span>
@@ -263,16 +239,7 @@
   </div>
 
   <!-- Privacy Policy Section -->
-  <div id="privacy-page" class="public-container" style="display: none; padding-bottom: 4rem;">
-    <!-- Navbar -->
-    <nav class="marketing-nav">
-      <a href="/" class="marketing-logo" data-link="/">
-        <i data-lucide="scale"></i> Chambers<span>.</span>
-      </a>
-      <div class="marketing-actions">
-        <a href="/" class="btn-nav-login" data-link="/">&larr; Back to Home</a>
-      </div>
-    </nav>
+  <div id="privacy-page" class="public-container" style="display: none; padding-top: 5rem; padding-bottom: 4rem;">
     <div style="max-width: 800px; margin: 4rem auto 0 auto; padding: 0 1.5rem;">
       <h1 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; color: #fff; margin-bottom: 1rem;">Privacy Policy</h1>
       <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 2rem;">Last updated: July 13, 2026</p>
@@ -293,16 +260,7 @@
   </div>
 
   <!-- Terms of Service Section -->
-  <div id="terms-page" class="public-container" style="display: none; padding-bottom: 4rem;">
-    <!-- Navbar -->
-    <nav class="marketing-nav">
-      <a href="/" class="marketing-logo" data-link="/">
-        <i data-lucide="scale"></i> Chambers<span>.</span>
-      </a>
-      <div class="marketing-actions">
-        <a href="/" class="btn-nav-login" data-link="/">&larr; Back to Home</a>
-      </div>
-    </nav>
+  <div id="terms-page" class="public-container" style="display: none; padding-top: 5rem; padding-bottom: 4rem;">
     <div style="max-width: 800px; margin: 4rem auto 0 auto; padding: 0 1.5rem;">
       <h1 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; color: #fff; margin-bottom: 1rem;">Terms of Service</h1>
       <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 2rem;">Last updated: July 13, 2026</p>
@@ -459,45 +417,6 @@
         <p style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 0;">
           <i data-lucide="lock" style="width: 12px; height: 12px; color: var(--color-success);"></i> Data encrypted at rest and in transit (SSL/TLS)
         </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- FAQs Page -->
-  <div id="faqs-page" class="public-container" style="display: none; padding-top: 5rem; padding-bottom: 5rem;">
-    <div style="max-width: 900px; margin: 0 auto; padding: 0 1.5rem;">
-      <span class="section-tag" style="display: block; text-align: center; margin-bottom: 0.5rem;">In-Depth FAQs</span>
-      <h1 style="font-family: 'Playfair Display', serif; font-size: 2.8rem; color: #fff; margin-bottom: 1.5rem; text-align: center; font-weight: 700;">Frequently Asked Questions</h1>
-      <p style="color: var(--text-secondary); text-align: center; max-width: 600px; margin: 0 auto 3rem auto; font-size: 1rem; line-height: 1.6;">
-        Everything you need to know about database hosting security, data backups, history logs, and operational features.
-      </p>
-
-      <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 2rem;">
-        <!-- Q1 -->
-        <div class="card" style="padding: 1.5rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-          <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif; font-weight: 600;">How is my data secured and isolated from other chambers?</h4>
-          <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin: 0;">Chambers uses a multi-tenant cloud logical isolation architecture. Your account documents are tagged with your unique tenant ID (e.g. `c_1_t_12345`), and query scoping enforces that no other firm can view, query, or modify your registries. We host records on MongoDB Atlas with logical partition whitelists, end-to-end TLS encryption in transit, and AES-256 volume encryption at rest.</p>
-        </div>
-        <!-- Q2 -->
-        <div class="card" style="padding: 1.5rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-          <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif; font-weight: 600;">Can I export my cases, clients, and billing records to local storage?</h4>
-          <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin: 0;">Yes. Under the System Settings page, you can click "Export Backup" at any time. This downloads a complete JSON structured snapshot of your chamber's databases to your device. You can use this snapshot as a local archive or import it to overwrite/restore your practice workspace if needed.</p>
-        </div>
-        <!-- Q3 -->
-        <div class="card" style="padding: 1.5rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-          <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif; font-weight: 600;">What is the Client Intimation Assistant and how does it share?</h4>
-          <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin: 0;">The Client Intimation Assistant is a widget inside the case profiles. It automatically compiles your latest case notes, listed court, and next scheduled hearing dates into a pre-formatted message block. With one click, it triggers a custom link to launch WhatsApp Web/App, Email, or SMS to send updates to your clients instantly.</p>
-        </div>
-        <!-- Q4 -->
-        <div class="card" style="padding: 1.5rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-          <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif; font-weight: 600;">How does the Daily Diary warn me about missing hearing dates?</h4>
-          <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin: 0;">On the Daily Diary screen, Chambers lists active litigation cases. If a case is listed for a hearing date but has not been updated with a next listing date, the calendar view flags it in the "Unscheduled Cases" list. This visual guardrail helps you ensure no case falls through the cracks.</p>
-        </div>
-        <!-- Q5 -->
-        <div class="card" style="padding: 1.5rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-          <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif; font-weight: 600;">Can I correct a wrongly recorded case hearing date?</h4>
-          <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin: 0;">Yes. Under the Case Registry view, select the case to open its dossier timeline. In the hearing history panel, you can click "Edit" on any past hearing logs to correct dates, outcomes, stages, or orders summaries, keeping your docket timeline perfectly accurate.</p>
-        </div>
       </div>
     </div>
   </div>

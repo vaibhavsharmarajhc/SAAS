@@ -366,7 +366,6 @@ async function router() {
   const featuresPage = document.getElementById('features-page');
   const aboutPage = document.getElementById('about-page');
   const pricingPage = document.getElementById('pricing-page-standalone');
-  const faqsPage = document.getElementById('faqs-page');
 
   // Hide everything first
   if (marketingNav) marketingNav.style.display = 'none';
@@ -378,7 +377,6 @@ async function router() {
   if (featuresPage) featuresPage.style.display = 'none';
   if (aboutPage) aboutPage.style.display = 'none';
   if (pricingPage) pricingPage.style.display = 'none';
-  if (faqsPage) faqsPage.style.display = 'none';
   document.body.classList.remove('app-active');
 
   // Check auth
@@ -394,7 +392,7 @@ async function router() {
     console.error("Auth check failed:", err);
   }
 
-  const publicRoutes = ['/', '/index.html', '/privacy', '/terms', '/login', '/register', '/features', '/about', '/pricing', '/faqs'];
+  const publicRoutes = ['/', '/index.html', '/privacy', '/terms', '/login', '/register', '/features', '/about', '/pricing'];
   const isPublicRoute = publicRoutes.includes(path);
 
   if (isPublicRoute) {
@@ -432,11 +430,6 @@ async function router() {
   } else if (path === '/pricing') {
     if (pricingPage) {
       pricingPage.style.display = 'block';
-      lucide.createIcons();
-    }
-  } else if (path === '/faqs') {
-    if (faqsPage) {
-      faqsPage.style.display = 'block';
       lucide.createIcons();
     }
   } else if (path === '/login' || path === '/register') {
