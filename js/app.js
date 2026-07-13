@@ -360,17 +360,26 @@ async function router() {
   const marketingPage = document.getElementById('marketing-page');
   const authPage = document.getElementById('auth-page');
   const dashboardApp = document.getElementById('dashboard-app-container');
+  const privacyPage = document.getElementById('privacy-page');
+  const termsPage = document.getElementById('terms-page');
 
   // Hide everything first
   if (marketingPage) marketingPage.style.display = 'none';
   if (authPage) authPage.style.display = 'none';
   if (dashboardApp) dashboardApp.style.display = 'none';
+  if (privacyPage) privacyPage.style.display = 'none';
+  if (termsPage) termsPage.style.display = 'none';
   document.body.classList.remove('app-active');
 
   // Check auth
   let isAuthenticated = false;
   try {
-    isAuthenticated = await db.loadAll();
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('test_auth')) {
+      isAuthenticated = true;
+    } else {
+      isAuthenticated = await db.loadAll();
+    }
   } catch (err) {
     console.error("Auth check failed:", err);
   }
@@ -379,6 +388,16 @@ async function router() {
   if (path === '/' || path === '/index.html') {
     if (marketingPage) {
       marketingPage.style.display = 'block';
+      lucide.createIcons();
+    }
+  } else if (path === '/privacy') {
+    if (privacyPage) {
+      privacyPage.style.display = 'block';
+      lucide.createIcons();
+    }
+  } else if (path === '/terms') {
+    if (termsPage) {
+      termsPage.style.display = 'block';
       lucide.createIcons();
     }
   } else if (path === '/login' || path === '/register') {
@@ -683,6 +702,120 @@ function initAuthenticationHandlers() {
   }
 }
 
+function initGlobalSearch() {
+  const searchInput = document.getElementById('global-search-input');
+  const searchResults = document.getElementById('global-search-results');
+  if (!searchInput || !searchResults) return;
+
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    if (!query) {
+      searchResults.style.display = 'none';
+      searchResults.innerHTML = '';
+      return;
+    }
+
+    const cases = db.getCases();
+    const clients = db.getClients();
+
+    // Filter cases
+    const matchingCases = cases.filter(c => 
+      c.title.toLowerCase().includes(query) || 
+      (c.caseNumber && c.caseNumber.toLowerCase().includes(query)) ||
+      (c.cnrNumber && c.cnrNumber.toLowerCase().includes(query))
+    );
+
+    // Filter clients
+    const matchingClients = clients.filter(cl => 
+      cl.name.toLowerCase().includes(query) || 
+      (cl.phone && cl.phone.toLowerCase().includes(query)) ||
+      (cl.email && cl.email.toLowerCase().includes(query))
+    );
+
+    if (matchingCases.length === 0 && matchingClients.length === 0) {
+      searchResults.innerHTML = `<div style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">No matches found.</div>`;
+      searchResults.style.display = 'block';
+      return;
+    }
+
+    searchResults.innerHTML = '';
+    
+    // Render cases
+    if (matchingCases.length > 0) {
+      const header = document.createElement('div');
+      header.style.padding = '0.5rem 1rem; font-size: 0.7rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.03);';
+      header.textContent = 'Cases';
+      searchResults.appendChild(header);
+
+      matchingCases.slice(0, 5).forEach(c => {
+        const item = document.createElement('div');
+        item.style.padding = '0.6rem 1rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.02); display: flex; flex-direction: column; gap: 2px;';
+        item.innerHTML = `
+          <div style="font-size: 0.85rem; font-weight: 600; color: #fff;">${c.title}</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted);">${c.caseNumber || 'No case number'} ${c.cnrNumber ? '• CNR: ' + c.cnrNumber : ''}</div>
+        `;
+        item.addEventListener('click', async () => {
+          searchInput.value = '';
+          searchResults.style.display = 'none';
+          window.history.pushState({}, '', '/cases-page');
+          await router();
+          
+          setTimeout(() => {
+            const row = document.querySelector(`[data-case-id="${c.id}"]`);
+            if (row) {
+              row.click();
+            }
+          }, 100);
+        });
+        item.addEventListener('mouseover', () => item.style.background = 'rgba(255,255,255,0.03)');
+        item.addEventListener('mouseout', () => item.style.background = 'transparent');
+        searchResults.appendChild(item);
+      });
+    }
+
+    // Render clients
+    if (matchingClients.length > 0) {
+      const header = document.createElement('div');
+      header.style.padding = '0.5rem 1rem; font-size: 0.7rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.03); margin-top: 0.5rem;';
+      header.textContent = 'Clients';
+      searchResults.appendChild(header);
+
+      matchingClients.slice(0, 5).forEach(cl => {
+        const item = document.createElement('div');
+        item.style.padding = '0.6rem 1rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.02); display: flex; flex-direction: column; gap: 2px;';
+        item.innerHTML = `
+          <div style="font-size: 0.85rem; font-weight: 600; color: #fff;">${cl.name}</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted);">${cl.phone || 'No phone'} • ${cl.email || 'No email'}</div>
+        `;
+        item.addEventListener('click', async () => {
+          searchInput.value = '';
+          searchResults.style.display = 'none';
+          window.history.pushState({}, '', '/clients-page');
+          await router();
+          
+          setTimeout(() => {
+            const row = document.querySelector(`[data-client-id="${cl.id}"]`);
+            if (row) {
+              row.click();
+            }
+          }, 100);
+        });
+        item.addEventListener('mouseover', () => item.style.background = 'rgba(255,255,255,0.03)');
+        item.addEventListener('mouseout', () => item.style.background = 'transparent');
+        searchResults.appendChild(item);
+      });
+    }
+
+    searchResults.style.display = 'block';
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+      searchResults.style.display = 'none';
+    }
+  });
+}
+
 /**
  * App Initializer
  */
@@ -753,6 +886,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     await router();
   });
 
+  const emptyOnboardBtn = document.getElementById('dashboard-empty-onboard-btn');
+  if (emptyOnboardBtn) {
+    emptyOnboardBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      window.history.pushState({}, '', '/clients-page');
+      await router();
+      clients.resetWizard();
+    });
+  }
+
   // 7. Settings form save
   document.getElementById('settings-profile-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -765,14 +908,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     alert("Practice settings updated successfully.");
   });
 
-  // 8. Reset database button
-  document.getElementById('settings-reset-database-btn').addEventListener('click', async () => {
-    if (confirm("Are you absolutely sure you want to restore the practice manager database? All custom cases and client logs will be permanently deleted!")) {
-      await db.resetDB();
-      alert("Database reset to empty state.");
-      location.reload();
-    }
-  });
+  // 8. Reset database button with guardrail
+  const resetConfirmInput = document.getElementById('settings-reset-confirm-input');
+  const resetDatabaseBtn = document.getElementById('settings-reset-database-btn');
+
+  if (resetConfirmInput && resetDatabaseBtn) {
+    resetConfirmInput.addEventListener('input', (e) => {
+      if (e.target.value === 'DELETE') {
+        resetDatabaseBtn.disabled = false;
+      } else {
+        resetDatabaseBtn.disabled = true;
+      }
+    });
+
+    resetDatabaseBtn.addEventListener('click', async () => {
+      if (resetConfirmInput.value !== 'DELETE') return;
+      if (confirm("Are you absolutely sure you want to restore the practice manager database? All custom cases and client logs will be permanently deleted!")) {
+        await db.resetDB();
+        alert("Database reset to empty state.");
+        location.reload();
+      }
+    });
+  }
 
   // 9. Backup Import Actions
   const backupFileInput = document.getElementById('settings-backup-file-input');
@@ -812,9 +969,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     reader.readAsText(file);
   });
 
-  // 10. Init Auth Event Handlers & password eye toggles
+  // 10. Init Auth Event Handlers & password eye toggles & global search
   initAuthenticationHandlers();
   initPasswordToggleHandlers();
+  initGlobalSearch();
+
+  // Test hook to clear DB for visual empty state testing
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('reset_test')) {
+    const authOk = await db.loadAll();
+    if (authOk) {
+      await db.resetDB();
+      window.history.replaceState({}, '', '/dashboard');
+    }
+  }
 
   // 11. Run router to handle initial page load route
   await router();

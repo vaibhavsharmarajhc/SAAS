@@ -37,7 +37,6 @@ const dashboardModule = {
     document.getElementById('kpi-active-clients').textContent = clients.length;
 
     // 3. Monthly Professional Income
-    // Current Local Date: Dynamic system date
     const today = new Date();
     const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
@@ -70,6 +69,13 @@ const dashboardModule = {
       totalOutstanding += balance.outstanding;
     });
     document.getElementById('kpi-outstanding-fees').textContent = '₹' + totalOutstanding.toLocaleString('en-IN');
+
+    // Toggle welcome banner if all metrics are zero
+    const isPracticeEmpty = (activeCases === 0 && clients.length === 0 && monthlyIncome === 0 && annualIncome === 0 && totalOutstanding === 0);
+    const emptyStateBanner = document.getElementById('dashboard-empty-state-banner');
+    if (emptyStateBanner) {
+      emptyStateBanner.style.display = isPracticeEmpty ? 'flex' : 'none';
+    }
   },
 
   /**
@@ -89,7 +95,17 @@ const dashboardModule = {
     });
 
     if (todaysHearings.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center;" class="text-muted">No hearings scheduled for today</td></tr>`;
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="3" style="text-align: center; padding: 2.5rem 1rem;">
+            <div style="color: var(--text-muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+              <i data-lucide="calendar" style="width: 28px; height: 28px; color: var(--text-muted);"></i>
+              <span style="font-size: 0.85rem; font-weight: 500;">No hearings scheduled for today</span>
+            </div>
+          </td>
+        </tr>
+      `;
+      lucide.createIcons();
       return;
     }
 
@@ -132,7 +148,17 @@ const dashboardModule = {
     .sort((a, b) => b.outstanding - a.outstanding);
 
     if (dues.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center;" class="text-muted">All balances settled</td></tr>`;
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="4" style="text-align: center; padding: 2.5rem 1rem;">
+            <div style="color: var(--text-muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+              <i data-lucide="check-circle-2" style="width: 28px; height: 28px; color: var(--color-success);"></i>
+              <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">All balances settled</span>
+            </div>
+          </td>
+        </tr>
+      `;
+      lucide.createIcons();
       return;
     }
 
@@ -195,29 +221,24 @@ const dashboardModule = {
     const chartLabels = Object.keys(categoriesCount);
     const chartData = Object.values(categoriesCount);
     
-    const ctx2 = document.getElementById('caseTypeChart').getContext('2d');
-    if (caseTypeChartInstance) {
-      caseTypeChartInstance.destroy();
-    }
+    const canvas2 = document.getElementById('caseTypeChart');
+    const placeholder2 = document.getElementById('caseTypeChart-placeholder');
 
     if (chartLabels.length === 0) {
-      // Empty placeholder state for Chart
-      caseTypeChartInstance = new Chart(ctx2, {
-        type: 'doughnut',
-        data: {
-          labels: ['No Cases Registered'],
-          datasets: [{
-            data: [1],
-            backgroundColor: [theme === 'dark' ? '#1e293b' : '#cbd5e1']
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } }
-        }
-      });
+      if (canvas2) canvas2.style.display = 'none';
+      if (placeholder2) placeholder2.style.display = 'flex';
+      if (caseTypeChartInstance) {
+        caseTypeChartInstance.destroy();
+        caseTypeChartInstance = null;
+      }
     } else {
+      if (canvas2) canvas2.style.display = 'block';
+      if (placeholder2) placeholder2.style.display = 'none';
+      
+      const ctx2 = canvas2.getContext('2d');
+      if (caseTypeChartInstance) {
+        caseTypeChartInstance.destroy();
+      }
       caseTypeChartInstance = new Chart(ctx2, {
         type: 'doughnut',
         data: {
@@ -296,29 +317,24 @@ const dashboardModule = {
       outstandingData.push(data.outstanding);
     });
 
-    const ctx3 = document.getElementById('revenueByCaseTypeChart').getContext('2d');
-    if (revenueByCaseTypeChartInstance) {
-      revenueByCaseTypeChartInstance.destroy();
-    }
+    const canvas3 = document.getElementById('revenueByCaseTypeChart');
+    const placeholder3 = document.getElementById('revenueByCaseTypeChart-placeholder');
 
     if (revLabels.length === 0) {
-      revenueByCaseTypeChartInstance = new Chart(ctx3, {
-        type: 'bar',
-        data: {
-          labels: ['No Revenue Logged'],
-          datasets: [{
-            data: [0],
-            backgroundColor: [theme === 'dark' ? '#1e293b' : '#cbd5e1']
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } }
-        }
-      });
+      if (canvas3) canvas3.style.display = 'none';
+      if (placeholder3) placeholder3.style.display = 'flex';
+      if (revenueByCaseTypeChartInstance) {
+        revenueByCaseTypeChartInstance.destroy();
+        revenueByCaseTypeChartInstance = null;
+      }
     } else {
+      if (canvas3) canvas3.style.display = 'block';
+      if (placeholder3) placeholder3.style.display = 'none';
+      
+      const ctx3 = canvas3.getContext('2d');
+      if (revenueByCaseTypeChartInstance) {
+        revenueByCaseTypeChartInstance.destroy();
+      }
       revenueByCaseTypeChartInstance = new Chart(ctx3, {
         type: 'bar',
         data: {

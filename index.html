@@ -51,14 +51,9 @@
     </header>
 
     <!-- Trust Section -->
-    <section class="trust-section">
-      <h2 class="trust-title">Trusted by leading law chambers and senior advocates</h2>
-      <div class="trust-logos">
-        <div class="trust-logo-item"><i data-lucide="scale"></i> Supreme Court Chambers</div>
-        <div class="trust-logo-item"><i data-lucide="landmark"></i> V. Sharma & Partners</div>
-        <div class="trust-logo-item"><i data-lucide="shield"></i> Apex Legal Firm</div>
-        <div class="trust-logo-item"><i data-lucide="briefcase"></i> High Court Registry</div>
-      </div>
+    <section class="trust-section" style="padding: 3rem 5%; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.02); border-bottom: 1px solid rgba(255, 255, 255, 0.02); background: rgba(17, 24, 39, 0.2);">
+      <h2 class="trust-title" style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #fff; margin-bottom: 0.5rem; font-weight: 600; letter-spacing: normal; text-transform: none;">Built for chambers across India</h2>
+      <p style="color: #94a3b8; font-size: 0.9rem; max-width: 600px; margin: 0 auto;">Designed to cater to advocates, senior counsel, and legal professionals practicing across high courts, district courts, and tribunals.</p>
     </section>
 
     <!-- Features Section -->
@@ -92,6 +87,11 @@
           <p>Generate shareable encrypted tokens for clients to track their case status and history in a read-only portal.</p>
         </div>
         <div class="feature-card">
+          <div class="feature-icon-wrapper"><i data-lucide="message-square"></i></div>
+          <h3>Client Intimation Assistant</h3>
+          <p>Instantly generate formatted WhatsApp, email, or SMS intimation summaries to notify clients of upcoming hearing dates and court directions.</p>
+        </div>
+        <div class="feature-card">
           <div class="feature-icon-wrapper"><i data-lucide="shield-check"></i></div>
           <h3>Multi-Tenant Cloud Sync</h3>
           <p>Securely isolated schemas per chamber, run entirely on Atlas Cloud with options for manual JSON data backups.</p>
@@ -122,17 +122,42 @@
       </div>
     </section>
 
+    <!-- FAQ Section -->
+    <section class="faq-section" style="padding: 5rem 5%; background: var(--bg-main); border-top: 1px solid rgba(255, 255, 255, 0.02);">
+      <div style="max-width: 800px; margin: 0 auto;">
+        <span class="section-tag" style="display: block; text-align: center; margin-bottom: 0.5rem;">FAQ</span>
+        <h2 class="section-title" style="text-align: center; margin-bottom: 3rem;">Frequently Asked Questions</h2>
+        
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+          <div class="card" style="padding: 1.5rem; background: rgba(17, 24, 39, 0.5); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+            <h4 style="color: #fff; font-size: 1rem; margin-bottom: 0.5rem; font-weight: 600;">Where is my data stored?</h4>
+            <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; margin: 0;">All advocate records and court case diaries are hosted on MongoDB Atlas cloud servers with encrypted storage volumes, ensuring security and maximum availability.</p>
+          </div>
+          <div class="card" style="padding: 1.5rem; background: rgba(17, 24, 39, 0.5); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+            <h4 style="color: #fff; font-size: 1rem; margin-bottom: 0.5rem; font-weight: 600;">Can I export my data?</h4>
+            <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; margin: 0;">Yes. You have 100% data ownership. You can download a complete backup of your cases, clients, and financial logs as a standard JSON snapshot at any time from System Settings.</p>
+          </div>
+          <div class="card" style="padding: 1.5rem; background: rgba(17, 24, 39, 0.5); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+            <h4 style="color: #fff; font-size: 1rem; margin-bottom: 0.5rem; font-weight: 600;">Is client data encrypted?</h4>
+            <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; margin: 0;">Yes. All passwords, database credentials, case details, and billing ledgers are encrypted in transit via SSL/TLS and at rest within our cloud servers.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Pricing Section -->
     <section id="pricing" class="features-section" style="background: rgba(17, 24, 39, 0.25); border-top: 1px solid rgba(255, 255, 255, 0.02);">
       <span class="section-tag">Flexible Plans</span>
       <h2 class="section-title">Chamber Pricing Plans</h2>
       <div class="features-grid" style="max-width: 900px; margin: 0 auto;">
         <div class="feature-card" style="border: 2px solid #701a27; background: rgba(17, 24, 39, 0.75);">
-          <div class="section-tag" style="text-align: right; font-weight: 700; color: #d97706;">PRO</div>
           <h3>Advocate Chamber</h3>
           <h2 style="font-size: 2.5rem; color: #fff; margin: 1rem 0;">₹1,499<span style="font-size: 1rem; color: #94a3b8;">/month</span></h2>
           <p style="margin-bottom: 2rem;">Full multi-tenant cloud storage, unlimited cases, advocate ledger invoicing, and client share portals.</p>
           <a href="/register" class="btn-nav-register" style="width: 100%; text-align: center;" data-link="/register">Start Free Trial</a>
+          <p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 0;">
+            <i data-lucide="lock" style="width: 11px; height: 11px; color: var(--color-success);"></i> Data encrypted at rest and in transit
+          </p>
         </div>
       </div>
     </section>
@@ -155,18 +180,78 @@
           <h5>Support</h5>
           <ul>
             <li><a href="#about">How it Works</a></li>
-            <li><a href="#">Contact Us</a></li>
+            <li><a href="mailto:contact@counselai.in">Contact Us</a></li>
           </ul>
         </div>
       </div>
       <div class="footer-bottom">
         <p>&copy; 2026 CounselAI Systems. All rights reserved.</p>
         <div class="footer-bottom-links">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
+          <a href="/privacy" data-link="/privacy">Privacy Policy</a>
+          <a href="/terms" data-link="/terms">Terms of Service</a>
         </div>
       </div>
     </footer>
+  </div>
+
+  <!-- Privacy Policy Section -->
+  <div id="privacy-page" class="public-container" style="display: none; padding-bottom: 4rem;">
+    <!-- Navbar -->
+    <nav class="marketing-nav">
+      <a href="/" class="marketing-logo" data-link="/">
+        <i data-lucide="scale"></i> Chambers<span>.</span>
+      </a>
+      <div class="marketing-actions">
+        <a href="/" class="btn-nav-login" data-link="/">&larr; Back to Home</a>
+      </div>
+    </nav>
+    <div style="max-width: 800px; margin: 4rem auto 0 auto; padding: 0 1.5rem;">
+      <h1 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; color: #fff; margin-bottom: 1rem;">Privacy Policy</h1>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 2rem;">Last updated: July 13, 2026</p>
+      
+      <div style="color: #94a3b8; line-height: 1.6; display: flex; flex-direction: column; gap: 1.5rem; font-size: 0.95rem;">
+        <p>At CounselAI (Chambers), we understand that legal practitioners handle highly sensitive and confidential data. Protecting your chamber's privacy and your clients' cases is our highest priority.</p>
+        
+        <h3 style="color: #fff; font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-top: 1rem; font-weight: 600;">1. Data Storage & Hosting</h3>
+        <p>All your chamber data, case records, financial ledgers, and client lists are securely hosted on MongoDB Atlas cloud servers. The database is isolated per tenant, ensuring that your data remains completely confidential and inaccessible to other chambers.</p>
+        
+        <h3 style="color: #fff; font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-top: 1rem; font-weight: 600;">2. Encryption Guardrails</h3>
+        <p>All data processed by Chambers is encrypted in transit using secure HTTPS protocols (SSL/TLS). Confidential case materials, client details, and passwords are also encrypted at rest within our databases to prevent unauthorized disclosures.</p>
+        
+        <h3 style="color: #fff; font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-top: 1rem; font-weight: 600;">3. Data Export & Ownership</h3>
+        <p>You retain 100% ownership of your data. You can download a complete backup of your case lists, financial logs, and client sheets in a standard JSON format at any time directly from the System Settings panel.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terms of Service Section -->
+  <div id="terms-page" class="public-container" style="display: none; padding-bottom: 4rem;">
+    <!-- Navbar -->
+    <nav class="marketing-nav">
+      <a href="/" class="marketing-logo" data-link="/">
+        <i data-lucide="scale"></i> Chambers<span>.</span>
+      </a>
+      <div class="marketing-actions">
+        <a href="/" class="btn-nav-login" data-link="/">&larr; Back to Home</a>
+      </div>
+    </nav>
+    <div style="max-width: 800px; margin: 4rem auto 0 auto; padding: 0 1.5rem;">
+      <h1 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; color: #fff; margin-bottom: 1rem;">Terms of Service</h1>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 2rem;">Last updated: July 13, 2026</p>
+      
+      <div style="color: #94a3b8; line-height: 1.6; display: flex; flex-direction: column; gap: 1.5rem; font-size: 0.95rem;">
+        <p>Welcome to CounselAI Chambers. By registering a chamber account, you agree to comply with and be bound by the following terms of service.</p>
+        
+        <h3 style="color: #fff; font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-top: 1rem; font-weight: 600;">1. Chamber Accounts</h3>
+        <p>You are responsible for safeguarding your lead advocate credentials and password. CounselAI cannot and will not be liable for any loss or damage arising from your failure to comply with account security obligations.</p>
+        
+        <h3 style="color: #fff; font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-top: 1rem; font-weight: 600;">2. Practice Records & Backups</h3>
+        <p>While we provide secure cloud storage, you are encouraged to periodically export a local JSON database snapshot from your Settings page to safeguard against any accidental data deletes or modifications.</p>
+        
+        <h3 style="color: #fff; font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-top: 1rem; font-weight: 600;">3. Fair Use & Fees</h3>
+        <p>Chambers is billed on a monthly subscription model. We reserve the right to suspend access to your cloud dashboard in the event of continuous unpaid billing statements.</p>
+      </div>
+    </div>
   </div>
 
   <div class="app-container" id="dashboard-app-container" style="display: none;">
@@ -242,11 +327,23 @@
     <!-- Main Canvas -->
     <main class="app-main">
       <!-- App Header -->
-      <header class="app-header">
-        <div class="page-title-section">
+      <header class="app-header" style="display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+        <div class="page-title-section" style="flex-shrink:0;">
           <h2 id="header-page-title">Dashboard</h2>
         </div>
-        <div class="header-actions">
+        
+        <!-- Global Search Bar -->
+        <div class="global-search-container" style="flex:1; max-width:400px; position:relative;">
+          <div style="position:relative; width:100%;">
+            <i data-lucide="search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:var(--text-muted);"></i>
+            <input type="text" id="global-search-input" placeholder="Search clients, cases, CNR numbers..." style="width:100%; padding:0.6rem 1rem 0.6rem 2.2rem; background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:30px; font-size:0.85rem; color:#fff; transition:all var(--transition-fast);" onfocus="this.style.borderColor='var(--color-primary)'; this.style.background='rgba(255,255,255,0.05)';" onblur="this.style.borderColor='var(--border-color)'; this.style.background='rgba(255,255,255,0.03)';">
+          </div>
+          <!-- Search Dropdown Results -->
+          <div id="global-search-results" style="display:none; position:absolute; top:calc(100% + 8px); left:0; right:0; background:#0f172a; border:1px solid var(--border-color); border-radius:var(--radius-md); box-shadow:0 10px 30px rgba(0,0,0,0.5); z-index:999; max-height:350px; overflow-y:auto; padding:0.5rem 0;">
+          </div>
+        </div>
+
+        <div class="header-actions" style="flex-shrink:0;">
           <button class="btn btn-primary" id="header-quick-action-btn">
             <i data-lucide="plus"></i> <span>Quick Action</span>
           </button>
@@ -255,6 +352,20 @@
 
       <!-- Dashboard View Container -->
       <div id="dashboard-page" class="page-container active">
+        <!-- Empty State Welcome Banner -->
+        <div id="dashboard-empty-state-banner" class="card" style="display: none; padding: 2.5rem; text-align: center; background: linear-gradient(135deg, rgba(112, 26, 39, 0.15), rgba(217, 119, 6, 0.05)); border: 1px dashed var(--border-color); border-radius: var(--radius-md); margin-bottom: 2rem; flex-direction: column; align-items: center; justify-content: center; gap: 1.25rem;">
+          <div style="background: rgba(112, 26, 39, 0.2); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-primary); box-shadow: 0 0 20px rgba(112, 26, 39, 0.3);">
+            <i data-lucide="sparkles" style="width: 28px; height: 28px;"></i>
+          </div>
+          <div>
+            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #fff; margin-bottom: 0.5rem; font-weight: 700;">Welcome to Chambers!</h3>
+            <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto; font-size: 0.9rem; line-height: 1.5;">Your practice is currently empty. Onboard your very first client to automatically set up your registry, calendar diaries, and financial ledgers.</p>
+          </div>
+          <button class="btn btn-primary" id="dashboard-empty-onboard-btn" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+            <i data-lucide="user-plus"></i> Onboard First Client
+          </button>
+        </div>
+
         <!-- KPI Row -->
         <div class="grid-cols-4" id="dashboard-kpis">
           <!-- Active Cases -->
@@ -301,15 +412,23 @@
 
         <!-- Charts Layout -->
         <div class="grid-cols-2">
-          <div class="card">
+          <div class="card" style="position: relative; min-height: 290px; display: flex; flex-direction: column;">
             <div class="section-header">
               <h3>Case Type Breakdown</h3>
             </div>
+            <div id="caseTypeChart-placeholder" style="display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); gap: 0.5rem; width: 100%;">
+              <i data-lucide="pie-chart" style="width: 32px; height: 32px; color: var(--text-muted);"></i>
+              <span style="font-size: 0.85rem;">No data yet — add your first case to see insights here</span>
+            </div>
             <canvas id="caseTypeChart" style="max-height: 250px; width: 100%;"></canvas>
           </div>
-          <div class="card">
+          <div class="card" style="position: relative; min-height: 290px; display: flex; flex-direction: column;">
             <div class="section-header">
               <h3>Revenue by Case Type</h3>
+            </div>
+            <div id="revenueByCaseTypeChart-placeholder" style="display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); gap: 0.5rem; width: 100%;">
+              <i data-lucide="bar-chart-3" style="width: 32px; height: 32px; color: var(--text-muted);"></i>
+              <span style="font-size: 0.85rem;">No data yet — add your first case to see insights here</span>
             </div>
             <canvas id="revenueByCaseTypeChart" style="max-height: 250px; width: 100%;"></canvas>
           </div>
@@ -875,9 +994,13 @@
             <div class="settings-section" style="margin-top:2.5rem; border-top:1px solid var(--border-color); padding-top:1rem;">
               <h4 class="settings-section-title" style="color:var(--color-danger);">Factory Reset Practice Data</h4>
               <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1rem;">
-                Completely erase all clients, cases, diaries, and transactions. Resets the application to fresh mock seed states.
+                Completely erase all clients, cases, diaries, and transactions. Resets the application to fresh mock seed states. This action is irreversible.
               </p>
-              <button class="btn btn-danger" id="settings-reset-database-btn"><i data-lucide="refresh-cw"></i> Reset Database</button>
+              <div style="display:flex; flex-direction:column; gap:0.5rem; max-width:350px; margin-bottom:1rem;">
+                <label class="form-label" style="font-size:0.8rem; font-weight:600; color:var(--text-secondary);">Type <span style="color:var(--color-danger); font-weight:700;">DELETE</span> to confirm factory reset:</label>
+                <input type="text" class="form-control" id="settings-reset-confirm-input" placeholder="Type DELETE here" style="padding: 0.5rem; font-size: 0.85rem;">
+              </div>
+              <button class="btn btn-danger" id="settings-reset-database-btn" disabled><i data-lucide="refresh-cw"></i> Reset Database</button>
             </div>
           </div>
         </div>
