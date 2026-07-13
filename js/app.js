@@ -291,10 +291,33 @@ export function initModals() {
   });
 }
 
+async function updateDbStatusBadge() {
+  const badge = document.getElementById('auth-db-status-badge');
+  if (!badge) return;
+  
+  badge.innerHTML = `<span style="background-color: var(--border-color); color: var(--text-secondary); padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600;">Checking connection...</span>`;
+  
+  try {
+    const status = await fetch('/api/status').then(r => r.json());
+    if (status.dbType === 'mongodb') {
+      badge.innerHTML = `<span style="background-color: var(--color-success); color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"><i data-lucide="database" style="width: 10px; height: 10px;"></i> Cloud DB Connected</span>`;
+    } else if (status.dbType === 'fallback-error') {
+      badge.innerHTML = `<span style="background-color: var(--color-danger); color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" title="MongoDB URI is configured but connection failed. Fallback storage is active (Temporary)."><i data-lucide="alert-triangle" style="width: 10px; height: 10px;"></i> Cloud DB Error (Temporary Storage Active)</span>`;
+    } else {
+      badge.innerHTML = `<span style="background-color: #f59e0b; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" title="No MongoDB cloud database configured. Local filesystem storage is active."><i data-lucide="file-text" style="width: 10px; height: 10px;"></i> Local Mode (Temporary Storage)</span>`;
+    }
+    lucide.createIcons();
+  } catch (err) {
+    badge.innerHTML = `<span style="background-color: var(--color-danger); color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"><i data-lucide="alert-triangle" style="width: 10px; height: 10px;"></i> Connection Failed</span>`;
+    lucide.createIcons();
+  }
+}
+
 function showAuthModal() {
   const authModal = document.getElementById('auth-modal');
   authModal.style.display = 'flex';
   authModal.classList.add('active');
+  updateDbStatusBadge();
 }
 
 function hideAuthModal() {

@@ -40,6 +40,20 @@ async function authenticateToken(req, res, next) {
   }
 }
 
+/**
+ * Database Connection Status Endpoint
+ */
+app.get('/api/status', async (req, res) => {
+  const isMongoConfigured = !!process.env.MONGODB_URI;
+  const dbInstance = await db.getDb();
+  const isMongoConnected = !!dbInstance;
+  
+  res.json({
+    dbType: isMongoConfigured ? (isMongoConnected ? 'mongodb' : 'fallback-error') : 'local',
+    connected: isMongoConnected
+  });
+});
+
 // ================= AUTH ROUTES =================
 
 /**

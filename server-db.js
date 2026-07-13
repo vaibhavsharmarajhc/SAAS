@@ -581,7 +581,7 @@ async function deleteTransaction(tenantId, id) {
  * Database Seeder
  */
 async function seedTenantData(tenantId) {
-  const clients = [
+  const clientsRaw = [
     {
       id: "c_1",
       tenantId,
@@ -639,7 +639,7 @@ async function seedTenantData(tenantId) {
     }
   ];
 
-  const cases = [
+  const casesRaw = [
     {
       id: "case_1",
       tenantId,
@@ -754,7 +754,7 @@ async function seedTenantData(tenantId) {
     }
   ];
 
-  const transactions = [
+  const transactionsRaw = [
     { id: "t_1", tenantId, clientId: "c_1", caseId: "case_1", date: "2026-01-16", amount: 150000, type: "Billed", description: "Arbitration Drafting Retainer Fee" },
     { id: "t_2", tenantId, clientId: "c_1", caseId: "case_1", date: "2026-01-20", amount: 100000, type: "Received", description: "Payment for Arbitration Drafting Retainer" },
     { id: "t_3", tenantId, clientId: "c_2", caseId: "case_2", date: "2026-02-12", amount: 200000, type: "Billed", description: "Civil Suit Partition Retainer & Court Fees" },
@@ -771,6 +771,31 @@ async function seedTenantData(tenantId) {
     { id: "t_14", tenantId, clientId: "c_1", caseId: "case_1", date: "2026-06-10", amount: 250000, type: "Billed", description: "Advocacy fee for Arbitration evidence & arguments" },
     { id: "t_15", tenantId, clientId: "c_1", caseId: "case_1", date: "2026-06-15", amount: 190000, type: "Received", description: "Payment for evidence hearings" }
   ];
+
+  const clients = clientsRaw.map(c => ({
+    ...c,
+    id: `${c.id}_${tenantId}`,
+    tenantId
+  }));
+
+  const cases = casesRaw.map(cs => ({
+    ...cs,
+    id: `${cs.id}_${tenantId}`,
+    tenantId,
+    clientId: `${cs.clientId}_${tenantId}`,
+    hearings: (cs.hearings || []).map(h => ({
+      ...h,
+      id: `${h.id}_${tenantId}`
+    }))
+  }));
+
+  const transactions = transactionsRaw.map(t => ({
+    ...t,
+    id: `${t.id}_${tenantId}`,
+    tenantId,
+    clientId: `${t.clientId}_${tenantId}`,
+    caseId: t.caseId ? `${t.caseId}_${tenantId}` : null
+  }));
 
   const db = await getDb();
   if (db) {
@@ -824,6 +849,7 @@ async function importTenantBackup(tenantId, backupData) {
 
 module.exports = {
   initDatabase,
+  getDb,
   getTenantByEmail,
   getTenantById,
   setTenantResetCode,
