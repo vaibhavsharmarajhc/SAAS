@@ -1281,8 +1281,8 @@
   <div id="auth-page" class="public-container" style="display: none; min-height: 100vh; align-items: center; justify-content: center; padding: 2rem 1rem;">
     <div class="modal-container" style="max-width: 420px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid var(--border-color); background: var(--bg-sidebar); border-radius: var(--radius-md); padding: 2rem;">
       <div class="modal-header" style="text-align: center; display: block; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
-        <h2 class="modal-title" id="auth-modal-title" style="font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--color-primary); font-weight: 700;">Login to Chambers</h2>
-        <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">CounselAI Practice Manager SaaS</span>
+        <a href="/" data-link="/" style="text-decoration: none;"><h2 class="modal-title" id="auth-modal-title" style="font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--color-primary); font-weight: 700; margin: 0; display: inline-block;">Login to Chambers</h2></a>
+        <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-top: 0.25rem; margin-bottom: 0.25rem;">CounselAI Practice Manager SaaS</span>
         <div id="auth-db-status-badge" style="display: inline-block;"></div>
       </div>
       
@@ -1404,6 +1404,13 @@
           </div>
         </div>
       </form>
+      
+      <!-- Return to Homepage Link -->
+      <div style="text-align: center; margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+        <a href="/" data-link="/" style="font-size: 0.85rem; color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-weight: 500; transition: color var(--transition-fast);">
+          <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i> Return to Homepage
+        </a>
+      </div>
     </div>
   </div>
 

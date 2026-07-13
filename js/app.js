@@ -669,8 +669,13 @@ function initAuthenticationHandlers() {
   if (sidebarLogoutBtn) {
     sidebarLogoutBtn.addEventListener('click', async () => {
       if (confirm("Are you sure you want to log out of your chamber account?")) {
-        await api.auth.logout();
-        location.reload();
+        try {
+          await api.auth.logout();
+        } catch (err) {
+          console.error("Logout failed:", err);
+        }
+        window.history.pushState({}, '', '/');
+        await router();
       }
     });
   }
