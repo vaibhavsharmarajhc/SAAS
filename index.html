@@ -297,15 +297,52 @@
     <section id="pricing" class="features-section" style="background: rgba(17, 24, 39, 0.25); border-top: 1px solid rgba(255, 255, 255, 0.02);">
       <span class="section-tag">Flexible Plans</span>
       <h2 class="section-title">Chamber Pricing Plans</h2>
-      <div class="features-grid" style="max-width: 900px; margin: 0 auto;">
-        <div class="feature-card" style="border: 2px solid #701a27; background: rgba(17, 24, 39, 0.75);">
-          <h3>Advocate Chamber</h3>
-          <h2 style="font-size: 2.5rem; color: #fff; margin: 1rem 0;">₹1,499<span style="font-size: 1rem; color: #94a3b8;">/month</span></h2>
-          <p style="margin-bottom: 2rem;">Full multi-tenant cloud storage, unlimited cases, advocate ledger invoicing, and client share portals.</p>
-          <a href="/register" class="btn-nav-register" style="width: 100%; text-align: center;" data-link="/register">Start Free Trial</a>
-          <p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 0;">
-            <i data-lucide="lock" style="width: 11px; height: 11px; color: var(--color-success);"></i> Data encrypted at rest and in transit
-          </p>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; max-width: 1000px; margin: 0 auto; align-items: stretch;">
+        <!-- Option 1: Monthly -->
+        <div class="feature-card" style="border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(17, 24, 39, 0.75); display: flex; flex-direction: column; justify-content: space-between; height: 100%; padding: 2rem;">
+          <div>
+            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.25rem; color: #fff; margin-bottom: 0.5rem; text-align: center;">Monthly Plan</h3>
+            <h2 style="font-size: 2.2rem; color: #fff; margin: 1rem 0; text-align: center;">₹399<span style="font-size: 0.9rem; color: #94a3b8;">/month + GST</span></h2>
+            <p style="margin-bottom: 2rem; font-size: 0.88rem; line-height: 1.5; text-align: center; color: var(--text-secondary);">Full multi-tenant cloud storage, unlimited cases, advocate ledger invoicing, and client share portals.</p>
+          </div>
+          <div>
+            <a href="/register" class="btn-nav-register" style="width: 100%; text-align: center; display: block;" data-link="/register">Start Free Trial</a>
+            <p style="text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 0;">
+              <i data-lucide="lock" style="width: 11px; height: 11px; color: var(--color-success);"></i> Data encrypted in transit & at rest
+            </p>
+          </div>
+        </div>
+
+        <!-- Option 2: Annual (Best Value) -->
+        <div class="feature-card" style="border: 2px solid #701a27; background: rgba(17, 24, 39, 0.85); display: flex; flex-direction: column; justify-content: space-between; height: 100%; position: relative; box-shadow: 0 10px 25px rgba(112, 26, 39, 0.15); padding: 2rem;">
+          <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #701a27; color: #fff; font-size: 0.65rem; font-weight: 700; padding: 2px 10px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px; z-index: 10;">Best Value</div>
+          <div>
+            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.25rem; color: #fff; margin-bottom: 0.5rem; text-align: center;">Annual Plan</h3>
+            <h2 style="font-size: 2.2rem; color: #fff; margin: 1rem 0; text-align: center;">₹999<span style="font-size: 0.9rem; color: #94a3b8;">/year + GST</span></h2>
+            <p style="margin-bottom: 2rem; font-size: 0.88rem; line-height: 1.5; text-align: center; color: var(--text-secondary);">Our most popular plan. Advanced daily chamber diaries, financial revenue breakdowns, and referral analytics.</p>
+          </div>
+          <div>
+            <a href="/register" class="btn-nav-register" style="width: 100%; text-align: center; display: block;" data-link="/register">Start Free Trial</a>
+            <p style="text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 0;">
+              <i data-lucide="shield" style="width: 11px; height: 11px; color: var(--color-success);"></i> Secure SSL encryption
+            </p>
+          </div>
+        </div>
+
+        <!-- Option 3: Triennial -->
+        <div class="feature-card" style="border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(17, 24, 39, 0.75); display: flex; flex-direction: column; justify-content: space-between; height: 100%; padding: 2rem;">
+          <div>
+            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.25rem; color: #fff; margin-bottom: 0.5rem; text-align: center;">3-Year Plan</h3>
+            <h2 style="font-size: 2.2rem; color: #fff; margin: 1rem 0; text-align: center;">₹2,499<span style="font-size: 0.9rem; color: #94a3b8;">/3 years + GST</span></h2>
+            <p style="margin-bottom: 2rem; font-size: 0.88rem; line-height: 1.5; text-align: center; color: var(--text-secondary);">Long-term automation. Multi-device syncing, client onboarding sheets, and priority advocate support backups.</p>
+          </div>
+          <div>
+            <a href="/register" class="btn-nav-register" style="width: 100%; text-align: center; display: block;" data-link="/register">Start Free Trial</a>
+            <p style="text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 0;">
+              <i data-lucide="lock" style="width: 11px; height: 11px; color: var(--color-success);"></i> Multi-tenant data safety
+            </p>
+          </div>
         </div>
       </div>
     </section>
@@ -505,22 +542,59 @@
 
   <!-- Pricing Page -->
   <div id="pricing-page-standalone" class="public-container" style="display: none; padding-top: 5rem; padding-bottom: 5rem;">
-    <div style="max-width: 800px; margin: 0 auto; padding: 0 1.5rem;">
+    <div style="max-width: 1000px; margin: 0 auto; padding: 0 1.5rem;">
       <span class="section-tag" style="display: block; text-align: center; margin-bottom: 0.5rem;">Pricing Plans</span>
-      <h1 style="font-family: 'Playfair Display', serif; font-size: 2.8rem; color: #fff; margin-bottom: 1.5rem; text-align: center; font-weight: 700;">Simple, Flat-Rate Pricing</h1>
-      <p style="color: var(--text-secondary); text-align: center; max-width: 600px; margin: 0 auto 3rem auto; font-size: 1rem; line-height: 1.6;">
-        No hidden fees. Pay a flat monthly fee for complete access to the Chambers practice manager tools.
+      <h1 style="font-family: 'Playfair Display', serif; font-size: 2.8rem; color: #fff; margin-bottom: 1.5rem; text-align: center; font-weight: 700;">Simple, Transparent Plans</h1>
+      <p style="color: var(--text-secondary); text-align: center; max-width: 600px; margin: 0 auto 4.5rem auto; font-size: 1.2rem; line-height: 1.6;">
+        Choose the plan that fits your chamber's operations. No hidden onboarding fees.
       </p>
 
-      <div class="card" style="border: 2px solid #701a27; background: rgba(17, 24, 39, 0.6); padding: 3rem; border-radius: var(--radius-md); max-width: 500px; margin: 0 auto; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
-        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #fff; margin-bottom: 1rem;">Advocate Chamber</h3>
-        <h2 style="font-size: 3rem; color: #fff; margin: 1rem 0; font-weight: 700;">₹1,499<span style="font-size: 1rem; color: #94a3b8;">/month</span></h2>
-        <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 2rem;">Includes unlimited cases, clients, financial ledgers, WhatsApp intimation tools, and cloud backups.</p>
-        <a href="/register" class="btn-nav-register" style="width: 100%; text-align: center; padding: 0.75rem 1.5rem; font-size: 0.95rem; display: block; text-decoration: none;" data-link="/register">Start 14-Day Free Trial</a>
-        
-        <p style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 0;">
-          <i data-lucide="lock" style="width: 12px; height: 12px; color: var(--color-success);"></i> Data encrypted at rest and in transit (SSL/TLS)
-        </p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; align-items: stretch; justify-content: center;">
+        <!-- Option 1: Monthly -->
+        <div class="card" style="border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(17, 24, 39, 0.6); padding: 2.5rem 2rem; border-radius: var(--radius-md); text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+          <div>
+            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.35rem; color: #fff; margin-bottom: 1rem;">Monthly Plan</h3>
+            <h2 style="font-size: 2.5rem; color: #fff; margin: 1rem 0; font-weight: 700;">₹399<span style="font-size: 0.95rem; color: #94a3b8;">/month + GST</span></h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 2rem; line-height: 1.5;">Includes unlimited cases, clients, financial ledgers, WhatsApp updates, and cloud backups.</p>
+          </div>
+          <div>
+            <a href="/register" class="btn-nav-register" style="width: 100%; text-align: center; padding: 0.65rem 1.25rem; font-size: 0.9rem; display: block; text-decoration: none;" data-link="/register">Start Free Trial</a>
+            <p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 0;">
+              <i data-lucide="lock" style="width: 12px; height: 12px; color: var(--color-success);"></i> Data encrypted at rest & in transit
+            </p>
+          </div>
+        </div>
+
+        <!-- Option 2: Annual (Best Value) -->
+        <div class="card" style="border: 2px solid #701a27; background: rgba(17, 24, 39, 0.75); padding: 2.5rem 2rem; border-radius: var(--radius-md); text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: space-between; height: 100%; position: relative;">
+          <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #701a27; color: #fff; font-size: 0.65rem; font-weight: 700; padding: 2px 10px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px; z-index: 10;">Best Value</div>
+          <div>
+            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.35rem; color: #fff; margin-bottom: 1rem;">Annual Plan</h3>
+            <h2 style="font-size: 2.5rem; color: #fff; margin: 1rem 0; font-weight: 700;">₹999<span style="font-size: 0.95rem; color: #94a3b8;">/year + GST</span></h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 2rem; line-height: 1.5;">Includes advanced daily chamber diaries, advocate ledger invoicing, and referral tracking dashboards.</p>
+          </div>
+          <div>
+            <a href="/register" class="btn-nav-register" style="width: 100%; text-align: center; padding: 0.65rem 1.25rem; font-size: 0.9rem; display: block; text-decoration: none;" data-link="/register">Start Free Trial</a>
+            <p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 0;">
+              <i data-lucide="shield" style="width: 12px; height: 12px; color: var(--color-success);"></i> High-grade secure SSL encryption
+            </p>
+          </div>
+        </div>
+
+        <!-- Option 3: Triennial -->
+        <div class="card" style="border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(17, 24, 39, 0.6); padding: 2.5rem 2rem; border-radius: var(--radius-md); text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+          <div>
+            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.35rem; color: #fff; margin-bottom: 1rem;">3-Year Plan</h3>
+            <h2 style="font-size: 2.5rem; color: #fff; margin: 1rem 0; font-weight: 700;">₹2,499<span style="font-size: 0.95rem; color: #94a3b8;">/3 years + GST</span></h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 2rem; line-height: 1.5;">Includes full firm automation profiles, multi-device cloud synchronizations, and priority advocate support.</p>
+          </div>
+          <div>
+            <a href="/register" class="btn-nav-register" style="width: 100%; text-align: center; padding: 0.65rem 1.25rem; font-size: 0.9rem; display: block; text-decoration: none;" data-link="/register">Start Free Trial</a>
+            <p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 0;">
+              <i data-lucide="lock" style="width: 12px; height: 12px; color: var(--color-success);"></i> Multi-tenant data safety isolated storage
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
