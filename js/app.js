@@ -1045,6 +1045,11 @@ function initFeaturesTabs() {
       desc: "Maintain complete litigation details, historical hearing logs, registry stages, and docket histories. Chambers stores active briefs, CNR number tracking, court benches, opposition party advocate details, and next scheduled listing dates securely in a single, unified view.",
       link: "/dashboard?view=cases",
       btnText: "Open Registry",
+      highlights: [
+        { icon: "shield", title: "Automated CNR Sync", desc: "Live tracking of orders and scheduled dates." },
+        { icon: "folder-open", title: "Document Vault", desc: "Attach petitions, briefs, and judgements securely." },
+        { icon: "user-check", title: "Opposition Log", desc: "Quick access to opponent details and judges directory." }
+      ],
       html: `
         <div style="width: 100%; font-family: sans-serif; display: flex; gap: 2rem; flex-wrap: wrap; text-align: left;">
           <!-- Left Side: Case Registry Table -->
@@ -1116,6 +1121,11 @@ function initFeaturesTabs() {
       desc: "Automatically generate daily diaries containing active listings for the day. Filter chambers court boards dynamically, check next scheduled dates, and receive prompt visual alerts for any active litigation matter that is currently missing a next hearing date.",
       link: "/dashboard?view=diary",
       btnText: "Go to Calendar",
+      highlights: [
+        { icon: "calendar", title: "Auto Listing Boards", desc: "Sync court board listings dynamically each morning." },
+        { icon: "bell", title: "Alerts & Reminders", desc: "Flag case matters currently missing next dates." },
+        { icon: "users", title: "Chamber Sync", desc: "Share calendars with junior advocates & clerks instantly." }
+      ],
       html: `
         <div style="width: 100%; display: flex; gap: 1.5rem; align-items: center; justify-content: center; flex-wrap: wrap;">
           <div style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 0.6rem; font-size: 0.6rem; width: 110px;">
@@ -1143,6 +1153,11 @@ function initFeaturesTabs() {
       desc: "Streamline advocate chamber intakes using a structured step-by-step onboarding wizard. Record new client profiles, assign customizable professional retainer billing, and concurrently log initial briefs in minutes to avoid separate registry paperwork.",
       link: "/dashboard?view=clients",
       btnText: "Onboard Client",
+      highlights: [
+        { icon: "user-plus", title: "Structured Intake", desc: "Log case histories and client profiles seamlessly." },
+        { icon: "credit-card", title: "Retainer Schedules", desc: "Configure advanced fee structures and milestones." },
+        { icon: "file-check", title: "KYC Compliance", desc: "Validate contact records and identity documents." }
+      ],
       html: `
         <div style="width: 100%; font-family: sans-serif; font-size: 0.8rem; color: #fff;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem; font-weight: 600; color: #94a3b8;">
@@ -1172,6 +1187,11 @@ function initFeaturesTabs() {
       desc: "Plugs revenue leakages in your chamber practice. Create professional fee statements, register cash or bank payments, log office disbursements, and view detailed account summaries detailing high outstanding balances and collection metrics.",
       link: "/dashboard?view=billings",
       btnText: "View Billings",
+      highlights: [
+        { icon: "wallet", title: "Professional Ledgers", desc: "Track complete receipt records and billing metrics." },
+        { icon: "receipt", title: "Court Disbursements", desc: "Log stamp paper, filing fees, and advocate expenses." },
+        { icon: "trending-up", title: "Outstanding Alerts", desc: "Flag pending payments with aged receivable reminders." }
+      ],
       html: `
         <div style="width: 100%; display: flex; gap: 1.5rem; align-items: center; justify-content: center; flex-wrap: wrap;">
           <div style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 0.75rem; width: 130px; font-family: sans-serif;">
@@ -1193,6 +1213,11 @@ function initFeaturesTabs() {
       desc: "Cultivate professional connections and optimize your chamber's inbound practice growth. Chambers allows advocates to register and track referral partners for every case, map client origins, and analyze structured networking relationships to calculate financial yields from collaborations.",
       link: "/dashboard?view=clients",
       btnText: "Analyze Network",
+      highlights: [
+        { icon: "network", title: "Partner Directory", desc: "Associate case metrics with colleague advocates." },
+        { icon: "bar-chart-2", title: "Yield Analytics", desc: "Monitor revenue volume generated per networking lead." },
+        { icon: "arrow-up-right", title: "Outbound Logs", desc: "Track matters referred out to different jurisdictions." }
+      ],
       html: `
         <div style="width: 100%; font-family: sans-serif; font-size: 0.8rem; color: #fff;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem; font-weight: 600; color: #94a3b8;">
@@ -1221,6 +1246,11 @@ function initFeaturesTabs() {
       desc: "Instantly create beautifully formatted summaries of next hearing dates, daily court orders, or pending dues. Draft custom message templates dynamically populated with case details, ready to share directly with clients via WhatsApp, email, or SMS in one click.",
       link: "/dashboard?view=cases",
       btnText: "Send Updates",
+      highlights: [
+        { icon: "message-square", title: "WhatsApp Updates", desc: "Send automated intimation alerts to client phones." },
+        { icon: "file-text", title: "Dynamic Templates", desc: "Auto-populate next dates, courtrooms, and dues." },
+        { icon: "check-circle", title: "Delivery Receipts", desc: "Verify that clients received critical court date alerts." }
+      ],
       html: `
         <div style="width: 100%; display: flex; justify-content: center; align-items: center;">
           <div style="background: rgba(15, 23, 42, 0.85); border: 1.5px solid rgba(217,119,6,0.35); border-radius: 6px; padding: 0.75rem 1.25rem; font-size: 0.75rem; color: #fff; width: 280px; border-left: 4px solid #d97706; box-shadow: 0 4px 10px rgba(0,0,0,0.3); line-height: 1.4; font-family: sans-serif;">
@@ -1247,6 +1277,25 @@ function initFeaturesTabs() {
     document.querySelectorAll('.feature-preview-display').forEach(el => {
       el.innerHTML = data.html;
     });
+
+    const highlightsContainer = document.querySelectorAll('.feature-highlights-container');
+    if (highlightsContainer.length > 0 && data.highlights) {
+      const highlightsHtml = data.highlights.map(item => `
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start; text-align: left;">
+          <div style="background: rgba(217, 119, 6, 0.1); border: 1px solid rgba(217, 119, 6, 0.2); border-radius: 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #d97706; flex-shrink: 0; margin-top: 2px;">
+            <i data-lucide="${item.icon}" style="width: 14px; height: 14px;"></i>
+          </div>
+          <div>
+            <h5 style="color: #fff; font-size: 0.8rem; margin: 0 0 2px 0; font-weight: 600;">${item.title}</h5>
+            <p style="color: #94a3b8; font-size: 0.7rem; margin: 0; line-height: 1.35;">${item.desc}</p>
+          </div>
+        </div>
+      `).join('');
+      
+      highlightsContainer.forEach(el => {
+        el.innerHTML = highlightsHtml;
+      });
+    }
 
     lucide.createIcons();
   }

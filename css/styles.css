@@ -1318,6 +1318,12 @@ input:checked + .slider:before {
   background-color: #0b0f19;
   color: #f8fafc;
   overflow-x: hidden;
+  
+  /* Force dark theme contrast color variables for marketing views */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --bg-card: rgba(30, 41, 59, 0.45);
 }
 
 /* Navbar */
@@ -1793,5 +1799,30 @@ input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 100px #1e293b inset !important;
   -webkit-text-fill-color: #f8fafc !important;
   transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Marketing Features Tab Switcher Readability Overrides */
+.feature-tab-btn {
+  transition: all 0.3s ease;
+}
+.feature-tab-btn h4 {
+  color: #ffffff !important;
+}
+.feature-tab-btn p {
+  color: #94a3b8 !important;
+  font-size: 0.8rem !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
+  transition: color 0.3s ease;
+}
+.feature-tab-btn.active p {
+  color: #cbd5e1 !important; /* Extremely readable silver-grey */
+}
+.feature-tab-btn:hover p {
+  color: #e2e8f0 !important;
+}
+.feature-detail-desc {
+  color: #cbd5e1 !important; /* Extremely readable description body */
+  line-height: 1.6 !important;
 }
 
