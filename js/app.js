@@ -1145,25 +1145,30 @@ function initFeaturesTabs() {
         </div>
       `
     },
-    share: {
-      title: "Secure Client Share",
-      desc: "Give clients peace of mind while protecting your billable hours. Generate secure, encrypted client tracking tokens. Clients can visit a designated read-only portal to view active case status, order summaries, and history without calling your staff.",
+    referrals: {
+      title: "Referral & Network Tracker",
+      desc: "Cultivate professional connections and optimize your chamber's inbound practice growth. Chambers allows advocates to register and track referral partners for every case, map client origins, and analyze structured networking relationships to calculate financial yields from collaborations.",
       link: "/dashboard?view=clients",
-      btnText: "Share Access",
+      btnText: "Analyze Network",
       html: `
         <div style="width: 100%; font-family: sans-serif; font-size: 0.8rem; color: #fff;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem; font-weight: 600; color: #94a3b8;">
-            <span>Shared Access Token</span><span>Expiration</span><span>Security</span>
+            <span>Referral Partner</span><span>Referred Cases</span><span>Network Yield</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
-            <code style="background: rgba(217,119,6,0.12); color:#d97706; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">tok_88f9a2</code>
-            <span>Aug 15, 2026</span>
-            <span style="color:#10b981; font-size: 0.7rem; font-weight:600; display:flex; align-items:center; gap:3px;"><i data-lucide="lock" style="width:10px; height:10px;"></i> ENCRYPTED</span>
+            <span>Adv. Rajesh Sen (High Court)</span>
+            <span>4 Matters</span>
+            <span style="color: #10b981; font-weight:600;">₹1,80,000</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
-            <code style="background: rgba(217,119,6,0.12); color:#d97706; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">tok_11a3bc</code>
-            <span>Aug 22, 2026</span>
-            <span style="color:#10b981; font-size: 0.7rem; font-weight:600; display:flex; align-items:center; gap:3px;"><i data-lucide="lock" style="width:10px; height:10px;"></i> ENCRYPTED</span>
+            <span>Adv. Priya Sharma (District Court)</span>
+            <span>3 Matters</span>
+            <span style="color: #10b981; font-weight:600;">₹95,000</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
+            <span>Supreme Court Bar Association</span>
+            <span>2 Matters</span>
+            <span style="color: #10b981; font-weight:600;">₹3,50,000</span>
           </div>
         </div>
       `
