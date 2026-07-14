@@ -1012,11 +1012,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     reader.readAsText(file);
   });
 
-  // 10. Init Auth Event Handlers & password eye toggles & global search
+  // 10. Init Auth Event Handlers & password eye toggles & global search & features switcher
   initAuthenticationHandlers();
   initPasswordToggleHandlers();
   initGlobalSearch();
-
+  initFeaturesTabs();
+ 
   // Test hook to clear DB for visual empty state testing
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('reset_test')) {
@@ -1026,7 +1027,211 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.history.replaceState({}, '', '/dashboard');
     }
   }
-
+ 
   // 11. Run router to handle initial page load route
   await router();
 });
+
+/**
+ * Interactive Features Tab Switcher
+ */
+function initFeaturesTabs() {
+  const tabsList = document.querySelectorAll('.feature-tab-btn');
+  if (tabsList.length === 0) return;
+
+  const dataMockups = {
+    cases: {
+      title: "Case Tracking & Registry",
+      desc: "Maintain comprehensive case briefs, historical hearing timelines, case stages, CNR numbers, and court registries in a single unified docket sheets view.",
+      link: "/dashboard?view=cases",
+      btnText: "Open Registry",
+      html: `
+        <div style="width: 100%; font-family: sans-serif; font-size: 0.8rem; color: #fff;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem; font-weight: 600; color: #94a3b8;">
+            <span>Case Brief</span><span>Status</span><span>Next Listed</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
+            <span>Apex Corp vs. Zenith Ltd</span>
+            <span style="background: rgba(16, 185, 129, 0.12); color: #10b981; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">ACTIVE</span>
+            <span>15 Aug 2026</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
+            <span>State of Rajasthan vs. Verma</span>
+            <span style="background: rgba(16, 185, 129, 0.12); color: #10b981; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">ACTIVE</span>
+            <span>22 Aug 2026</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
+            <span>M/S Builders vs. Municipal Corp</span>
+            <span style="background: rgba(245, 158, 11, 0.12); color: #f59e0b; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">PENDING</span>
+            <span>10 Sep 2026</span>
+          </div>
+        </div>
+      `
+    },
+    diary: {
+      title: "Daily Diary & Listings",
+      desc: "Automatically filter court listings for the day, check next listed dates, and receive prompt visual alerts for cases missing a next scheduled date.",
+      link: "/dashboard?view=diary",
+      btnText: "Go to Calendar",
+      html: `
+        <div style="width: 100%; display: flex; gap: 1.5rem; align-items: center; justify-content: center; flex-wrap: wrap;">
+          <div style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 0.6rem; font-size: 0.6rem; width: 110px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem; font-weight: 600; color: #fff;">
+              <span>August 2026</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; color: #fff;">
+              <span style="opacity: 0.3;">28</span><span style="opacity: 0.3;">29</span><span>1</span><span>2</span><span>3</span><span style="background:#d97706; border-radius: 2px; color:#fff; font-weight:700; padding:1px;">4</span><span>5</span>
+            </div>
+          </div>
+          <div style="flex: 1; min-width: 150px; font-family: sans-serif; font-size: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem;">
+            <div style="font-weight: 600; color: #94a3b8; margin-bottom: 0.25rem;">Board Listings (Aug 4)</div>
+            <div style="background: rgba(255,255,255,0.02); border-left: 2.5px solid #d97706; padding: 6px; border-radius: 3px;">
+              <strong>Item #12:</strong> Apex Corp vs. Zenith - <em>SC (Court 3)</em>
+            </div>
+            <div style="background: rgba(255,255,255,0.02); border-left: 2.5px solid #94a3b8; padding: 6px; border-radius: 3px;">
+              <strong>Item #25:</strong> Verma vs. State - <em>HC (Court 8)</em>
+            </div>
+          </div>
+        </div>
+      `
+    },
+    clients: {
+      title: "Client Onboarding Wizard",
+      desc: "A step-by-step onboarding wizard to register new clients, set up initial retainers, and log core case briefs concurrently in minutes.",
+      link: "/dashboard?view=clients",
+      btnText: "Onboard Client",
+      html: `
+        <div style="width: 100%; font-family: sans-serif; font-size: 0.8rem; color: #fff;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem; font-weight: 600; color: #94a3b8;">
+            <span>Client Profile</span><span>Registered On</span><span>Retainer Status</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <div style="background:#d97706; color:#fff; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.6rem; font-weight:700;">AK</div>
+              <span>Amit Kumar</span>
+            </div>
+            <span>Jul 12, 2026</span>
+            <span style="color: #10b981; font-weight:600;">PAID (₹45k)</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <div style="background:#94a3b8; color:#0f172a; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.6rem; font-weight:700;">SD</div>
+              <span>Sunita Devi</span>
+            </div>
+            <span>Jul 14, 2026</span>
+            <span style="color: #f59e0b; font-weight:600;">PARTIAL (₹60k)</span>
+          </div>
+        </div>
+      `
+    },
+    billing: {
+      title: "Advocate Ledger & Billings",
+      desc: "Track invoice balances, register professional receipts, manage disbursements, and check high outstanding dues from a secure financial ledger.",
+      link: "/dashboard?view=billings",
+      btnText: "View Billings",
+      html: `
+        <div style="width: 100%; display: flex; gap: 1.5rem; align-items: center; justify-content: center; flex-wrap: wrap;">
+          <div style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 0.75rem; width: 130px; font-family: sans-serif;">
+            <div style="color: #94a3b8; font-size: 0.65rem; font-weight: 600; margin-bottom: 0.25rem;">Total Outstanding</div>
+            <div style="color: #ef4444; font-size: 1.3rem; font-weight: 700; margin-bottom: 0.4rem;">₹1,85,000</div>
+            <div style="color: #10b981; font-size: 0.6rem; font-weight: 600;">↑ 12% billing collection</div>
+          </div>
+          <div style="display: flex; align-items: flex-end; gap: 10px; height: 75px;">
+            <div style="background: rgba(217,119,6,0.15); width: 18px; height: 35%; border-radius: 2px;"></div>
+            <div style="background: rgba(217,119,6,0.3); width: 18px; height: 60%; border-radius: 2px;"></div>
+            <div style="background: #d97706; width: 18px; height: 95%; border-radius: 2px; box-shadow: 0 0 10px rgba(217,119,6,0.35);"></div>
+            <div style="background: rgba(217,119,6,0.5); width: 18px; height: 50%; border-radius: 2px;"></div>
+          </div>
+        </div>
+      `
+    },
+    share: {
+      title: "Secure Client Share",
+      desc: "Generate shareable encrypted tokens for clients to track their case status and history in a secure read-only portal.",
+      link: "/dashboard?view=clients",
+      btnText: "Share Access",
+      html: `
+        <div style="width: 100%; font-family: sans-serif; font-size: 0.8rem; color: #fff;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem; font-weight: 600; color: #94a3b8;">
+            <span>Shared Access Token</span><span>Expiration</span><span>Security</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
+            <code style="background: rgba(217,119,6,0.12); color:#d97706; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">tok_88f9a2</code>
+            <span>Aug 15, 2026</span>
+            <span style="color:#10b981; font-size: 0.7rem; font-weight:600; display:flex; align-items:center; gap:3px;"><i data-lucide="lock" style="width:10px; height:10px;"></i> ENCRYPTED</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
+            <code style="background: rgba(217,119,6,0.12); color:#d97706; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">tok_11a3bc</code>
+            <span>Aug 22, 2026</span>
+            <span style="color:#10b981; font-size: 0.7rem; font-weight:600; display:flex; align-items:center; gap:3px;"><i data-lucide="lock" style="width:10px; height:10px;"></i> ENCRYPTED</span>
+          </div>
+        </div>
+      `
+    },
+    intimation: {
+      title: "Client Intimation Assistant",
+      desc: "Generate ready-to-share summaries of daily orders, next hearing dates, or payment reminders, and share instantly via WhatsApp or Email.",
+      link: "/dashboard?view=cases",
+      btnText: "Send Updates",
+      html: `
+        <div style="width: 100%; display: flex; justify-content: center; align-items: center;">
+          <div style="background: rgba(15, 23, 42, 0.85); border: 1.5px solid rgba(217,119,6,0.35); border-radius: 6px; padding: 0.75rem 1.25rem; font-size: 0.75rem; color: #fff; width: 280px; border-left: 4px solid #d97706; box-shadow: 0 4px 10px rgba(0,0,0,0.3); line-height: 1.4; font-family: sans-serif;">
+            <strong style="color: #d97706; font-size: 0.8rem; display: block; margin-bottom: 0.25rem;">WhatsApp Notification</strong>
+            <span>Dear Client, this is to intimate you that your case <strong>Apex Corp vs. Zenith Ltd</strong> is listed for hearing on <strong>Aug 15, 2026</strong>.</span>
+          </div>
+        </div>
+      `
+    }
+  };
+
+  function updatePreview(feature) {
+    const data = dataMockups[feature];
+    if (!data) return;
+
+    document.querySelectorAll('.feature-detail-title').forEach(el => el.textContent = data.title);
+    document.querySelectorAll('.feature-detail-desc').forEach(el => el.textContent = data.desc);
+    
+    document.querySelectorAll('.feature-detail-cta').forEach(el => {
+      el.setAttribute('href', data.link);
+      el.textContent = data.btnText;
+    });
+
+    document.querySelectorAll('.feature-preview-display').forEach(el => {
+      el.innerHTML = data.html;
+    });
+
+    lucide.createIcons();
+  }
+
+  tabsList.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const feature = btn.getAttribute('data-feature');
+      
+      document.querySelectorAll(`.feature-tab-btn`).forEach(b => {
+        if (b.getAttribute('data-feature') === feature) {
+          b.classList.add('active');
+          b.style.background = 'rgba(30, 41, 59, 0.45)';
+          b.style.borderColor = 'rgba(217, 119, 6, 0.35)';
+          const icon = b.querySelector('.tab-icon-wrapper');
+          if (icon) {
+            icon.style.color = '#d97706';
+            icon.style.background = 'rgba(217, 119, 6, 0.12)';
+            icon.style.borderColor = 'rgba(217, 119, 6, 0.25)';
+          }
+        } else {
+          b.classList.remove('active');
+          b.style.background = 'rgba(17, 24, 39, 0.3)';
+          b.style.borderColor = 'rgba(255, 255, 255, 0.03)';
+          const icon = b.querySelector('.tab-icon-wrapper');
+          if (icon) {
+            icon.style.color = '#94a3b8';
+            icon.style.background = 'rgba(255, 255, 255, 0.03)';
+            icon.style.borderColor = 'rgba(255, 255, 255, 0.05)';
+          }
+        }
+      });
+
+      updatePreview(feature);
+    });
+  });
+}

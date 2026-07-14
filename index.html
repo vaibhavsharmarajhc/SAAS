@@ -125,147 +125,114 @@
     </section>
 
     <!-- Features Section -->
+    <!-- Features Section -->
     <section id="features" class="features-section" style="padding: 6rem 5%; background: rgba(17, 24, 39, 0.25); border-bottom: 1px solid rgba(255, 255, 255, 0.02);">
       <span class="section-tag" style="margin-bottom: 0.5rem; display: inline-block;">Advocate Ledger & Legal CRM Suite</span>
-      <h2 class="section-title" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; color: #fff; font-weight: 700; margin-bottom: 0.5rem; text-transform: none; letter-spacing: normal;">Advocate Ledger & Legal CRM Suite</h2>
-      <p style="color: var(--text-secondary); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4rem; text-align: center; font-weight: 600;">STREAMLINED CASE MANAGEMENT & CLIENT ACCOUNTING</p>
-      
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto; align-items: stretch;">
-        
-        <!-- CARD 1: Case Tracking & Registry -->
-        <div class="card" style="padding: 2rem 1.75rem; background: rgba(17, 24, 39, 0.65); border: 1.5px solid rgba(255, 255, 255, 0.04); border-radius: var(--radius-md); box-shadow: 0 15px 30px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; text-align: left; position: relative;">
-          <div style="flex: 1.2; display: flex; flex-direction: column; gap: 0.6rem;">
-            <div style="background: rgba(217, 119, 6, 0.12); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #d97706; border: 1px solid rgba(217, 119, 6, 0.25);">
+      <h2 class="section-title" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; color: #fff; font-weight: 700; margin-bottom: 0.5rem; text-transform: none; letter-spacing: normal;">Interactive Practice Modules</h2>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4rem; text-align: center; font-weight: 600;">Streamlined Case Management & Client Accounting</p>
+
+      <div class="features-tabs-container" style="display: flex; gap: 3rem; max-width: 1200px; margin: 0 auto; text-align: left; align-items: stretch; min-height: 520px; flex-wrap: wrap;">
+        <!-- Left tabs list -->
+        <div class="features-tabs-list" style="flex: 1; min-width: 290px; display: flex; flex-direction: column; gap: 1rem;">
+          <!-- Tab 1 -->
+          <div class="feature-tab-btn active" data-feature="cases" style="padding: 1.25rem 1.5rem; background: rgba(30, 41, 59, 0.45); border: 1.5px solid rgba(217, 119, 6, 0.35); border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: flex-start; gap: 1rem; transition: var(--transition-normal);">
+            <div class="tab-icon-wrapper" style="background: rgba(217, 119, 6, 0.12); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #d97706; border: 1px solid rgba(217, 119, 6, 0.25); flex-shrink: 0;">
               <i data-lucide="briefcase" style="width: 18px; height: 18px;"></i>
             </div>
-            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #fff; font-weight: 600; margin: 0.2rem 0 0 0;">Case Tracking & Registry</h3>
-            <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; margin: 0;">Maintain case dossiers, details, historical listings, and next hearing timelines for every court registry.</p>
-            <a href="/dashboard?view=cases" class="btn-nav-register" style="padding: 0.45rem 0.8rem; font-size: 0.75rem; border-radius: 4px; text-decoration: none; display: inline-block; width: fit-content; margin-top: 0.5rem; text-align: center;" data-link="/dashboard">View Dossiers</a>
-          </div>
-          <div style="flex: 0.8; display: flex; justify-content: center; align-items: center; min-width: 100px;">
-            <div style="position: relative; width: 100px; height: 90px; display: flex; align-items: center; justify-content: center; opacity: 0.85;">
-              <div style="position: absolute; left: 0; top: 10px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 4px; color: #d97706; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-                <i data-lucide="file-text" style="width: 14px; height: 14px;"></i>
-              </div>
-              <div style="position: absolute; right: 0; top: 25px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 4px; color: #d97706; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-                <i data-lucide="file-text" style="width: 14px; height: 14px;"></i>
-              </div>
-              <div style="position: absolute; right: 15px; bottom: 5px; background: rgba(217,119,6,0.1); border: 1.5px solid rgba(217,119,6,0.3); border-radius: 4px; padding: 5px; color: #d97706; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(217,119,6,0.15); z-index: 2;">
-                <i data-lucide="gavel" style="width: 16px; height: 16px;"></i>
-              </div>
-              <svg style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none;" viewBox="0 0 100 90">
-                <path d="M 25,22 Q 50,22 50,45" fill="none" stroke="rgba(217, 119, 6, 0.25)" stroke-width="1.5" />
-                <path d="M 75,37 Q 50,37 50,55" fill="none" stroke="rgba(217, 119, 6, 0.25)" stroke-width="1.5" />
-              </svg>
+            <div>
+              <h4 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fff; margin: 0 0 0.25rem 0; font-weight: 600;">Case Tracking & Registry</h4>
+              <p style="color: var(--text-secondary); font-size: 0.8rem; line-height: 1.4; margin: 0;">Maintain case dossiers, details, and histories.</p>
             </div>
           </div>
-        </div>
-
-        <!-- CARD 2: Daily Diary & Listings -->
-        <div class="card" style="padding: 2rem 1.75rem; background: rgba(17, 24, 39, 0.65); border: 1.5px solid rgba(255, 255, 255, 0.04); border-radius: var(--radius-md); box-shadow: 0 15px 30px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; text-align: left; position: relative;">
-          <div style="flex: 1.2; display: flex; flex-direction: column; gap: 0.6rem;">
-            <div style="background: rgba(217, 119, 6, 0.12); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #d97706; border: 1px solid rgba(217, 119, 6, 0.25);">
+          <!-- Tab 2 -->
+          <div class="feature-tab-btn" data-feature="diary" style="padding: 1.25rem 1.5rem; background: rgba(17, 24, 39, 0.3); border: 1.5px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: flex-start; gap: 1rem; transition: var(--transition-normal);">
+            <div class="tab-icon-wrapper" style="background: rgba(255, 255, 255, 0.03); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.05); flex-shrink: 0;">
               <i data-lucide="calendar" style="width: 18px; height: 18px;"></i>
             </div>
-            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #fff; font-weight: 600; margin: 0.2rem 0 0 0;">Daily Diary & Listings</h3>
-            <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; margin: 0;">View daily listings dynamically with calendar state and sidebar alerts showing cases that lack scheduled next dates.</p>
-            <a href="/dashboard?view=diary" class="btn-nav-register" style="padding: 0.45rem 0.8rem; font-size: 0.75rem; border-radius: 4px; text-decoration: none; display: inline-block; width: fit-content; margin-top: 0.5rem; text-align: center;" data-link="/dashboard">Go to Calendar</a>
-          </div>
-          <div style="flex: 0.8; display: flex; justify-content: center; align-items: center; min-width: 100px;">
-            <div style="position: relative; width: 100px; height: 90px; opacity: 0.85;">
-              <div style="position: absolute; left: 0; top: 10px; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 0.5rem; font-size: 0.5rem; width: 68px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-                <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 2px; margin-bottom: 3px; color: #fff; font-weight: 600; text-align: center;">August</div>
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; text-align: center; color: #94a3b8;">
-                  <span>12</span><span>13</span><span style="background:#d97706; color:#fff; border-radius:1px; font-weight:700;">14</span><span>15</span>
-                </div>
-              </div>
-              <div style="position: absolute; right: 0; bottom: 15px; background: #0f172a; border: 1.5px solid rgba(217, 119, 6, 0.35); border-radius: 4px; padding: 4px; font-size: 0.5rem; width: 62px; color: #fff; box-shadow: 0 5px 12px rgba(0,0,0,0.4); z-index: 2; display: flex; align-items: center; gap: 3px;">
-                <i data-lucide="bell" style="width: 10px; height: 10px; color: #d97706; flex-shrink: 0;"></i>
-                <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Hearing!</div>
-              </div>
+            <div>
+              <h4 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fff; margin: 0 0 0.25rem 0; font-weight: 600;">Daily Diary & Listings</h4>
+              <p style="color: var(--text-secondary); font-size: 0.8rem; line-height: 1.4; margin: 0;">View daily court boards and scheduled listings.</p>
             </div>
           </div>
-        </div>
-
-        <!-- CARD 3: Client Onboarding -->
-        <div class="card" style="padding: 2rem 1.75rem; background: rgba(17, 24, 39, 0.65); border: 1.5px solid rgba(255, 255, 255, 0.04); border-radius: var(--radius-md); box-shadow: 0 15px 30px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; text-align: left; position: relative;">
-          <div style="flex: 1.2; display: flex; flex-direction: column; gap: 0.6rem;">
-            <div style="background: rgba(217, 119, 6, 0.12); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #d97706; border: 1px solid rgba(217, 119, 6, 0.25);">
+          <!-- Tab 3 -->
+          <div class="feature-tab-btn" data-feature="clients" style="padding: 1.25rem 1.5rem; background: rgba(17, 24, 39, 0.3); border: 1.5px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: flex-start; gap: 1rem; transition: var(--transition-normal);">
+            <div class="tab-icon-wrapper" style="background: rgba(255, 255, 255, 0.03); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.05); flex-shrink: 0;">
               <i data-lucide="users" style="width: 18px; height: 18px;"></i>
             </div>
-            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #fff; font-weight: 600; margin: 0.2rem 0 0 0;">Client Onboarding</h3>
-            <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; margin: 0;">Track client contact sheets, addresses, onboardings, and reference client details instantly within case profiles.</p>
-            <a href="/dashboard?view=clients" class="btn-nav-register" style="padding: 0.45rem 0.8rem; font-size: 0.75rem; border-radius: 4px; text-decoration: none; display: inline-block; width: fit-content; margin-top: 0.5rem; text-align: center;" data-link="/dashboard">Onboard Client</a>
-          </div>
-          <div style="flex: 0.8; display: flex; justify-content: center; align-items: center; min-width: 100px;">
-            <div style="position: relative; width: 100px; height: 90px; opacity: 0.85; display: flex; flex-direction: column; justify-content: center; gap: 0.5rem; align-items: flex-end; padding-right: 0.5rem;">
-              <div style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255,255,255,0.06); border-radius: 4px; padding: 4px 6px; font-size: 0.55rem; display: flex; align-items: center; gap: 4px; width: 75px; box-shadow: 0 3px 6px rgba(0,0,0,0.2);">
-                <div style="background: #d97706; color: #fff; width: 12px; height: 12px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.45rem; font-weight: 700;">A</div>
-                <span style="color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Amit K.</span>
-              </div>
-              <div style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255,255,255,0.06); border-radius: 4px; padding: 4px 6px; font-size: 0.55rem; display: flex; align-items: center; gap: 4px; width: 75px; box-shadow: 0 3px 6px rgba(0,0,0,0.2); margin-right: 10px;">
-                <div style="background: #94a3b8; color: #0f172a; width: 12px; height: 12px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.45rem; font-weight: 700;">S</div>
-                <span style="color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Sunita</span>
-              </div>
+            <div>
+              <h4 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fff; margin: 0 0 0.25rem 0; font-weight: 600;">Client Onboarding Wizard</h4>
+              <p style="color: var(--text-secondary); font-size: 0.8rem; line-height: 1.4; margin: 0;">Register new clients and retainer details setup.</p>
             </div>
           </div>
-        </div>
-
-        <!-- CARD 4: Advocate Ledger & Billings -->
-        <div class="card" style="padding: 2rem 1.75rem; background: rgba(17, 24, 39, 0.65); border: 1.5px solid rgba(255, 255, 255, 0.04); border-radius: var(--radius-md); box-shadow: 0 15px 30px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; text-align: left; position: relative;">
-          <div style="flex: 1.2; display: flex; flex-direction: column; gap: 0.6rem;">
-            <div style="background: rgba(217, 119, 6, 0.12); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #d97706; border: 1px solid rgba(217, 119, 6, 0.25);">
+          <!-- Tab 4 -->
+          <div class="feature-tab-btn" data-feature="billing" style="padding: 1.25rem 1.5rem; background: rgba(17, 24, 39, 0.3); border: 1.5px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: flex-start; gap: 1rem; transition: var(--transition-normal);">
+            <div class="tab-icon-wrapper" style="background: rgba(255, 255, 255, 0.03); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.05); flex-shrink: 0;">
               <i data-lucide="wallet" style="width: 18px; height: 18px;"></i>
             </div>
-            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #fff; font-weight: 600; margin: 0.2rem 0 0 0;">Advocate Ledger & Billings</h3>
-            <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; margin: 0;">Create invoice billings, track cash and bank payments, and view real-time income summaries of outstanding dues.</p>
-            <a href="/dashboard?view=billings" class="btn-nav-register" style="padding: 0.45rem 0.8rem; font-size: 0.75rem; border-radius: 4px; text-decoration: none; display: inline-block; width: fit-content; margin-top: 0.5rem; text-align: center;" data-link="/dashboard">View Billings</a>
-          </div>
-          <div style="flex: 0.8; display: flex; justify-content: center; align-items: center; min-width: 100px;">
-            <div style="position: relative; width: 100px; height: 90px; opacity: 0.85; display: flex; align-items: flex-end; justify-content: center; gap: 8px; padding-bottom: 10px;">
-              <div style="background: rgba(217,119,6,0.15); width: 15px; height: 35%; border-radius: 2px;"></div>
-              <div style="background: rgba(217,119,6,0.3); width: 15px; height: 60%; border-radius: 2px;"></div>
-              <div style="background: #d97706; width: 15px; height: 90%; border-radius: 2px; box-shadow: 0 0 10px rgba(217,119,6,0.35);"></div>
-              <div style="background: rgba(217,119,6,0.5); width: 15px; height: 50%; border-radius: 2px;"></div>
+            <div>
+              <h4 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fff; margin: 0 0 0.25rem 0; font-weight: 600;">Advocate Ledger & Billings</h4>
+              <p style="color: var(--text-secondary); font-size: 0.8rem; line-height: 1.4; margin: 0;">Track invoices, payments, and outstanding dues.</p>
             </div>
           </div>
-        </div>
-
-        <!-- CARD 5: Secure Client Share -->
-        <div class="card" style="padding: 2rem 1.75rem; background: rgba(17, 24, 39, 0.65); border: 1.5px solid rgba(255, 255, 255, 0.04); border-radius: var(--radius-md); box-shadow: 0 15px 30px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; text-align: left; position: relative;">
-          <div style="flex: 1.2; display: flex; flex-direction: column; gap: 0.6rem;">
-            <div style="background: rgba(217, 119, 6, 0.12); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #d97706; border: 1px solid rgba(217, 119, 6, 0.25);">
-              <i data-lucide="share-2" style="width: 18px; height: 18px;"></i>
+          <!-- Tab 5 -->
+          <div class="feature-tab-btn" data-feature="share" style="padding: 1.25rem 1.5rem; background: rgba(17, 24, 39, 0.3); border: 1.5px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: flex-start; gap: 1rem; transition: var(--transition-normal);">
+            <div class="tab-icon-wrapper" style="background: rgba(255, 255, 255, 0.03); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.05); flex-shrink: 0;">
+              <i data-lucide="lock" style="width: 18px; height: 18px;"></i>
             </div>
-            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #fff; font-weight: 600; margin: 0.2rem 0 0 0;">Secure Client Share</h3>
-            <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; margin: 0;">Generate shareable encrypted tokens for clients to track their case status and history in a read-only portal.</p>
-            <a href="/dashboard?view=clients" class="btn-nav-register" style="padding: 0.45rem 0.8rem; font-size: 0.75rem; border-radius: 4px; text-decoration: none; display: inline-block; width: fit-content; margin-top: 0.5rem; text-align: center;" data-link="/dashboard">Share Access</a>
-          </div>
-          <div style="flex: 0.8; display: flex; justify-content: center; align-items: center; min-width: 100px;">
-            <div style="position: relative; width: 100px; height: 90px; opacity: 0.85; display: flex; align-items: center; justify-content: center;">
-              <div style="position: relative; width: 54px; height: 44px; background: rgba(217,119,6,0.1); border: 1.5px solid rgba(217,119,6,0.3); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #d97706; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
-                <i data-lucide="lock" style="width: 16px; height: 16px;"></i>
-              </div>
+            <div>
+              <h4 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fff; margin: 0 0 0.25rem 0; font-weight: 600;">Secure Client Share</h4>
+              <p style="color: var(--text-secondary); font-size: 0.8rem; line-height: 1.4; margin: 0;">Generate secure read-only tracking credentials.</p>
             </div>
           </div>
-        </div>
-
-        <!-- CARD 6: Client Intimation Assistant -->
-        <div class="card" style="padding: 2rem 1.75rem; background: rgba(17, 24, 39, 0.65); border: 1.5px solid rgba(255, 255, 255, 0.04); border-radius: var(--radius-md); box-shadow: 0 15px 30px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; text-align: left; position: relative;">
-          <div style="flex: 1.2; display: flex; flex-direction: column; gap: 0.6rem;">
-            <div style="background: rgba(217, 119, 6, 0.12); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #d97706; border: 1px solid rgba(217, 119, 6, 0.25);">
+          <!-- Tab 6 -->
+          <div class="feature-tab-btn" data-feature="intimation" style="padding: 1.25rem 1.5rem; background: rgba(17, 24, 39, 0.3); border: 1.5px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: flex-start; gap: 1rem; transition: var(--transition-normal);">
+            <div class="tab-icon-wrapper" style="background: rgba(255, 255, 255, 0.03); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.05); flex-shrink: 0;">
               <i data-lucide="message-square" style="width: 18px; height: 18px;"></i>
             </div>
-            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #fff; font-weight: 600; margin: 0.2rem 0 0 0;">Client Intimation Assistant</h3>
-            <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; margin: 0;">Instantly generate formatted WhatsApp, email, or SMS intimation summaries to notify clients of upcoming hearing dates and court directions.</p>
-            <a href="/dashboard?view=cases" class="btn-nav-register" style="padding: 0.45rem 0.8rem; font-size: 0.75rem; border-radius: 4px; text-decoration: none; display: inline-block; width: fit-content; margin-top: 0.5rem; text-align: center;" data-link="/dashboard">Send Updates</a>
+            <div>
+              <h4 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fff; margin: 0 0 0.25rem 0; font-weight: 600;">Client Intimation Assistant</h4>
+              <p style="color: var(--text-secondary); font-size: 0.8rem; line-height: 1.4; margin: 0;">Instantly generate and send WhatsApp summaries.</p>
+            </div>
           </div>
-          <div style="flex: 0.8; display: flex; justify-content: center; align-items: center; min-width: 100px;">
-            <div style="position: relative; width: 100px; height: 90px; opacity: 0.85; display: flex; align-items: center; justify-content: center;">
-              <div style="background: rgba(15, 23, 42, 0.85); border: 1.5px solid rgba(217,119,6,0.35); border-radius: 6px; padding: 6px 10px; font-size: 0.55rem; color: #fff; width: 85px; border-left: 3px solid #d97706; box-shadow: 0 4px 10px rgba(0,0,0,0.3); line-height: 1.3;">
-                <strong style="color: #d97706;">WhatsApp Update</strong><br>Hearing Listed!
+        </div>
+
+        <!-- Right preview display -->
+        <div class="features-preview-panel" style="flex: 1.8; min-width: 320px; background: rgba(17, 24, 39, 0.65); border: 1.5px solid rgba(255, 255, 255, 0.04); border-radius: var(--radius-md); box-shadow: 0 20px 40px rgba(0,0,0,0.3); padding: 2.5rem; display: flex; flex-direction: column; justify-content: space-between; gap: 2rem;">
+          <div>
+            <h3 class="feature-detail-title" style="font-family: 'Playfair Display', serif; font-size: 1.6rem; color: #fff; margin-bottom: 0.5rem; font-weight: 600;">Case Tracking & Registry</h3>
+            <p class="feature-detail-desc" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin: 0;">Maintain case dossiers, details, historical listings, and next hearing timelines for every court registry.</p>
+          </div>
+
+          <!-- Feature Interactive Preview Area -->
+          <div class="feature-preview-display" style="background: #0b0f19; border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-md); padding: 1.5rem; min-height: 220px; display: flex; align-items: center; justify-content: center;">
+            <!-- Initial cases list mockup -->
+            <div style="width: 100%; font-family: sans-serif; font-size: 0.8rem; color: #fff;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem; font-weight: 600; color: #94a3b8;">
+                <span>Case Brief</span><span>Status</span><span>Next Listed</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                <span>Apex Corp vs. Zenith Ltd</span>
+                <span style="background: rgba(16, 185, 129, 0.12); color: #10b981; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">ACTIVE</span>
+                <span>15 Aug 2026</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                <span>State of Rajasthan vs. Verma</span>
+                <span style="background: rgba(16, 185, 129, 0.12); color: #10b981; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">ACTIVE</span>
+                <span>22 Aug 2026</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
+                <span>M/S Builders vs. Municipal Corp</span>
+                <span style="background: rgba(245, 158, 11, 0.12); color: #f59e0b; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">PENDING</span>
+                <span>10 Sep 2026</span>
               </div>
             </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.25rem;">
+            <span style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
+              <i data-lucide="shield" style="width: 12px; height: 12px; color: var(--color-success);"></i> High-grade secure SSL data protection
+            </span>
+            <a class="feature-detail-cta btn-nav-register" href="/dashboard?view=cases" style="padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: 4px; text-decoration: none;" data-link="/dashboard">Open Registry</a>
           </div>
         </div>
       </div>
@@ -424,73 +391,116 @@
 
   <!-- Features Page -->
   <div id="features-page" class="public-container" style="display: none; padding-top: 5rem; padding-bottom: 5rem;">
-    <div style="max-width: 1100px; margin: 0 auto; padding: 0 1.5rem;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
       <span class="section-tag" style="display: block; text-align: center; margin-bottom: 0.5rem;">Core Modules</span>
       <h1 style="font-family: 'Playfair Display', serif; font-size: 2.8rem; color: #fff; margin-bottom: 1.5rem; text-align: center; font-weight: 700;">Chambers Feature Suite</h1>
-      <p style="color: var(--text-secondary); text-align: center; max-width: 600px; margin: 0 auto 3rem auto; font-size: 1rem; line-height: 1.6;">
+      <p style="color: var(--text-secondary); text-align: center; max-width: 600px; margin: 0 auto 4rem auto; font-size: 1.1rem; line-height: 1.6;">
         Explore the built-in practice modules designed to streamline operations, automate client notifications, and secure your advocate ledger.
       </p>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-top: 3rem;">
-        <!-- Card 1 -->
-        <div class="card" style="padding: 2rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 1rem;">
-          <div style="background: rgba(59, 130, 246, 0.1); width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #3b82f6;">
-            <i data-lucide="briefcase" style="width: 24px; height: 24px;"></i>
+      <div class="features-tabs-container" style="display: flex; gap: 3rem; align-items: stretch; min-height: 520px; flex-wrap: wrap;">
+        <!-- Left tabs list -->
+        <div class="features-tabs-list" style="flex: 1; min-width: 290px; display: flex; flex-direction: column; gap: 1rem;">
+          <!-- Tab 1 -->
+          <div class="feature-tab-btn active" data-feature="cases" style="padding: 1.25rem 1.5rem; background: rgba(30, 41, 59, 0.45); border: 1.5px solid rgba(217, 119, 6, 0.35); border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: flex-start; gap: 1rem; transition: var(--transition-normal);">
+            <div class="tab-icon-wrapper" style="background: rgba(217, 119, 6, 0.12); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #d97706; border: 1px solid rgba(217, 119, 6, 0.25); flex-shrink: 0;">
+              <i data-lucide="briefcase" style="width: 18px; height: 18px;"></i>
+            </div>
+            <div>
+              <h4 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fff; margin: 0 0 0.25rem 0; font-weight: 600;">Case Tracking & Registry</h4>
+              <p style="color: var(--text-secondary); font-size: 0.8rem; line-height: 1.4; margin: 0;">Maintain case dossiers, details, and histories.</p>
+            </div>
           </div>
-          <h3 style="color: #fff; font-size: 1.25rem; font-family: 'Playfair Display', serif; font-weight: 600;">Case Tracking & Registry</h3>
-          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0;">
-            Maintain comprehensive case briefs, historical hearing timelines, case stages, CNR numbers, and court registries in a single unified docket sheets view.
-          </p>
+          <!-- Tab 2 -->
+          <div class="feature-tab-btn" data-feature="diary" style="padding: 1.25rem 1.5rem; background: rgba(17, 24, 39, 0.3); border: 1.5px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: flex-start; gap: 1rem; transition: var(--transition-normal);">
+            <div class="tab-icon-wrapper" style="background: rgba(255, 255, 255, 0.03); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.05); flex-shrink: 0;">
+              <i data-lucide="calendar" style="width: 18px; height: 18px;"></i>
+            </div>
+            <div>
+              <h4 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fff; margin: 0 0 0.25rem 0; font-weight: 600;">Daily Diary & Listings</h4>
+              <p style="color: var(--text-secondary); font-size: 0.8rem; line-height: 1.4; margin: 0;">View daily court boards and scheduled listings.</p>
+            </div>
+          </div>
+          <!-- Tab 3 -->
+          <div class="feature-tab-btn" data-feature="clients" style="padding: 1.25rem 1.5rem; background: rgba(17, 24, 39, 0.3); border: 1.5px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: flex-start; gap: 1rem; transition: var(--transition-normal);">
+            <div class="tab-icon-wrapper" style="background: rgba(255, 255, 255, 0.03); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.05); flex-shrink: 0;">
+              <i data-lucide="users" style="width: 18px; height: 18px;"></i>
+            </div>
+            <div>
+              <h4 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fff; margin: 0 0 0.25rem 0; font-weight: 600;">Client Onboarding Wizard</h4>
+              <p style="color: var(--text-secondary); font-size: 0.8rem; line-height: 1.4; margin: 0;">Register new clients and retainer details setup.</p>
+            </div>
+          </div>
+          <!-- Tab 4 -->
+          <div class="feature-tab-btn" data-feature="billing" style="padding: 1.25rem 1.5rem; background: rgba(17, 24, 39, 0.3); border: 1.5px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: flex-start; gap: 1rem; transition: var(--transition-normal);">
+            <div class="tab-icon-wrapper" style="background: rgba(255, 255, 255, 0.03); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.05); flex-shrink: 0;">
+              <i data-lucide="wallet" style="width: 18px; height: 18px;"></i>
+            </div>
+            <div>
+              <h4 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fff; margin: 0 0 0.25rem 0; font-weight: 600;">Advocate Ledger & Billings</h4>
+              <p style="color: var(--text-secondary); font-size: 0.8rem; line-height: 1.4; margin: 0;">Track invoices, payments, and outstanding dues.</p>
+            </div>
+          </div>
+          <!-- Tab 5 -->
+          <div class="feature-tab-btn" data-feature="share" style="padding: 1.25rem 1.5rem; background: rgba(17, 24, 39, 0.3); border: 1.5px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: flex-start; gap: 1rem; transition: var(--transition-normal);">
+            <div class="tab-icon-wrapper" style="background: rgba(255, 255, 255, 0.03); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.05); flex-shrink: 0;">
+              <i data-lucide="lock" style="width: 18px; height: 18px;"></i>
+            </div>
+            <div>
+              <h4 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fff; margin: 0 0 0.25rem 0; font-weight: 600;">Secure Client Share</h4>
+              <p style="color: var(--text-secondary); font-size: 0.8rem; line-height: 1.4; margin: 0;">Generate secure read-only tracking credentials.</p>
+            </div>
+          </div>
+          <!-- Tab 6 -->
+          <div class="feature-tab-btn" data-feature="intimation" style="padding: 1.25rem 1.5rem; background: rgba(17, 24, 39, 0.3); border: 1.5px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: flex-start; gap: 1rem; transition: var(--transition-normal);">
+            <div class="tab-icon-wrapper" style="background: rgba(255, 255, 255, 0.03); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.05); flex-shrink: 0;">
+              <i data-lucide="message-square" style="width: 18px; height: 18px;"></i>
+            </div>
+            <div>
+              <h4 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fff; margin: 0 0 0.25rem 0; font-weight: 600;">Client Intimation Assistant</h4>
+              <p style="color: var(--text-secondary); font-size: 0.8rem; line-height: 1.4; margin: 0;">Instantly generate and send WhatsApp summaries.</p>
+            </div>
+          </div>
         </div>
-        <!-- Card 2 -->
-        <div class="card" style="padding: 2rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 1rem;">
-          <div style="background: rgba(16, 185, 129, 0.1); width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #10b981;">
-            <i data-lucide="calendar" style="width: 24px; height: 24px;"></i>
+
+        <!-- Right preview display -->
+        <div class="features-preview-panel" style="flex: 1.8; min-width: 320px; background: rgba(17, 24, 39, 0.65); border: 1.5px solid rgba(255, 255, 255, 0.04); border-radius: var(--radius-md); box-shadow: 0 20px 40px rgba(0,0,0,0.3); padding: 2.5rem; display: flex; flex-direction: column; justify-content: space-between; gap: 2rem;">
+          <div>
+            <h3 class="feature-detail-title" style="font-family: 'Playfair Display', serif; font-size: 1.6rem; color: #fff; margin-bottom: 0.5rem; font-weight: 600;">Case Tracking & Registry</h3>
+            <p class="feature-detail-desc" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin: 0;">Maintain case dossiers, details, historical listings, and next hearing timelines for every court registry.</p>
           </div>
-          <h3 style="color: #fff; font-size: 1.25rem; font-family: 'Playfair Display', serif; font-weight: 600;">Daily Diary & Listings</h3>
-          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0;">
-            Automatically filter court listings for the day, check next listed dates, and receive prompt visual alerts for cases missing a next scheduled date.
-          </p>
-        </div>
-        <!-- Card 3 -->
-        <div class="card" style="padding: 2rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 1rem;">
-          <div style="background: rgba(245, 158, 11, 0.1); width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #f59e0b;">
-            <i data-lucide="users" style="width: 24px; height: 24px;"></i>
+
+          <!-- Feature Interactive Preview Area -->
+          <div class="feature-preview-display" style="background: #0b0f19; border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-md); padding: 1.5rem; min-height: 220px; display: flex; align-items: center; justify-content: center;">
+            <!-- Initial cases list mockup -->
+            <div style="width: 100%; font-family: sans-serif; font-size: 0.8rem; color: #fff;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem; font-weight: 600; color: #94a3b8;">
+                <span>Case Brief</span><span>Status</span><span>Next Listed</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                <span>Apex Corp vs. Zenith Ltd</span>
+                <span style="background: rgba(16, 185, 129, 0.12); color: #10b981; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">ACTIVE</span>
+                <span>15 Aug 2026</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                <span>State of Rajasthan vs. Verma</span>
+                <span style="background: rgba(16, 185, 129, 0.12); color: #10b981; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">ACTIVE</span>
+                <span>22 Aug 2026</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
+                <span>M/S Builders vs. Municipal Corp</span>
+                <span style="background: rgba(245, 158, 11, 0.12); color: #f59e0b; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">PENDING</span>
+                <span>10 Sep 2026</span>
+              </div>
+            </div>
           </div>
-          <h3 style="color: #fff; font-size: 1.25rem; font-family: 'Playfair Display', serif; font-weight: 600;">Client Onboarding Wizard</h3>
-          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0;">
-            A step-by-step onboarding wizard to register new clients, set up initial retainers, and log core case briefs concurrently in minutes.
-          </p>
-        </div>
-        <!-- Card 4 -->
-        <div class="card" style="padding: 2rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 1rem;">
-          <div style="background: rgba(239, 68, 68, 0.1); width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ef4444;">
-            <i data-lucide="wallet" style="width: 24px; height: 24px;"></i>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.25rem;">
+            <span style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
+              <i data-lucide="shield" style="width: 12px; height: 12px; color: var(--color-success);"></i> High-grade secure SSL data protection
+            </span>
+            <a class="feature-detail-cta btn-nav-register" href="/dashboard?view=cases" style="padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: 4px; text-decoration: none;" data-link="/dashboard">Open Registry</a>
           </div>
-          <h3 style="color: #fff; font-size: 1.25rem; font-family: 'Playfair Display', serif; font-weight: 600;">Advocate Ledger & Billings</h3>
-          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0;">
-            Track invoice balances, register professional receipts, manage disbursements, and check high outstanding dues from a secure financial ledger.
-          </p>
-        </div>
-        <!-- Card 5 -->
-        <div class="card" style="padding: 2rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 1rem;">
-          <div style="background: rgba(139, 92, 246, 0.1); width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #8b5cf6;">
-            <i data-lucide="message-square" style="width: 24px; height: 24px;"></i>
-          </div>
-          <h3 style="color: #fff; font-size: 1.25rem; font-family: 'Playfair Display', serif; font-weight: 600;">Client Intimation Assistant</h3>
-          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0;">
-            Generate ready-to-share summaries of daily orders, next hearing dates, or payment reminders, and share instantly via WhatsApp or Email.
-          </p>
-        </div>
-        <!-- Card 6 -->
-        <div class="card" style="padding: 2rem; background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 1rem;">
-          <div style="background: rgba(6, 182, 212, 0.1); width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #06b6d4;">
-            <i data-lucide="search" style="width: 24px; height: 24px;"></i>
-          </div>
-          <h3 style="color: #fff; font-size: 1.25rem; font-family: 'Playfair Display', serif; font-weight: 600;">Global Header Search</h3>
-          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0;">
-            A fast, dashboard-wide search bar that dynamically parses case names, case numbers, CNR tags, client names, and phone records.
-          </p>
         </div>
       </div>
     </div>
