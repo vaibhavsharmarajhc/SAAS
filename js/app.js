@@ -1042,7 +1042,7 @@ function initFeaturesTabs() {
   const dataMockups = {
     cases: {
       title: "Case Tracking & Registry",
-      desc: "Maintain comprehensive case briefs, historical hearing timelines, case stages, CNR numbers, and court registries in a single unified docket sheets view.",
+      desc: "Maintain complete litigation details, historical hearing logs, registry stages, and docket histories. Chambers stores active briefs, CNR number tracking, court benches, opposition party advocate details, and next scheduled listing dates securely in a single, unified view.",
       link: "/dashboard?view=cases",
       btnText: "Open Registry",
       html: `
@@ -1070,7 +1070,7 @@ function initFeaturesTabs() {
     },
     diary: {
       title: "Daily Diary & Listings",
-      desc: "Automatically filter court listings for the day, check next listed dates, and receive prompt visual alerts for cases missing a next scheduled date.",
+      desc: "Automatically generate daily diaries containing active listings for the day. Filter chambers court boards dynamically, check next scheduled dates, and receive prompt visual alerts for any active litigation matter that is currently missing a next hearing date.",
       link: "/dashboard?view=diary",
       btnText: "Go to Calendar",
       html: `
@@ -1097,7 +1097,7 @@ function initFeaturesTabs() {
     },
     clients: {
       title: "Client Onboarding Wizard",
-      desc: "A step-by-step onboarding wizard to register new clients, set up initial retainers, and log core case briefs concurrently in minutes.",
+      desc: "Streamline advocate chamber intakes using a structured step-by-step onboarding wizard. Record new client profiles, assign customizable professional retainer billing, and concurrently log initial briefs in minutes to avoid separate registry paperwork.",
       link: "/dashboard?view=clients",
       btnText: "Onboard Client",
       html: `
@@ -1126,7 +1126,7 @@ function initFeaturesTabs() {
     },
     billing: {
       title: "Advocate Ledger & Billings",
-      desc: "Track invoice balances, register professional receipts, manage disbursements, and check high outstanding dues from a secure financial ledger.",
+      desc: "Plugs revenue leakages in your chamber practice. Create professional fee statements, register cash or bank payments, log office disbursements, and view detailed account summaries detailing high outstanding balances and collection metrics.",
       link: "/dashboard?view=billings",
       btnText: "View Billings",
       html: `
@@ -1147,7 +1147,7 @@ function initFeaturesTabs() {
     },
     share: {
       title: "Secure Client Share",
-      desc: "Generate shareable encrypted tokens for clients to track their case status and history in a secure read-only portal.",
+      desc: "Give clients peace of mind while protecting your billable hours. Generate secure, encrypted client tracking tokens. Clients can visit a designated read-only portal to view active case status, order summaries, and history without calling your staff.",
       link: "/dashboard?view=clients",
       btnText: "Share Access",
       html: `
@@ -1170,7 +1170,7 @@ function initFeaturesTabs() {
     },
     intimation: {
       title: "Client Intimation Assistant",
-      desc: "Generate ready-to-share summaries of daily orders, next hearing dates, or payment reminders, and share instantly via WhatsApp or Email.",
+      desc: "Instantly create beautifully formatted summaries of next hearing dates, daily court orders, or pending dues. Draft custom message templates dynamically populated with case details, ready to share directly with clients via WhatsApp, email, or SMS in one click.",
       link: "/dashboard?view=cases",
       btnText: "Send Updates",
       html: `
