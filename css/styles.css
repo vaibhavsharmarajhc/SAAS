@@ -808,7 +808,7 @@ textarea.form-control {
 /* Monthly view layout */
 .month-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 2px;
   background-color: var(--border-color);
   border: 1px solid var(--border-color);
@@ -972,7 +972,7 @@ textarea.form-control {
 
 .mini-month-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 1px;
 }
 
