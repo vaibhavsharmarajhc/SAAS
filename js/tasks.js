@@ -463,7 +463,7 @@ const tasksModule = {
       'P1': { border: '#ef4444', text: 'P1 - High', bg: 'rgba(239,68,68,0.12)' },
       'P2': { border: '#f97316', text: 'P2 - Medium', bg: 'rgba(249,115,22,0.12)' },
       'P3': { border: '#3b82f6', text: 'P3 - Low', bg: 'rgba(59,130,246,0.12)' },
-      'P4': { border: 'rgba(255,255,255,0.1)', text: 'P4 - None', bg: 'rgba(255,255,255,0.02)' }
+      'P4': { border: 'var(--border-color)', text: 'P4 - None', bg: 'var(--bg-sidebar)' }
     };
     const pri = priMap[t.priority] || priMap['P4'];
 
@@ -472,23 +472,23 @@ const tasksModule = {
     const commentsCount = t.comments ? t.comments.length : 0;
 
     return `
-      <div class="task-item-card" data-task-id="${t.id}" style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.015); border:1px solid rgba(255,255,255,0.03); border-left: 3px solid ${pri.border}; padding:0.75rem 1rem; border-radius:6px; transition:all 0.2s;">
+      <div class="task-item-card" data-task-id="${t.id}" style="border-left: 3px solid ${pri.border};">
         <div style="display:flex; align-items:center; gap:0.75rem; flex-grow:1; min-width:0;">
           
           <!-- Complete trigger checkbox -->
-          <button class="btn-toggle-task-status" data-task-id="${t.id}" style="background:none; border:1px solid ${isCompleted ? 'var(--color-primary)' : 'rgba(255,255,255,0.2)'}; width:16px; height:16px; border-radius:3px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#d97706; padding:0; flex-shrink:0;">
+          <button class="btn-toggle-task-status" data-task-id="${t.id}" style="background:none; border:1px solid ${isCompleted ? 'var(--color-primary)' : 'var(--border-color)'}; width:16px; height:16px; border-radius:3px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#d97706; padding:0; flex-shrink:0;">
             ${isCompleted ? '<i data-lucide="check" style="width:12px; height:12px;"></i>' : ''}
           </button>
           
           <div style="min-width:0; display:flex; flex-direction:column; gap:2px;">
-            <span style="font-size:0.85rem; color:${isCompleted ? 'var(--text-muted)' : '#fff'}; font-weight:600; text-decoration:${isCompleted ? 'line-through' : 'none'}; cursor:pointer;" class="btn-view-task-details" data-task-id="${t.id}">
+            <span style="font-size:0.85rem; color:${isCompleted ? 'var(--text-muted)' : 'var(--text-primary)'}; font-weight:600; text-decoration:${isCompleted ? 'line-through' : 'none'}; cursor:pointer;" class="btn-view-task-details" data-task-id="${t.id}">
               ${t.title}
             </span>
             ${t.desc ? `<span style="font-size:0.75rem; color:var(--text-muted); text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:320px;">${t.desc}</span>` : ''}
             
             <div style="display:flex; align-items:center; gap:8px; margin-top:2px;">
               <!-- Priority badge -->
-              <span style="font-size:0.6rem; font-weight:700; color:${pri.border}; background:${pri.bg}; border:1px solid rgba(255,255,255,0.02); padding:1px 4px; border-radius:3px;">
+              <span style="font-size:0.6rem; font-weight:700; color:${pri.border}; background:${pri.bg}; border:1px solid var(--border-color); padding:1px 4px; border-radius:3px;">
                 ${pri.text}
               </span>
               <!-- Project Label -->
@@ -514,7 +514,7 @@ const tasksModule = {
           ` : ''}
 
           <!-- Edit button -->
-          <button class="btn-edit-task" data-task-id="${t.id}" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); color:var(--text-muted); cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px;" title="Edit Task Parameters">
+          <button class="btn-edit-task" data-task-id="${t.id}" style="background:var(--border-color); border:1px solid var(--border-color); color:var(--text-muted); cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px;" title="Edit Task Parameters">
             <i data-lucide="edit-3" style="width:12px; height:12px;"></i>
           </button>
         </div>
@@ -646,13 +646,13 @@ const tasksModule = {
       html += `
         <div style="display: flex; gap: 8px; align-items: flex-start; margin-bottom: 0.25rem; ${isMe ? 'flex-direction: row-reverse;' : ''}">
           <!-- Mini avatar bubble -->
-          <div style="background: ${isMe ? 'rgba(217,119,6,0.15)' : 'rgba(255,255,255,0.06)'}; border: 1px solid ${isMe ? 'rgba(217,119,6,0.25)' : 'rgba(255,255,255,0.08)'}; color: ${isMe ? 'var(--color-primary)' : '#94a3b8'}; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 700; flex-shrink: 0;">
+          <div class="chat-avatar ${isMe ? 'is-me' : ''}">
             ${initials}
           </div>
           
           <!-- Message text bubble -->
           <div style="display: flex; flex-direction: column; max-width: 80%; align-items: ${isMe ? 'flex-end' : 'flex-start'};">
-            <div style="background: ${isMe ? 'rgba(217,119,6,0.08)' : 'rgba(255,255,255,0.02)'}; border: 1px solid ${isMe ? 'rgba(217,119,6,0.2)' : 'rgba(255,255,255,0.04)'}; border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.8rem; color: #fff; line-height: 1.4; text-align: left;">
+            <div class="chat-bubble ${isMe ? 'is-me' : ''}">
               ${c.content}
             </div>
             <span style="font-size:0.6rem; color:var(--text-muted); margin-top:2px; display:inline-block;">${c.senderName} • ${date}, ${time}</span>
