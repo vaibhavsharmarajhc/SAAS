@@ -191,7 +191,73 @@ const tasksModule = {
       }
     }
 
+    this.updateAssigneeWorkloadAlert();
     modal.classList.add('active');
+  },
+
+  /**
+   * Calculate capacity loads
+   */
+  getMemberWorkloadInfo(memberId) {
+    const myUser = db.getUser();
+    const myId = myUser ? myUser.id : null;
+    const targetId = memberId || myId;
+
+    const activeTasks = tasksState.tasks.filter(t => t.status === 'pending' && (t.assigneeId === targetId || (!t.assigneeId && targetId === myId)));
+    const activeCount = activeTasks.length;
+
+    let loadRating = 'Optimal';
+    let color = '#10b981';
+
+    if (activeCount > 5) {
+      loadRating = 'High Load';
+      color = '#ef4444';
+    } else if (activeCount > 3) {
+      loadRating = 'Moderate';
+      color = '#f59e0b';
+    } else if (activeCount === 0) {
+      loadRating = 'Underloaded';
+      color = 'var(--text-muted)';
+    }
+
+    return { count: activeCount, rating: loadRating, color };
+  },
+
+  updateAssigneeWorkloadAlert() {
+    const select = document.getElementById('task-assignee');
+    const indicator = document.getElementById('assignee-workload-indicator');
+    const textEl = document.getElementById('assignee-workload-text');
+    if (!select || !indicator || !textEl) return;
+
+    const val = select.value;
+    
+    let name = "Self";
+    if (val) {
+      const col = tasksState.colleagues.find(c => c.colleagueId === val);
+      if (col) name = col.lawyerName;
+    }
+
+    const info = this.getMemberWorkloadInfo(val);
+    indicator.style.display = 'flex';
+
+    if (info.rating === 'High Load') {
+      indicator.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+      indicator.style.borderColor = '#ef4444';
+      textEl.style.color = '#f87171';
+      textEl.innerHTML = `<i data-lucide="alert-triangle" style="width:14px; height:14px; flex-shrink:0;"></i> <span><strong>⚠️ Overburdened:</strong> ${name} currently has ${info.count} active tasks (High Load). Avoid assigning new tasks if possible.</span>`;
+    } else if (info.rating === 'Moderate') {
+      indicator.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
+      indicator.style.borderColor = '#f59e0b';
+      textEl.style.color = '#fbbf24';
+      textEl.innerHTML = `<i data-lucide="info" style="width:14px; height:14px; flex-shrink:0;"></i> <span><strong>⚠️ Moderate Load:</strong> ${name} currently has ${info.count} active tasks. Proceed with normal scheduling.</span>`;
+    } else {
+      indicator.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+      indicator.style.borderColor = '#10b981';
+      textEl.style.color = '#34d399';
+      textEl.innerHTML = `<i data-lucide="check-circle" style="width:14px; height:14px; flex-shrink:0;"></i> <span><strong>✅ Available:</strong> ${name} currently has ${info.count} active tasks (${info.rating}).</span>`;
+    }
+
+    lucide.createIcons();
   },
 
   /**
@@ -201,9 +267,12 @@ const tasksModule = {
     const select = document.getElementById('task-assignee');
     if (!select) return;
 
-    select.innerHTML = '<option value="">-- Assign to Me --</option>';
+    const selfWorkload = this.getMemberWorkloadInfo('');
+    select.innerHTML = `<option value="">-- Assign to Me [${selfWorkload.count} tasks: ${selfWorkload.rating}] --</option>`;
+    
     tasksState.colleagues.forEach(c => {
-      select.innerHTML += `<option value="${c.colleagueId}">${c.lawyerName} (${c.colleagueEmail})</option>`;
+      const colleagueWorkload = this.getMemberWorkloadInfo(c.colleagueId);
+      select.innerHTML += `<option value="${c.colleagueId}">${c.lawyerName} (${c.colleagueEmail}) — [${colleagueWorkload.count} tasks: ${colleagueWorkload.rating}]</option>`;
     });
   },
 
@@ -213,6 +282,13 @@ const tasksModule = {
   setupTaskForm() {
     const form = document.getElementById('add-task-form');
     const modal = document.getElementById('add-task-modal');
+    
+    const assigneeSelect = document.getElementById('task-assignee');
+    if (assigneeSelect) {
+      assigneeSelect.addEventListener('change', () => {
+        this.updateAssigneeWorkloadAlert();
+      });
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
