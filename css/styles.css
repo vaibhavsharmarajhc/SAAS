@@ -1826,3 +1826,31 @@ input:-webkit-autofill:active {
   line-height: 1.6 !important;
 }
 
+/* Task Manager Sidebar Filters */
+.task-filter-btn, .project-filter-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all var(--transition-fast);
+}
+
+.task-filter-btn:hover, .project-filter-btn:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+}
+
+.task-filter-btn.active, .project-filter-btn.active {
+  background-color: var(--border-color) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+

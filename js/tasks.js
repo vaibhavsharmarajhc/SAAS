@@ -40,21 +40,14 @@ const tasksModule = {
     this.populateAssigneeDropdowns();
   },
 
-  /**
-   * Side Menu Filters bindings
-   */
   setupFilters() {
     const filterBtns = document.querySelectorAll('.task-filter-btn');
     filterBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         filterBtns.forEach(b => {
           b.classList.remove('active');
-          b.style.background = 'transparent';
-          b.style.color = 'var(--text-secondary)';
         });
         btn.classList.add('active');
-        btn.style.background = 'rgba(255,255,255,0.03)';
-        btn.style.color = '#fff';
 
         tasksState.activeFilter = btn.getAttribute('data-filter');
         this.renderTasksContainer();
@@ -304,9 +297,9 @@ const tasksModule = {
       const count = tasksState.tasks.filter(t => t.status === 'pending' && t.project === p).length;
 
       html += `
-        <button class="project-filter-btn ${isSelected ? 'active' : ''}" data-project="${p}" style="display: flex; align-items: center; justify-content: space-between; width: 100%; text-align: left; padding: 0.4rem 0.75rem; background: ${isSelected ? 'rgba(255,255,255,0.03)' : 'transparent'}; border: 1px solid ${isSelected ? 'rgba(255,255,255,0.05)' : 'transparent'}; border-radius: 6px; color: ${isSelected ? '#fff' : 'var(--text-secondary)'}; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;">
+        <button class="project-filter-btn ${isSelected ? 'active' : ''}" data-project="${p}">
           <span style="display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="tag" style="width: 12px; height: 12px; color: ${p === 'Onboarding' ? '#10b981' : p === 'Drafting' ? '#fbbf24' : p === 'Filings' ? '#3b82f6' : p === 'Research' ? '#a855f7' : '#94a3b8'};"></i> ${p}</span>
-          <span class="badge" style="font-size: 0.65rem; background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 10px;">${count}</span>
+          <span class="badge" style="font-size: 0.65rem; background: rgba(0,0,0,0.05); padding: 1px 5px; border-radius: 10px;">${count}</span>
         </button>
       `;
     });
@@ -318,18 +311,12 @@ const tasksModule = {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.task-filter-btn').forEach(b => {
           b.classList.remove('active');
-          b.style.background = 'transparent';
-          b.style.color = 'var(--text-secondary)';
         });
         container.querySelectorAll('.project-filter-btn').forEach(b => {
           b.classList.remove('active');
-          b.style.background = 'transparent';
-          b.style.color = 'var(--text-secondary)';
         });
 
         btn.classList.add('active');
-        btn.style.background = 'rgba(255,255,255,0.03)';
-        btn.style.color = '#fff';
 
         tasksState.activeFilter = btn.getAttribute('data-project');
         this.renderTasksContainer();
