@@ -1,7 +1,7 @@
 @echo off
-title VSH Legal Practice Manager
+title CounselAI Practice Manager
 echo ==========================================================
-echo   VSH Legal Practice Manager Launcher
+echo   CounselAI Practice Manager Launcher
 echo   Adv. Vaibhav Sharma - Chambers Administration
 echo ==========================================================
 echo.

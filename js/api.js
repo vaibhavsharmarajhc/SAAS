@@ -209,10 +209,10 @@ const api = {
     async getColleagues() {
       return await fetchAPI('/api/colleagues');
     },
-    async addColleague(email) {
+    async addColleague(email, role = 'work') {
       return await fetchAPI('/api/colleagues', {
         method: 'POST',
-        body: { email }
+        body: { email, role }
       });
     }
   }

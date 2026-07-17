@@ -1494,24 +1494,83 @@
               <div>
                 <h3 style="font-size: 1.15rem; margin: 0;" id="task-active-view-title">All Tasks</h3>
                 <p style="color: var(--text-muted); font-size: 0.75rem; margin: 2px 0 0 0;" id="task-active-view-desc">All tasks in your practice space.</p>
+                
+                <!-- View switcher tabs -->
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;" class="task-view-tabs">
+                  <button class="btn btn-secondary active" id="btn-view-list" style="padding: 0.25rem 0.5rem; font-size: 0.7rem; border-radius: 4px; display: flex; align-items: center; gap: 3px;"><i data-lucide="list"></i> List View</button>
+                  <button class="btn btn-secondary" id="btn-view-kanban" style="padding: 0.25rem 0.5rem; font-size: 0.7rem; border-radius: 4px; display: flex; align-items: center; gap: 3px;"><i data-lucide="kanban"></i> Kanban Board</button>
+                  <button class="btn btn-secondary" id="btn-view-capacity" style="padding: 0.25rem 0.5rem; font-size: 0.7rem; border-radius: 4px; display: flex; align-items: center; gap: 3px;"><i data-lucide="activity"></i> Capacity Planner</button>
+                </div>
               </div>
               <button class="btn btn-primary" id="btn-add-task-manager" style="display: flex; align-items: center; gap: 4px;">
                 <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Add Task
               </button>
             </div>
 
-            <!-- Active Pending Tasks List -->
-            <div style="display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1;" id="task-items-container">
-              <!-- Dynamically populated tasks -->
+            <!-- List View wrapper -->
+            <div id="tasks-list-view" style="display: flex; flex-direction: column; flex-grow: 1;">
+              <!-- Active Pending Tasks List -->
+              <div style="display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1;" id="task-items-container">
+                <!-- Dynamically populated tasks -->
+              </div>
+
+              <!-- Completed Tasks Subheader -->
+              <div style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 1rem; display: none;" id="completed-tasks-section">
+                <button style="background: none; border: none; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0;" id="toggle-completed-tasks">
+                  <i data-lucide="chevron-down" style="width: 14px; height: 14px;"></i> Completed Tasks (<span id="completed-tasks-count">0</span>)
+                </button>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem;" id="completed-tasks-container">
+                  <!-- Completed tasks -->
+                </div>
+              </div>
             </div>
 
-            <!-- Completed Tasks Subheader -->
-            <div style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 1rem; display: none;" id="completed-tasks-section">
-              <button style="background: none; border: none; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0;" id="toggle-completed-tasks">
-                <i data-lucide="chevron-down" style="width: 14px; height: 14px;"></i> Completed Tasks (<span id="completed-tasks-count">0</span>)
-              </button>
-              <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem;" id="completed-tasks-container">
-                <!-- Completed tasks -->
+            <!-- Kanban View wrapper -->
+            <div id="tasks-kanban-view" style="display: none; flex-grow: 1; margin-top: 1rem;">
+              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; height: 100%;">
+                <!-- To Do column -->
+                <div class="kanban-column" data-status="todo" style="background: rgba(var(--bg-main), 0.3); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem; min-height: 400px;">
+                  <h4 style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin: 0 0 0.25rem 0; display: flex; align-items: center; justify-content: space-between;">
+                    <span>⚪ To Do</span>
+                    <span class="badge" id="kanban-count-todo" style="font-size:0.65rem;">0</span>
+                  </h4>
+                  <div class="kanban-cards-container" id="kanban-cards-todo" style="display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1; overflow-y: auto;"></div>
+                </div>
+
+                <!-- In Progress column -->
+                <div class="kanban-column" data-status="in-progress" style="background: rgba(var(--bg-main), 0.3); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem; min-height: 400px;">
+                  <h4 style="font-size: 0.8rem; font-weight: 700; color: #3b82f6; margin: 0 0 0.25rem 0; display: flex; align-items: center; justify-content: space-between;">
+                    <span>🔵 In Progress</span>
+                    <span class="badge" id="kanban-count-in-progress" style="font-size:0.65rem;">0</span>
+                  </h4>
+                  <div class="kanban-cards-container" id="kanban-cards-in-progress" style="display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1; overflow-y: auto;"></div>
+                </div>
+
+                <!-- In Review column -->
+                <div class="kanban-column" data-status="in-review" style="background: rgba(var(--bg-main), 0.3); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem; min-height: 400px;">
+                  <h4 style="font-size: 0.8rem; font-weight: 700; color: #f59e0b; margin: 0 0 0.25rem 0; display: flex; align-items: center; justify-content: space-between;">
+                    <span>🟠 In Review</span>
+                    <span class="badge" id="kanban-count-in-review" style="font-size:0.65rem;">0</span>
+                  </h4>
+                  <div class="kanban-cards-container" id="kanban-cards-in-review" style="display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1; overflow-y: auto;"></div>
+                </div>
+
+                <!-- Completed column -->
+                <div class="kanban-column" data-status="completed" style="background: rgba(var(--bg-main), 0.3); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem; min-height: 400px;">
+                  <h4 style="font-size: 0.8rem; font-weight: 700; color: #10b981; margin: 0 0 0.25rem 0; display: flex; align-items: center; justify-content: space-between;">
+                    <span>🟢 Completed</span>
+                    <span class="badge" id="kanban-count-completed" style="font-size:0.65rem;">0</span>
+                  </h4>
+                  <div class="kanban-cards-container" id="kanban-cards-completed" style="display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1; overflow-y: auto;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Capacity Planner View wrapper -->
+            <div id="tasks-capacity-view" style="display: none; flex-grow: 1; margin-top: 1rem; flex-direction: column; gap: 1rem;">
+              <h4 style="font-size: 0.85rem; font-weight: 700; margin: 0; color: var(--color-primary);">Team Workload Capacity Planner</h4>
+              <div id="capacity-planner-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Dynamically populated capacities -->
               </div>
             </div>
 
@@ -2075,6 +2134,13 @@
             <label class="form-label">Colleague Registered Email *</label>
             <input type="email" class="form-control" id="invite-email" placeholder="colleague@counselai.com" required>
           </div>
+          <div class="form-group" style="margin-top: 0.75rem;">
+            <label class="form-label">Teammate Designation / Role *</label>
+            <select class="form-control" id="invite-role" required>
+              <option value="work" selected>Associate Colleague (Work only)</option>
+              <option value="lead">Senior Associate / Leader (Lead & Delegate)</option>
+            </select>
+          </div>
           <div id="invite-error-container" style="display:none; color:var(--color-danger); font-size:0.75rem; margin-top:0.5rem; align-items:center; gap:4px;">
             <i data-lucide="alert-triangle" style="width:12px; height:12px;"></i> <span id="invite-error-text"></span>
           </div>
@@ -2122,6 +2188,34 @@
             <div style="color: var(--text-muted); margin-bottom: 2px;">Description:</div>
             <p id="task-detail-desc" style="color: #e2e8f0; margin: 0; white-space: pre-wrap;"></p>
           </div>
+        </div>
+
+        <!-- Time Tracking Panel -->
+        <div style="background: rgba(var(--bg-main), 0.3); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+          <h4 style="font-size: 0.8rem; font-weight: 700; color: var(--color-primary); margin: 0; display: flex; align-items: center; justify-content: space-between;">
+            <span><i data-lucide="clock" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> Time Tracker</span>
+            <span id="task-detail-total-cost" style="font-size: 0.75rem; color: #10b981; font-weight: 700;">₹0.00 Cost</span>
+          </h4>
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span id="task-detail-timer-display" style="font-family: monospace; font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">00:00:00</span>
+            <div style="display: flex; gap: 0.5rem;">
+              <button type="button" class="btn btn-primary" id="btn-task-timer-start" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; display: flex; align-items: center; gap: 3px;"><i data-lucide="play" style="width: 12px; height: 12px;"></i> Start</button>
+              <button type="button" class="btn btn-danger" id="btn-task-timer-stop" style="display: none; padding: 0.3rem 0.6rem; font-size: 0.75rem; display: flex; align-items: center; gap: 3px; background-color: var(--color-danger); border-color: var(--color-danger);"><i data-lucide="square" style="width: 12px; height: 12px;"></i> Stop</button>
+              <button type="button" class="btn btn-secondary" id="btn-task-log-manual" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; display: flex; align-items: center; gap: 3px;"><i data-lucide="plus" style="width: 12px; height: 12px;"></i> Log</button>
+            </div>
+          </div>
+          <div id="task-detail-time-logs" style="max-height: 80px; overflow-y: auto; font-size: 0.7rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;"></div>
+        </div>
+
+        <!-- Delegation Tree Panel -->
+        <div id="task-detail-hierarchy-section" style="background: rgba(var(--bg-main), 0.3); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+          <h4 style="font-size: 0.8rem; font-weight: 700; color: var(--color-primary); margin: 0; display: flex; align-items: center; gap: 4px;">
+            <i data-lucide="git-branch" style="width: 14px; height: 14px;"></i> Delegation Tree
+          </h4>
+          <div id="task-detail-hierarchy-tree" style="font-size: 0.75rem; display: flex; flex-direction: column; gap: 4px; padding-left: 0.5rem; border-left: 1px dashed var(--border-color);"></div>
+          <button type="button" class="btn btn-secondary" id="btn-task-sub-delegate" style="padding: 0.4rem; font-size: 0.75rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 0.25rem;">
+            <i data-lucide="user-plus" style="width: 12px; height: 12px;"></i> Sub-delegate this Task
+          </button>
         </div>
 
         <!-- Comments Chat Thread Section -->

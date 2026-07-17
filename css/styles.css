@@ -1936,3 +1936,32 @@ input:-webkit-autofill:active {
   background-color: var(--color-primary-glow);
 }
 
+/* Task View Tabs active state styling */
+.task-view-tabs .btn.active {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #fff !important;
+}
+
+/* Kanban Cards and Columns */
+.kanban-cards-container::-webkit-scrollbar {
+  width: 4px;
+}
+.kanban-cards-container::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.05);
+  border-radius: 2px;
+}
+.task-kanban-card:hover {
+  border-color: var(--color-primary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Projects Editing Row styling */
+.project-item-row:hover {
+  background: rgba(255,255,255,0.02);
+}
+.btn-edit-project-category:hover {
+  color: var(--color-primary) !important;
+}
+

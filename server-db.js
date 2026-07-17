@@ -912,7 +912,7 @@ async function getColleagues(tenantId) {
   return localDb.colleagues.filter(c => c.tenantId === tenantId);
 }
 
-async function addColleague(tenantId, colleagueEmail) {
+async function addColleague(tenantId, colleagueEmail, role = 'work') {
   const colleagueTenant = await getTenantByEmail(colleagueEmail);
 
   if (!colleagueTenant) {
@@ -935,6 +935,21 @@ async function addColleague(tenantId, colleagueEmail) {
     // Return the relation record now.
     const record = existingColleagues.find(c => c.colleagueEmail.toLowerCase() === colleagueEmail.toLowerCase());
     if (record && record.colleagueId && record.colleagueId !== 'undefined') {
+      // If role needs update
+      if (record.role !== role) {
+        record.role = role;
+        const db = await getDb();
+        if (db) {
+          await db.collection('colleagues').updateOne({ _id: record.id }, { $set: { role } });
+        } else {
+          const localDb = readDb();
+          const rIdx = localDb.colleagues.findIndex(c => c.id === record.id);
+          if (rIdx !== -1) {
+            localDb.colleagues[rIdx].role = role;
+            writeDb(localDb);
+          }
+        }
+      }
       return record;
     }
     throw new Error("This user is already in your team.");
@@ -946,7 +961,8 @@ async function addColleague(tenantId, colleagueEmail) {
     colleagueId: colleagueTenant.id,
     colleagueEmail: colleagueTenant.email,
     lawyerName: colleagueTenant.lawyerName || "Teammate",
-    firmName: colleagueTenant.firmName || ""
+    firmName: colleagueTenant.firmName || "",
+    role: role
   };
 
   const newColleagueRelation2 = {
@@ -955,7 +971,8 @@ async function addColleague(tenantId, colleagueEmail) {
     colleagueId: tenantId,
     colleagueEmail: currentTenant.email,
     lawyerName: currentTenant.lawyerName || "Teammate",
-    firmName: currentTenant.firmName || ""
+    firmName: currentTenant.firmName || "",
+    role: 'work'
   };
 
   const db = await getDb();
@@ -988,6 +1005,7 @@ async function getTasks(tenantId) {
     }).toArray();
 
     const repaired = [];
+    const directTaskIds = new Set();
     for (let t of tasks) {
       if (t.assigneeId === 'undefined' && t.assigneeEmail) {
         try {
@@ -1003,9 +1021,32 @@ async function getTasks(tenantId) {
       }
       if (t.tenantId === tenantId || t.assigneeId === tenantId) {
         repaired.push(t);
+        directTaskIds.add(t._id);
       }
     }
-    return mapIds(repaired);
+
+    // Recursively query sub-delegated child tasks up to 3 levels deep
+    let currentLevelIds = Array.from(directTaskIds);
+    const allSubTasks = [];
+    while (currentLevelIds.length > 0) {
+      const subTasks = await db.collection('tasks').find({
+        parentId: { $in: currentLevelIds }
+      }).toArray();
+
+      if (subTasks.length === 0) break;
+
+      const newIds = [];
+      for (let st of subTasks) {
+        if (!directTaskIds.has(st._id)) {
+          allSubTasks.push(st);
+          directTaskIds.add(st._id);
+          newIds.push(st._id);
+        }
+      }
+      currentLevelIds = newIds;
+    }
+
+    return mapIds([...repaired, ...allSubTasks]);
   }
 
   const localDb = readDb();
@@ -1027,7 +1068,29 @@ async function getTasks(tenantId) {
   if (hasChanges) {
     writeDb(localDb);
   }
-  return localDb.tasks.filter(t => t.tenantId === tenantId || t.assigneeId === tenantId);
+
+  // Local recursive search
+  const directTasks = localDb.tasks.filter(t => t.tenantId === tenantId || t.assigneeId === tenantId);
+  const directTaskIds = new Set(directTasks.map(t => t.id));
+
+  let currentLevelIds = Array.from(directTaskIds);
+  const allSubTasks = [];
+  while (currentLevelIds.length > 0) {
+    const subTasks = localDb.tasks.filter(t => currentLevelIds.includes(t.parentId));
+    if (subTasks.length === 0) break;
+
+    const newIds = [];
+    for (let st of subTasks) {
+      if (!directTaskIds.has(st.id)) {
+        allSubTasks.push(st);
+        directTaskIds.add(st.id);
+        newIds.push(st.id);
+      }
+    }
+    currentLevelIds = newIds;
+  }
+
+  return [...directTasks, ...allSubTasks];
 }
 
 async function getTask(tenantId, id) {
@@ -1055,6 +1118,9 @@ async function addTask(tenantId, taskData) {
     priority: taskData.priority || "P4",
     project: taskData.project || "Inbox",
     status: taskData.status || "pending",
+    parentId: taskData.parentId || null,
+    kanbanStatus: taskData.kanbanStatus || "todo",
+    timeLogs: taskData.timeLogs || [],
     comments: [],
     createdAt: new Date().toISOString()
   };
@@ -1088,6 +1154,9 @@ async function updateTask(tenantId, id, taskData) {
   if (taskData.assigneeId !== undefined) allowedUpdates.assigneeId = taskData.assigneeId;
   if (taskData.assigneeEmail !== undefined) allowedUpdates.assigneeEmail = taskData.assigneeEmail;
   if (taskData.assigneeName !== undefined) allowedUpdates.assigneeName = taskData.assigneeName;
+  if (taskData.parentId !== undefined) allowedUpdates.parentId = taskData.parentId;
+  if (taskData.kanbanStatus !== undefined) allowedUpdates.kanbanStatus = taskData.kanbanStatus;
+  if (taskData.timeLogs !== undefined) allowedUpdates.timeLogs = taskData.timeLogs;
 
   const db = await getDb();
   if (db) {
