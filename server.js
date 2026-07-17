@@ -377,6 +377,97 @@ app.post('/api/backup/import', authenticateToken, async (req, res) => {
   }
 });
 
+// ================= TASKS & TEAM ROUTES =================
+
+/**
+ * Get Colleagues list
+ */
+app.get('/api/colleagues', authenticateToken, async (req, res) => {
+  try {
+    const list = await db.getColleagues(req.user.id);
+    res.json(list);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * Add a Colleague
+ */
+app.post('/api/colleagues', authenticateToken, async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: "Teammate email is required." });
+  }
+
+  try {
+    const relation = await db.addColleague(req.user.id, email);
+    res.status(201).json(relation);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/**
+ * Get Tasks
+ */
+app.get('/api/tasks', authenticateToken, async (req, res) => {
+  try {
+    const list = await db.getTasks(req.user.id);
+    res.json(list);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * Create Task
+ */
+app.post('/api/tasks', authenticateToken, async (req, res) => {
+  try {
+    const newTask = await db.addTask(req.user.id, req.body);
+    res.status(201).json(newTask);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/**
+ * Update Task
+ */
+app.put('/api/tasks/:id', authenticateToken, async (req, res) => {
+  try {
+    const updated = await db.updateTask(req.user.id, req.params.id, req.body);
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/**
+ * Delete Task
+ */
+app.delete('/api/tasks/:id', authenticateToken, async (req, res) => {
+  try {
+    await db.deleteTask(req.user.id, req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/**
+ * Add Comment to Task
+ */
+app.post('/api/tasks/:id/comments', authenticateToken, async (req, res) => {
+  try {
+    const comment = await db.addTaskComment(req.user.id, req.params.id, req.body);
+    res.status(201).json(comment);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 // ================= SERVE STATIC CLIENT ASSETS =================
 
 // Serve styles.css from /css

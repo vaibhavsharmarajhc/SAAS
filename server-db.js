@@ -15,7 +15,9 @@ const DEFAULT_SCHEMA = {
   tenants: [],
   clients: [],
   cases: [],
-  transactions: []
+  transactions: [],
+  colleagues: [],
+  tasks: []
 };
 
 // MongoDB connection management
@@ -69,7 +71,10 @@ function readDb() {
       return DEFAULT_SCHEMA;
     }
     const data = fs.readFileSync(dbPath, 'utf8');
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    parsed.colleagues = parsed.colleagues || [];
+    parsed.tasks = parsed.tasks || [];
+    return parsed;
   } catch (e) {
     console.error("Error reading JSON database file. Returning default schema.", e);
     return DEFAULT_SCHEMA;
@@ -847,6 +852,230 @@ async function importTenantBackup(tenantId, backupData) {
   writeDb(localDb);
 }
 
+/**
+ * Colleague & Team Management
+ */
+async function getColleagues(tenantId) {
+  const db = await getDb();
+  if (db) {
+    const colleagues = await db.collection('colleagues').find({ tenantId }).toArray();
+    return mapIds(colleagues);
+  }
+
+  const localDb = readDb();
+  localDb.colleagues = localDb.colleagues || [];
+  return localDb.colleagues.filter(c => c.tenantId === tenantId);
+}
+
+async function addColleague(tenantId, colleagueEmail) {
+  const dbInstance = await getDb();
+  let colleagueTenant = null;
+  if (dbInstance) {
+    colleagueTenant = await dbInstance.collection('tenants').findOne({ email: colleagueEmail });
+  } else {
+    const localDb = readDb();
+    colleagueTenant = localDb.tenants.find(t => t.email.toLowerCase() === colleagueEmail.toLowerCase());
+  }
+
+  if (!colleagueTenant) {
+    throw new Error("No registered account found with email '" + colleagueEmail + "'. Teammates must register first.");
+  }
+
+  const currentTenant = await getTenantById(tenantId);
+  if (!currentTenant) {
+    throw new Error("Main tenant not found.");
+  }
+
+  if (colleagueTenant.id === tenantId) {
+    throw new Error("You cannot add yourself as a colleague.");
+  }
+
+  const existingColleagues = await getColleagues(tenantId);
+  const alreadyAdded = existingColleagues.some(c => c.colleagueEmail.toLowerCase() === colleagueEmail.toLowerCase());
+  if (alreadyAdded) {
+    throw new Error("This user is already in your team.");
+  }
+
+  const newColleagueRelation1 = {
+    id: "col_" + Date.now() + "_1",
+    tenantId: tenantId,
+    colleagueId: colleagueTenant.id,
+    colleagueEmail: colleagueTenant.email,
+    lawyerName: colleagueTenant.lawyerName || "Teammate",
+    firmName: colleagueTenant.firmName || ""
+  };
+
+  const newColleagueRelation2 = {
+    id: "col_" + Date.now() + "_2",
+    tenantId: colleagueTenant.id,
+    colleagueId: tenantId,
+    colleagueEmail: currentTenant.email,
+    lawyerName: currentTenant.lawyerName || "Teammate",
+    firmName: currentTenant.firmName || ""
+  };
+
+  if (dbInstance) {
+    await dbInstance.collection('colleagues').insertOne(toMongoDoc(newColleagueRelation1));
+    await dbInstance.collection('colleagues').insertOne(toMongoDoc(newColleagueRelation2));
+  } else {
+    const localDb = readDb();
+    localDb.colleagues = localDb.colleagues || [];
+    localDb.colleagues.push(newColleagueRelation1);
+    localDb.colleagues.push(newColleagueRelation2);
+    writeDb(localDb);
+  }
+
+  return newColleagueRelation1;
+}
+
+/**
+ * Todoist-style Tasks Management
+ */
+async function getTasks(tenantId) {
+  const db = await getDb();
+  if (db) {
+    const tasks = await db.collection('tasks').find({
+      $or: [
+        { tenantId: tenantId },
+        { assigneeId: tenantId }
+      ]
+    }).toArray();
+    return mapIds(tasks);
+  }
+
+  const localDb = readDb();
+  localDb.tasks = localDb.tasks || [];
+  return localDb.tasks.filter(t => t.tenantId === tenantId || t.assigneeId === tenantId);
+}
+
+async function getTask(tenantId, id) {
+  const db = await getDb();
+  if (db) {
+    const taskObj = await db.collection('tasks').findOne({ _id: id });
+    return mapId(taskObj);
+  }
+
+  const localDb = readDb();
+  localDb.tasks = localDb.tasks || [];
+  return localDb.tasks.find(t => t.id === id) || null;
+}
+
+async function addTask(tenantId, taskData) {
+  const newTask = {
+    id: "task_" + Date.now(),
+    tenantId: tenantId,
+    assigneeId: taskData.assigneeId || null,
+    assigneeEmail: taskData.assigneeEmail || null,
+    assigneeName: taskData.assigneeName || null,
+    title: taskData.title || "Untitled Task",
+    desc: taskData.desc || "",
+    dueDate: taskData.dueDate || null,
+    priority: taskData.priority || "P4",
+    project: taskData.project || "Inbox",
+    status: taskData.status || "pending",
+    comments: [],
+    createdAt: new Date().toISOString()
+  };
+
+  const db = await getDb();
+  if (db) {
+    await db.collection('tasks').insertOne(toMongoDoc(newTask));
+    return newTask;
+  }
+
+  const localDb = readDb();
+  localDb.tasks = localDb.tasks || [];
+  localDb.tasks.push(newTask);
+  writeDb(localDb);
+  return newTask;
+}
+
+async function updateTask(tenantId, id, taskData) {
+  const taskObj = await getTask(tenantId, id);
+  if (!taskObj) {
+    throw new Error("Task not found or access denied.");
+  }
+
+  const allowedUpdates = {};
+  if (taskData.title !== undefined) allowedUpdates.title = taskData.title;
+  if (taskData.desc !== undefined) allowedUpdates.desc = taskData.desc;
+  if (taskData.dueDate !== undefined) allowedUpdates.dueDate = taskData.dueDate;
+  if (taskData.priority !== undefined) allowedUpdates.priority = taskData.priority;
+  if (taskData.project !== undefined) allowedUpdates.project = taskData.project;
+  if (taskData.status !== undefined) allowedUpdates.status = taskData.status;
+  if (taskData.assigneeId !== undefined) allowedUpdates.assigneeId = taskData.assigneeId;
+  if (taskData.assigneeEmail !== undefined) allowedUpdates.assigneeEmail = taskData.assigneeEmail;
+  if (taskData.assigneeName !== undefined) allowedUpdates.assigneeName = taskData.assigneeName;
+
+  const db = await getDb();
+  if (db) {
+    await db.collection('tasks').updateOne({ _id: id }, { $set: allowedUpdates });
+    return { ...taskObj, ...allowedUpdates };
+  }
+
+  const localDb = readDb();
+  localDb.tasks = localDb.tasks || [];
+  const idx = localDb.tasks.findIndex(t => t.id === id);
+  if (idx !== -1) {
+    localDb.tasks[idx] = { ...localDb.tasks[idx], ...allowedUpdates };
+    writeDb(localDb);
+    return localDb.tasks[idx];
+  }
+  return null;
+}
+
+async function deleteTask(tenantId, id) {
+  const taskObj = await getTask(tenantId, id);
+  if (!taskObj) {
+    throw new Error("Task not found or access denied.");
+  }
+
+  const db = await getDb();
+  if (db) {
+    await db.collection('tasks').deleteOne({ _id: id });
+    return true;
+  }
+
+  const localDb = readDb();
+  localDb.tasks = localDb.tasks || [];
+  const filtered = localDb.tasks.filter(t => t.id !== id);
+  localDb.tasks = filtered;
+  writeDb(localDb);
+  return true;
+}
+
+async function addTaskComment(tenantId, id, commentData) {
+  const taskObj = await getTask(tenantId, id);
+  if (!taskObj) {
+    throw new Error("Task not found or access denied.");
+  }
+
+  const newComment = {
+    id: "com_" + Date.now(),
+    senderEmail: commentData.senderEmail,
+    senderName: commentData.senderName || commentData.senderEmail,
+    content: commentData.content || "",
+    timestamp: new Date().toISOString()
+  };
+
+  const db = await getDb();
+  if (db) {
+    await db.collection('tasks').updateOne({ _id: id }, { $push: { comments: newComment } });
+    return newComment;
+  }
+
+  const localDb = readDb();
+  localDb.tasks = localDb.tasks || [];
+  const idx = localDb.tasks.findIndex(t => t.id === id);
+  if (idx !== -1) {
+    localDb.tasks[idx].comments = localDb.tasks[idx].comments || [];
+    localDb.tasks[idx].comments.push(newComment);
+    writeDb(localDb);
+    return newComment;
+  }
+  return null;
+}
+
 module.exports = {
   initDatabase,
   getDb,
@@ -871,5 +1100,13 @@ module.exports = {
   getTransactions,
   addTransaction,
   deleteTransaction,
-  importTenantBackup
+  importTenantBackup,
+  getColleagues,
+  addColleague,
+  getTasks,
+  getTask,
+  addTask,
+  updateTask,
+  deleteTask,
+  addTaskComment
 };

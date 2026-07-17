@@ -177,6 +177,44 @@ const api = {
         body: jsonData
       });
     }
+  },
+
+  tasks: {
+    async getAll() {
+      return await fetchAPI('/api/tasks');
+    },
+    async create(taskData) {
+      return await fetchAPI('/api/tasks', {
+        method: 'POST',
+        body: taskData
+      });
+    },
+    async update(id, taskData) {
+      return await fetchAPI(`/api/tasks/${id}`, {
+        method: 'PUT',
+        body: taskData
+      });
+    },
+    async delete(id) {
+      return await fetchAPI(`/api/tasks/${id}`, {
+        method: 'DELETE'
+      });
+    },
+    async addComment(taskId, commentData) {
+      return await fetchAPI(`/api/tasks/${taskId}/comments`, {
+        method: 'POST',
+        body: commentData
+      });
+    },
+    async getColleagues() {
+      return await fetchAPI('/api/colleagues');
+    },
+    async addColleague(email) {
+      return await fetchAPI('/api/colleagues', {
+        method: 'POST',
+        body: { email }
+      });
+    }
   }
 };
 

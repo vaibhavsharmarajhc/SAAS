@@ -33,6 +33,8 @@ import cases from './cases.js';
 import diary from './diary.js';
 import accounts from './accounts.js';
 import share from './share.js';
+import tasks from './tasks.js';
+window.tasksModule = tasks;
 
 // Application State
 const state = {
@@ -53,6 +55,15 @@ const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
 
 // View Configuration for Quick Actions
 const viewQuickActions = {
+  'tasks-page': {
+    text: 'New Task',
+    icon: 'plus',
+    action: () => {
+      if (typeof window.tasksModule !== 'undefined') {
+        window.tasksModule.showAddTaskModal();
+      }
+    }
+  },
   'dashboard-page': {
     text: 'Log Payment',
     icon: 'plus',
@@ -142,7 +153,12 @@ export async function switchView(targetViewId) {
   const capitalizedTitle = pageTitle.charAt(0).toUpperCase() + pageTitle.slice(1);
   headerPageTitle.textContent = capitalizedTitle === 'Clients' ? 'Clients Onboarding' : 
                                 capitalizedTitle === 'Accounts' ? 'Accounts & Income Ledger' : 
-                                capitalizedTitle === 'Share' ? 'Client Intimation' : capitalizedTitle;
+                                capitalizedTitle === 'Share' ? 'Client Intimation' : 
+                                capitalizedTitle === 'Tasks' ? 'Task Manager' : capitalizedTitle;
+
+  if (targetViewId === 'tasks-page' && typeof window.tasksModule !== 'undefined') {
+    window.tasksModule.render();
+  }
 
   // Update Quick Action button
   const config = viewQuickActions[targetViewId];
@@ -444,7 +460,7 @@ async function router() {
         updateDbStatusBadge();
       }
     }
-  } else if (path === '/dashboard' || path.startsWith('/dashboard-page') || path.startsWith('/clients-page') || path.startsWith('/cases-page') || path.startsWith('/diary-page') || path.startsWith('/accounts-page') || path.startsWith('/share-page') || path.startsWith('/settings-page')) {
+  } else if (path === '/dashboard' || path.startsWith('/dashboard-page') || path.startsWith('/clients-page') || path.startsWith('/cases-page') || path.startsWith('/diary-page') || path.startsWith('/accounts-page') || path.startsWith('/share-page') || path.startsWith('/tasks-page') || path.startsWith('/settings-page')) {
     if (!isAuthenticated) {
       window.history.pushState({}, '', '/login');
       router();
@@ -463,6 +479,7 @@ async function router() {
           diary.init();
           accounts.init();
           share.init();
+          tasks.init();
           appInitialized = true;
         }
 
