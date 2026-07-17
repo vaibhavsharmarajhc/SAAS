@@ -872,11 +872,43 @@ async function getColleagues(tenantId) {
   const db = await getDb();
   if (db) {
     const colleagues = await db.collection('colleagues').find({ tenantId }).toArray();
-    return mapIds(colleagues);
+    const repaired = [];
+    for (let c of colleagues) {
+      if ((!c.colleagueId || c.colleagueId === 'undefined') && c.colleagueEmail) {
+        try {
+          const tenantObj = await getTenantByEmail(c.colleagueEmail);
+          if (tenantObj) {
+            c.colleagueId = tenantObj.id;
+            await db.collection('colleagues').updateOne({ _id: c._id }, { $set: { colleagueId: tenantObj.id } });
+            console.log(`Database self-healing: Repaired colleagueId for ${c.colleagueEmail}`);
+          }
+        } catch (err) {
+          console.error("Database self-healing repair failed:", err);
+        }
+      }
+      repaired.push(c);
+    }
+    return mapIds(repaired);
   }
 
   const localDb = readDb();
   localDb.colleagues = localDb.colleagues || [];
+  let hasChanges = false;
+  localDb.colleagues = localDb.colleagues.map(c => {
+    if (c.tenantId === tenantId && (!c.colleagueId || c.colleagueId === 'undefined') && c.colleagueEmail) {
+      const tenantObj = localDb.tenants.find(t => t.email.toLowerCase() === c.colleagueEmail.toLowerCase());
+      if (tenantObj) {
+        c.colleagueId = tenantObj.id;
+        hasChanges = true;
+        console.log(`Local database self-healing: Repaired colleagueId for ${c.colleagueEmail}`);
+      }
+    }
+    return c;
+  });
+
+  if (hasChanges) {
+    writeDb(localDb);
+  }
   return localDb.colleagues.filter(c => c.tenantId === tenantId);
 }
 
@@ -899,6 +931,12 @@ async function addColleague(tenantId, colleagueEmail) {
   const existingColleagues = await getColleagues(tenantId);
   const alreadyAdded = existingColleagues.some(c => c.colleagueEmail.toLowerCase() === colleagueEmail.toLowerCase());
   if (alreadyAdded) {
+    // If relation exists but colleagueId is broken/missing, self-healing will have restored it.
+    // Return the relation record now.
+    const record = existingColleagues.find(c => c.colleagueEmail.toLowerCase() === colleagueEmail.toLowerCase());
+    if (record && record.colleagueId && record.colleagueId !== 'undefined') {
+      return record;
+    }
     throw new Error("This user is already in your team.");
   }
 
@@ -944,14 +982,51 @@ async function getTasks(tenantId) {
     const tasks = await db.collection('tasks').find({
       $or: [
         { tenantId: tenantId },
-        { assigneeId: tenantId }
+        { assigneeId: tenantId },
+        { assigneeId: "undefined" }
       ]
     }).toArray();
-    return mapIds(tasks);
+
+    const repaired = [];
+    for (let t of tasks) {
+      if (t.assigneeId === 'undefined' && t.assigneeEmail) {
+        try {
+          const tenantObj = await getTenantByEmail(t.assigneeEmail);
+          if (tenantObj) {
+            t.assigneeId = tenantObj.id;
+            await db.collection('tasks').updateOne({ _id: t._id }, { $set: { assigneeId: tenantObj.id } });
+            console.log(`Database self-healing: Repaired assigneeId for task ${t._id}`);
+          }
+        } catch (err) {
+          console.error("Task self-healing repair failed:", err);
+        }
+      }
+      if (t.tenantId === tenantId || t.assigneeId === tenantId) {
+        repaired.push(t);
+      }
+    }
+    return mapIds(repaired);
   }
 
   const localDb = readDb();
   localDb.tasks = localDb.tasks || [];
+  let hasChanges = false;
+
+  localDb.tasks = localDb.tasks.map(t => {
+    if (t.assigneeId === 'undefined' && t.assigneeEmail) {
+      const tenantObj = localDb.tenants.find(u => u.email.toLowerCase() === t.assigneeEmail.toLowerCase());
+      if (tenantObj) {
+        t.assigneeId = tenantObj.id;
+        hasChanges = true;
+        console.log(`Local task self-healing: Repaired assigneeId for task ${t.id}`);
+      }
+    }
+    return t;
+  });
+
+  if (hasChanges) {
+    writeDb(localDb);
+  }
   return localDb.tasks.filter(t => t.tenantId === tenantId || t.assigneeId === tenantId);
 }
 
