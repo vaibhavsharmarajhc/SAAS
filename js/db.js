@@ -22,10 +22,11 @@ class LegalDB {
     };
   }
 
-  /**
-   * Load all multi-tenant data from server into cache
-   */
-  async loadAll() {
+  async loadAll(forceReload = false) {
+    if (!forceReload && this.cache.user) {
+      return true; // Already loaded and authenticated
+    }
+
     const me = await api.auth.me();
     if (!me || !me.user) {
       this.cache.user = null;

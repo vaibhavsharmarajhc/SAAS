@@ -918,7 +918,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       sidebarRefreshBtn.disabled = true;
 
       try {
-        const authOk = await db.loadAll();
+        const authOk = await db.loadAll(true);
         if (authOk) {
           await switchView(state.activeView);
           updateBrandingHeaders();

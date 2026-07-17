@@ -99,6 +99,19 @@ async function initDatabase() {
   const db = await getDb();
   if (db) {
     console.log("Persistence Layer: MongoDB Cloud Active.");
+    try {
+      await db.collection('tenants').createIndex({ email: 1 });
+      await db.collection('clients').createIndex({ tenantId: 1 });
+      await db.collection('cases').createIndex({ tenantId: 1 });
+      await db.collection('transactions').createIndex({ tenantId: 1 });
+      await db.collection('colleagues').createIndex({ tenantId: 1 });
+      await db.collection('colleagues').createIndex({ colleagueId: 1 });
+      await db.collection('tasks').createIndex({ tenantId: 1 });
+      await db.collection('tasks').createIndex({ assigneeId: 1 });
+      console.log("Database performance indexes initialized successfully.");
+    } catch (indexErr) {
+      console.error("Index initialization failed:", indexErr);
+    }
   } else {
     readDb();
     console.log("Persistence Layer: Local JSON Database initialized at: " + dbPath);
