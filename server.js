@@ -395,13 +395,13 @@ app.get('/api/colleagues', authenticateToken, async (req, res) => {
  * Add a Colleague
  */
 app.post('/api/colleagues', authenticateToken, async (req, res) => {
-  const { email, role } = req.body;
+  const { email, role, name } = req.body;
   if (!email) {
     return res.status(400).json({ error: "Teammate email is required." });
   }
 
   try {
-    const relation = await db.addColleague(req.user.id, email, role || 'work');
+    const relation = await db.addColleague(req.user.id, email, role || 'work', name || null);
     res.status(201).json(relation);
   } catch (err) {
     res.status(400).json({ error: err.message });

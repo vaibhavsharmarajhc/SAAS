@@ -275,9 +275,12 @@ const tasksModule = {
       errorContainer.style.display = 'none';
       const email = document.getElementById('invite-email').value.trim();
       const role = document.getElementById('invite-role').value;
+      const name = document.getElementById('invite-name').value.trim();
 
       try {
-        await api.tasks.addColleague(email, role);
+        await api.tasks.addColleague(email, role, name);
+        document.getElementById('invite-email').value = '';
+        document.getElementById('invite-name').value = '';
         modal.classList.remove('active');
         await this.render();
       } catch (err) {
@@ -362,9 +365,14 @@ const tasksModule = {
             <span class="badge" style="font-size: 0.65rem; background: rgba(255,255,255,0.05); padding: 1px 5px; border-radius: 10px;">${count}</span>
           </button>
           ${p !== 'Inbox' ? `
-            <button class="btn-edit-project-category" data-project="${p}" style="background: transparent; border: none; padding: 0.4rem 0.5rem; cursor: pointer; color: var(--text-muted); display: flex; align-items: center;" title="Rename or Delete Project">
-              <i data-lucide="more-vertical" style="width: 14px; height: 14px;"></i>
-            </button>
+            <div style="display: flex; gap: 2px; align-items: center; padding-right: 4px;">
+              <button class="btn-rename-project-category" data-project="${p}" style="background: transparent; border: none; padding: 0.25rem; cursor: pointer; color: var(--text-muted); display: flex; align-items: center;" title="Rename Project">
+                <i data-lucide="edit-2" style="width: 12px; height: 12px;"></i>
+              </button>
+              <button class="btn-delete-project-category" data-project="${p}" style="background: transparent; border: none; padding: 0.25rem; cursor: pointer; color: var(--color-danger); display: flex; align-items: center;" title="Delete Project">
+                <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+              </button>
+            </div>
           ` : ''}
         </div>
       `;
@@ -389,53 +397,55 @@ const tasksModule = {
       });
     });
 
-    // Attach click events to options trigger
-    container.querySelectorAll('.btn-edit-project-category').forEach(btn => {
+    // Attach click events to rename button
+    container.querySelectorAll('.btn-rename-project-category').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const p = btn.getAttribute('data-project');
-        const action = prompt(`Choose action for project category '${p}':\nType 'rename' to rename, or 'delete' to delete.`);
-        if (!action) return;
-
+        const newName = prompt("Enter new project category name:", p);
+        if (!newName || newName.trim() === '') return;
+        const trimmed = newName.trim();
         const projects = [...this.getProjectCategories()];
+        if (projects.includes(trimmed)) {
+          alert("A category with this name already exists.");
+          return;
+        }
 
-        if (action.toLowerCase() === 'rename') {
-          const newName = prompt("Enter new project category name:", p);
-          if (!newName || newName.trim() === '') return;
-          const trimmed = newName.trim();
-          if (projects.includes(trimmed)) {
-            alert("A category with this name already exists.");
-            return;
+        const idx = projects.indexOf(p);
+        if (idx !== -1) {
+          projects[idx] = trimmed;
+          await db.updateSettings({ projects });
+          
+          // Cascade update tasks
+          const relatedTasks = tasksState.tasks.filter(t => t.project === p);
+          for (let t of relatedTasks) {
+            await api.tasks.update(t.id, { project: trimmed });
           }
+          tasksState.activeFilter = trimmed;
+          await this.render();
+        }
+      });
+    });
 
+    // Attach click events to delete button
+    container.querySelectorAll('.btn-delete-project-category').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const p = btn.getAttribute('data-project');
+        if (confirm(`Delete project category '${p}'? Associated tasks will be re-classified to 'Inbox'.`)) {
+          const projects = [...this.getProjectCategories()];
           const idx = projects.indexOf(p);
           if (idx !== -1) {
-            projects[idx] = trimmed;
+            projects.splice(idx, 1);
             await db.updateSettings({ projects });
-            
-            // Cascade update tasks
+
+            // Cascade update tasks to Inbox
             const relatedTasks = tasksState.tasks.filter(t => t.project === p);
             for (let t of relatedTasks) {
-              await api.tasks.update(t.id, { project: trimmed });
+              await api.tasks.update(t.id, { project: 'Inbox' });
             }
-            tasksState.activeFilter = trimmed;
+            tasksState.activeFilter = 'inbox';
             await this.render();
-          }
-        } else if (action.toLowerCase() === 'delete') {
-          if (confirm(`Delete project category '${p}'? Associated tasks will be re-classified to 'Inbox'.`)) {
-            const idx = projects.indexOf(p);
-            if (idx !== -1) {
-              projects.splice(idx, 1);
-              await db.updateSettings({ projects });
-
-              // Cascade update tasks to Inbox
-              const relatedTasks = tasksState.tasks.filter(t => t.project === p);
-              for (let t of relatedTasks) {
-                await api.tasks.update(t.id, { project: 'Inbox' });
-              }
-              tasksState.activeFilter = 'inbox';
-              await this.render();
-            }
           }
         }
       });

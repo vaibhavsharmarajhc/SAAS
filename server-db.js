@@ -912,7 +912,7 @@ async function getColleagues(tenantId) {
   return localDb.colleagues.filter(c => c.tenantId === tenantId);
 }
 
-async function addColleague(tenantId, colleagueEmail, role = 'work') {
+async function addColleague(tenantId, colleagueEmail, role = 'work', lawyerName = null) {
   const colleagueTenant = await getTenantByEmail(colleagueEmail);
 
   if (!colleagueTenant) {
@@ -935,17 +935,28 @@ async function addColleague(tenantId, colleagueEmail, role = 'work') {
     // Return the relation record now.
     const record = existingColleagues.find(c => c.colleagueEmail.toLowerCase() === colleagueEmail.toLowerCase());
     if (record && record.colleagueId && record.colleagueId !== 'undefined') {
-      // If role needs update
+      // If role or custom name needs update
+      let needsUpdate = false;
+      const updates = {};
       if (record.role !== role) {
         record.role = role;
+        updates.role = role;
+        needsUpdate = true;
+      }
+      if (lawyerName && record.lawyerName !== lawyerName) {
+        record.lawyerName = lawyerName;
+        updates.lawyerName = lawyerName;
+        needsUpdate = true;
+      }
+      if (needsUpdate) {
         const db = await getDb();
         if (db) {
-          await db.collection('colleagues').updateOne({ _id: record.id }, { $set: { role } });
+          await db.collection('colleagues').updateOne({ _id: record.id }, { $set: updates });
         } else {
           const localDb = readDb();
           const rIdx = localDb.colleagues.findIndex(c => c.id === record.id);
           if (rIdx !== -1) {
-            localDb.colleagues[rIdx].role = role;
+            localDb.colleagues[rIdx] = { ...localDb.colleagues[rIdx], ...updates };
             writeDb(localDb);
           }
         }
@@ -960,7 +971,7 @@ async function addColleague(tenantId, colleagueEmail, role = 'work') {
     tenantId: tenantId,
     colleagueId: colleagueTenant.id,
     colleagueEmail: colleagueTenant.email,
-    lawyerName: colleagueTenant.lawyerName || "Teammate",
+    lawyerName: lawyerName || colleagueTenant.lawyerName || "Teammate",
     firmName: colleagueTenant.firmName || "",
     role: role
   };

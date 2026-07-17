@@ -1466,7 +1466,12 @@
 
               <!-- Projects/Categories List -->
               <div>
-                <h4 style="font-size: 0.75rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 0.5rem 0;">Projects</h4>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                  <h4 style="font-size: 0.75rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Projects</h4>
+                  <button class="btn btn-secondary" style="padding: 0.2rem 0.4rem; font-size: 0.7rem; display: flex; align-items: center; gap: 2px;" id="btn-add-project-category">
+                    <i data-lucide="plus" style="width: 10px; height: 10px;"></i> Add
+                  </button>
+                </div>
                 <div style="display: flex; flex-direction: column; gap: 0.25rem;" id="task-projects-list">
                   <!-- Javascript rendered projects links -->
                 </div>
@@ -2133,6 +2138,10 @@
           <div class="form-group">
             <label class="form-label">Colleague Registered Email *</label>
             <input type="email" class="form-control" id="invite-email" placeholder="colleague@counselai.com" required>
+          </div>
+          <div class="form-group" style="margin-top: 0.75rem;">
+            <label class="form-label">Teammate Name / Display Alias *</label>
+            <input type="text" class="form-control" id="invite-name" placeholder="e.g. Adv. Rohit Verma" required>
           </div>
           <div class="form-group" style="margin-top: 0.75rem;">
             <label class="form-label">Teammate Designation / Role *</label>
