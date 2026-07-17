@@ -920,9 +920,10 @@ async function addColleague(tenantId, colleagueEmail) {
     firmName: currentTenant.firmName || ""
   };
 
-  if (dbInstance) {
-    await dbInstance.collection('colleagues').insertOne(toMongoDoc(newColleagueRelation1));
-    await dbInstance.collection('colleagues').insertOne(toMongoDoc(newColleagueRelation2));
+  const db = await getDb();
+  if (db) {
+    await db.collection('colleagues').insertOne(toMongoDoc(newColleagueRelation1));
+    await db.collection('colleagues').insertOne(toMongoDoc(newColleagueRelation2));
   } else {
     const localDb = readDb();
     localDb.colleagues = localDb.colleagues || [];
