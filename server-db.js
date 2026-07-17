@@ -868,14 +868,7 @@ async function getColleagues(tenantId) {
 }
 
 async function addColleague(tenantId, colleagueEmail) {
-  const dbInstance = await getDb();
-  let colleagueTenant = null;
-  if (dbInstance) {
-    colleagueTenant = await dbInstance.collection('tenants').findOne({ email: colleagueEmail });
-  } else {
-    const localDb = readDb();
-    colleagueTenant = localDb.tenants.find(t => t.email.toLowerCase() === colleagueEmail.toLowerCase());
-  }
+  const colleagueTenant = await getTenantByEmail(colleagueEmail);
 
   if (!colleagueTenant) {
     throw new Error("No registered account found with email '" + colleagueEmail + "'. Teammates must register first.");
