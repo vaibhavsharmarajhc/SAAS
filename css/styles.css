@@ -1909,3 +1909,30 @@ input:-webkit-autofill:active {
   background-color: rgba(var(--bg-card), 0.8);
 }
 
+/* Task Status Checkbox */
+.btn-toggle-task-status {
+  background: transparent;
+  border: 1px solid var(--text-muted) !important;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-primary);
+  padding: 0;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.btn-toggle-task-status:hover {
+  border-color: var(--color-primary) !important;
+  background-color: var(--color-primary-glow);
+}
+
+.btn-toggle-task-status.is-completed {
+  border-color: var(--color-primary) !important;
+  background-color: var(--color-primary-glow);
+}
+

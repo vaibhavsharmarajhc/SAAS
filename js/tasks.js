@@ -476,7 +476,7 @@ const tasksModule = {
         <div style="display:flex; align-items:center; gap:0.75rem; flex-grow:1; min-width:0;">
           
           <!-- Complete trigger checkbox -->
-          <button class="btn-toggle-task-status" data-task-id="${t.id}" style="background:none; border:1px solid ${isCompleted ? 'var(--color-primary)' : 'var(--border-color)'}; width:16px; height:16px; border-radius:3px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#d97706; padding:0; flex-shrink:0;">
+          <button class="btn-toggle-task-status ${isCompleted ? 'is-completed' : ''}" data-task-id="${t.id}">
             ${isCompleted ? '<i data-lucide="check" style="width:12px; height:12px;"></i>' : ''}
           </button>
           
