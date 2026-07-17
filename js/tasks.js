@@ -557,12 +557,49 @@ const tasksModule = {
               <span style="font-size:0.6rem; color:var(--text-muted);">${c.colleagueEmail}</span>
             </div>
           </div>
-          <span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; box-shadow: 0 0 6px #10b981;"></span>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <button class="btn-edit-teammate" data-colleague-email="${c.colleagueEmail}" data-colleague-name="${c.lawyerName}" data-colleague-role="${c.role}" style="background: transparent; border: none; padding: 0.2rem; cursor: pointer; color: var(--text-muted); display: flex; align-items: center;" title="Edit Teammate Details">
+              <i data-lucide="edit-2" style="width: 11px; height: 11px;"></i>
+            </button>
+            <span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; box-shadow: 0 0 6px #10b981;"></span>
+          </div>
         </div>
       `;
     });
 
     container.innerHTML = html;
+
+    // Attach click events to edit teammate button
+    container.querySelectorAll('.btn-edit-teammate').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const email = btn.getAttribute('data-colleague-email');
+        const currentName = btn.getAttribute('data-colleague-name');
+        const currentRole = btn.getAttribute('data-colleague-role');
+
+        const newName = prompt("Edit teammate name:", currentName);
+        if (newName === null) return;
+        const nameVal = newName.trim();
+        if (nameVal === '') return;
+
+        const roleInput = prompt("Edit teammate role (type 'work' for Associate Colleague, or 'lead' for Leader):", currentRole);
+        if (roleInput === null) return;
+        const roleVal = roleInput.trim().toLowerCase();
+        if (roleVal !== 'work' && roleVal !== 'lead') {
+          alert("Invalid role. Please type either 'work' or 'lead'.");
+          return;
+        }
+
+        try {
+          await api.tasks.addColleague(email, roleVal, nameVal);
+          await this.render();
+        } catch (err) {
+          alert("Failed to update teammate: " + err.message);
+        }
+      });
+    });
+
+    lucide.createIcons();
   },
 
   /**
@@ -818,11 +855,13 @@ const tasksModule = {
     const isMyCreated = task.tenantId === myId;
     document.getElementById('task-detail-creator').textContent = isMyCreated ? 'Self (Owner)' : 'Teammate Colleague';
 
-    // Show/hide sub-delegate button based on lead/owner permissions
-    const canEdit = this.hasEditPermission(task, myId);
+    // Show/hide sub-delegate button based on assignee or owner permissions
+    const isAssignee = task.assigneeId === myId;
+    const isOwner = task.tenantId === myId;
+    const canSubDelegate = isOwner || isAssignee;
     const subDelegateBtn = document.getElementById('btn-task-sub-delegate');
     if (subDelegateBtn) {
-      subDelegateBtn.style.display = canEdit ? 'flex' : 'none';
+      subDelegateBtn.style.display = canSubDelegate ? 'flex' : 'none';
     }
 
     // Render Lifecycle Tracker and Hierarchy Tree
@@ -1141,15 +1180,7 @@ const tasksModule = {
 
   hasEditPermission(task, myId) {
     if (!task) return false;
-    if (task.tenantId === myId) return true;
-
-    if (task.assigneeId === myId) {
-      const relation = tasksState.colleagues.find(c => c.tenantId === task.tenantId && c.colleagueId === myId);
-      if (relation && relation.role === 'lead') {
-        return true;
-      }
-    }
-    return false;
+    return task.tenantId === myId;
   },
 
   buildHierarchyTreeHTML(taskId, activeTaskId) {
