@@ -1120,7 +1120,8 @@ async function addTask(tenantId, taskData) {
     status: taskData.status || "pending",
     parentId: taskData.parentId || null,
     kanbanStatus: taskData.kanbanStatus || "todo",
-    timeLogs: taskData.timeLogs || [],
+    assignedAt: taskData.assigneeId ? new Date().toISOString() : null,
+    completedAt: null,
     comments: [],
     createdAt: new Date().toISOString()
   };
@@ -1156,7 +1157,18 @@ async function updateTask(tenantId, id, taskData) {
   if (taskData.assigneeName !== undefined) allowedUpdates.assigneeName = taskData.assigneeName;
   if (taskData.parentId !== undefined) allowedUpdates.parentId = taskData.parentId;
   if (taskData.kanbanStatus !== undefined) allowedUpdates.kanbanStatus = taskData.kanbanStatus;
-  if (taskData.timeLogs !== undefined) allowedUpdates.timeLogs = taskData.timeLogs;
+
+  // Automatically determine assignedAt and completedAt
+  if (taskData.assigneeId !== undefined && taskData.assigneeId !== taskObj.assigneeId) {
+    allowedUpdates.assignedAt = taskData.assigneeId ? new Date().toISOString() : null;
+  }
+  if (taskData.status !== undefined && taskData.status !== taskObj.status) {
+    if (taskData.status === 'completed') {
+      allowedUpdates.completedAt = new Date().toISOString();
+    } else {
+      allowedUpdates.completedAt = null;
+    }
+  }
 
   const db = await getDb();
   if (db) {

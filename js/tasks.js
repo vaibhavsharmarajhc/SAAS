@@ -13,9 +13,6 @@ let tasksState = {
   currentTaskDetails: null, // active task displayed in comments sidebar
   showCompleted: false,
   activeView: 'list', // list, kanban, capacity
-  timerInterval: null,
-  timerSeconds: 0,
-  timerTaskId: null,
   currentParentId: null
 };
 
@@ -29,7 +26,6 @@ const tasksModule = {
     this.setupModalToggles();
     this.setupViewSwitcher();
     this.setupProjectAddBtn();
-    this.setupTimeTracker();
     this.setupSubDelegateBtn();
     window.tasksModule = this;
   },
@@ -743,23 +739,8 @@ const tasksModule = {
       subDelegateBtn.style.display = canEdit ? 'flex' : 'none';
     }
 
-    // Timer display setup
-    const btnStart = document.getElementById('btn-task-timer-start');
-    const btnStop = document.getElementById('btn-task-timer-stop');
-    const timerDisplay = document.getElementById('task-detail-timer-display');
-    if (btnStart && btnStop && timerDisplay) {
-      if (tasksState.timerTaskId === task.id) {
-        btnStart.style.display = 'none';
-        btnStop.style.display = 'flex';
-      } else {
-        btnStart.style.display = 'flex';
-        btnStop.style.display = 'none';
-        timerDisplay.textContent = "00:00:00";
-      }
-    }
-
-    // Render Time Logs and Hierarchy Tree
-    this.renderTimeLogs(task);
+    // Render Lifecycle Tracker and Hierarchy Tree
+    this.renderLifecycleTracker(task);
     this.renderHierarchyTree(task);
 
     // Render Comments Log list
@@ -1149,167 +1130,62 @@ const tasksModule = {
     }
   },
 
-  setupTimeTracker() {
-    const btnStart = document.getElementById('btn-task-timer-start');
-    const btnStop = document.getElementById('btn-task-timer-stop');
-    const btnLog = document.getElementById('btn-task-log-manual');
-
-    if (btnStart) {
-      if (!btnStart.dataset.listenerAttached) {
-        btnStart.dataset.listenerAttached = "true";
-        btnStart.addEventListener('click', () => {
-          const task = tasksState.currentTaskDetails;
-          if (!task) return;
-
-          tasksState.timerTaskId = task.id;
-          tasksState.timerSeconds = 0;
-          
-          btnStart.style.display = 'none';
-          btnStop.style.display = 'flex';
-
-          if (tasksState.timerInterval) clearInterval(tasksState.timerInterval);
-          tasksState.timerInterval = setInterval(() => {
-            tasksState.timerSeconds++;
-            const hrs = Math.floor(tasksState.timerSeconds / 3600).toString().padStart(2, '0');
-            const mins = Math.floor((tasksState.timerSeconds % 3600) / 60).toString().padStart(2, '0');
-            const secs = (tasksState.timerSeconds % 60).toString().padStart(2, '0');
-            document.getElementById('task-detail-timer-display').textContent = `${hrs}:${mins}:${secs}`;
-          }, 1000);
-        });
-      }
-    }
-
-    if (btnStop) {
-      if (!btnStop.dataset.listenerAttached) {
-        btnStop.dataset.listenerAttached = "true";
-        btnStop.addEventListener('click', async () => {
-          const task = tasksState.currentTaskDetails;
-          if (!task || tasksState.timerTaskId !== task.id) return;
-
-          clearInterval(tasksState.timerInterval);
-          tasksState.timerInterval = null;
-
-          const desc = prompt("Describe work completed in this session:", "Working on task updates");
-          if (desc === null) {
-            tasksState.timerInterval = setInterval(() => {
-              tasksState.timerSeconds++;
-              const hrs = Math.floor(tasksState.timerSeconds / 3600).toString().padStart(2, '0');
-              const mins = Math.floor((tasksState.timerSeconds % 3600) / 60).toString().padStart(2, '0');
-              const secs = (tasksState.timerSeconds % 60).toString().padStart(2, '0');
-              document.getElementById('task-detail-timer-display').textContent = `${hrs}:${mins}:${secs}`;
-            }, 1000);
-            return;
-          }
-
-          const currentUser = db.getUser();
-          const rate = currentUser?.settings?.hourlyRate || 1000;
-          
-          const logEntry = {
-            id: 'log_' + Date.now(),
-            senderEmail: currentUser.email,
-            senderName: currentUser.lawyerName || "Teammate",
-            durationSeconds: tasksState.timerSeconds,
-            hourlyRate: rate,
-            timestamp: new Date().toISOString(),
-            description: desc || "Task Session Log"
-          };
-
-          const timeLogs = task.timeLogs || [];
-          timeLogs.push(logEntry);
-
-          try {
-            await api.tasks.update(task.id, { timeLogs });
-            tasksState.currentTaskDetails.timeLogs = timeLogs;
-            
-            this.renderTimeLogs(tasksState.currentTaskDetails);
-            await this.render();
-          } catch (err) {
-            alert("Failed to save time log: " + err.message);
-          }
-
-          btnStart.style.display = 'flex';
-          btnStop.style.display = 'none';
-          document.getElementById('task-detail-timer-display').textContent = "00:00:00";
-          tasksState.timerSeconds = 0;
-          tasksState.timerTaskId = null;
-        });
-      }
-    }
-
-    if (btnLog) {
-      if (!btnLog.dataset.listenerAttached) {
-        btnLog.dataset.listenerAttached = "true";
-        btnLog.addEventListener('click', async () => {
-          const task = tasksState.currentTaskDetails;
-          if (!task) return;
-
-          const hoursInput = prompt("Enter hours spent (e.g. 1.5 or 0.75):");
-          if (!hoursInput || isNaN(hoursInput)) return;
-          
-          const hours = parseFloat(hoursInput);
-          if (hours <= 0) return;
-
-          const desc = prompt("Enter work description:");
-          const currentUser = db.getUser();
-          const rate = currentUser?.settings?.hourlyRate || 1000;
-
-          const logEntry = {
-            id: 'log_' + Date.now(),
-            senderEmail: currentUser.email,
-            senderName: currentUser.lawyerName || "Teammate",
-            durationSeconds: Math.round(hours * 3600),
-            hourlyRate: rate,
-            timestamp: new Date().toISOString(),
-            description: desc || "Manual Time Log"
-          };
-
-          const timeLogs = task.timeLogs || [];
-          timeLogs.push(logEntry);
-
-          try {
-            await api.tasks.update(task.id, { timeLogs });
-            tasksState.currentTaskDetails.timeLogs = timeLogs;
-            
-            this.renderTimeLogs(tasksState.currentTaskDetails);
-            await this.render();
-          } catch (err) {
-            alert("Failed to save time log: " + err.message);
-          }
-        });
-      }
-    }
-  },
-
-  renderTimeLogs(task) {
-    const logsContainer = document.getElementById('task-detail-time-logs');
-    const totalCostEl = document.getElementById('task-detail-total-cost');
-    if (!logsContainer || !totalCostEl) return;
-
-    const logs = task.timeLogs || [];
-    if (logs.length === 0) {
-      logsContainer.innerHTML = `<span style="font-size:0.65rem; color:var(--text-muted);">No billable time logged.</span>`;
-      totalCostEl.textContent = "₹0.00 Cost";
-      return;
-    }
-
-    let totalCost = 0;
-    let html = '';
-    logs.forEach(l => {
-      const hrsVal = l.durationSeconds / 3600;
-      const cost = hrsVal * l.hourlyRate;
-      totalCost += cost;
-      const hoursStr = hrsVal.toFixed(2);
+  renderLifecycleTracker(task) {
+    const assignedAtEl = document.getElementById('task-detail-assigned-at');
+    const completedAtEl = document.getElementById('task-detail-completed-at');
+    const resolutionEl = document.getElementById('task-detail-resolution-time');
+    
+    if (!assignedAtEl || !completedAtEl || !resolutionEl) return;
+    
+    const assignedTime = task.assignedAt || task.createdAt;
+    const completedTime = task.completedAt;
+    
+    const formatTime = (isoString) => {
+      if (!isoString) return '--';
+      return new Date(isoString).toLocaleString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+    };
+    
+    assignedAtEl.textContent = task.assigneeId ? formatTime(assignedTime) : 'Not assigned (Self)';
+    completedAtEl.textContent = task.status === 'completed' ? formatTime(completedTime) : 'Pending / Active';
+    
+    if (task.status === 'completed') {
+      const start = new Date(assignedTime);
+      const end = new Date(completedTime || new Date());
+      const diffMs = end - start;
       
-      html += `
-        <div style="display:flex; justify-content:space-between; align-items:center; padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 0.7rem;">
-          <span><strong>${l.senderName}</strong>: ${hoursStr} hrs (${l.description})</span>
-          <span style="font-weight:700; color: #10b981;">₹${cost.toFixed(2)}</span>
-        </div>
-      `;
-    });
-
-    logsContainer.innerHTML = html;
-    totalCostEl.textContent = `₹${totalCost.toFixed(2)} Cost`;
+      if (diffMs < 0) {
+        resolutionEl.textContent = '0 mins';
+      } else {
+        const diffHrs = diffMs / (1000 * 60 * 60);
+        if (diffHrs < 1) {
+          const diffMins = Math.round(diffMs / (1000 * 60));
+          resolutionEl.textContent = `${diffMins} mins`;
+        } else {
+          resolutionEl.textContent = `${diffHrs.toFixed(1)} hours`;
+        }
+      }
+    } else {
+      const start = new Date(assignedTime);
+      const end = new Date();
+      const diffMs = end - start;
+      
+      if (diffMs < 0) {
+        resolutionEl.textContent = 'Active (0 mins)';
+      } else {
+        const diffHrs = diffMs / (1000 * 60 * 60);
+        if (diffHrs < 1) {
+          const diffMins = Math.round(diffMs / (1000 * 60));
+          resolutionEl.textContent = `Active (${diffMins} mins elapsed)`;
+        } else {
+          resolutionEl.textContent = `Active (${diffHrs.toFixed(1)} hours elapsed)`;
+        }
+      }
+    }
   }
 };
 
