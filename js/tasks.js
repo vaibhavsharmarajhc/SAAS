@@ -398,7 +398,7 @@ const tasksModule = {
     const titleEl = document.getElementById('task-active-view-title');
     const descEl = document.getElementById('task-active-view-desc');
     const coreTitles = {
-      'inbox': { t: 'Inbox', d: 'All tasks in your practice space.' },
+      'inbox': { t: 'All Tasks', d: 'All tasks in your practice space.' },
       'today': { t: 'Today', d: 'Tasks scheduled to complete today.' },
       'upcoming': { t: 'Upcoming', d: 'Matters scheduled for future dates.' },
       'assigned-to-me': { t: 'Assigned to Me', d: 'Tasks assigned to your schedule by teammates.' },
