@@ -8,6 +8,10 @@ import api from './api.js';
 
 class LegalDB {
   constructor() {
+    this.clearCache();
+  }
+
+  clearCache() {
     this.cache = {
       user: null,
       settings: {
@@ -23,24 +27,25 @@ class LegalDB {
   }
 
   async loadAll(forceReload = false) {
-    if (!forceReload && this.cache.user) {
-      return true; // Already loaded and authenticated
-    }
+    try {
+      const me = await api.auth.me();
+      if (!me || !me.user) {
+        this.clearCache();
+        return false; // Not authenticated
+      }
 
-    const me = await api.auth.me();
-    if (!me || !me.user) {
-      this.cache.user = null;
-      return false; // Not authenticated
+      this.cache.user = me.user;
+      this.cache.settings = me.user.settings || {};
+      
+      // Fetch resource collections from backend
+      this.cache.clients = await api.clients.getAll() || [];
+      this.cache.cases = await api.cases.getAll() || [];
+      this.cache.transactions = await api.transactions.getAll() || [];
+      return true; // Authenticated and loaded
+    } catch (e) {
+      this.clearCache();
+      return false;
     }
-
-    this.cache.user = me.user;
-    this.cache.settings = me.user.settings || {};
-    
-    // Fetch resource collections from backend
-    this.cache.clients = await api.clients.getAll() || [];
-    this.cache.cases = await api.cases.getAll() || [];
-    this.cache.transactions = await api.transactions.getAll() || [];
-    return true; // Authenticated and loaded
   }
 
   getUser() {

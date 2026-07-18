@@ -193,7 +193,7 @@ app.post('/api/auth/reset-password', async (req, res) => {
  * Log Out (Session Clear)
  */
 app.post('/api/auth/logout', (req, res) => {
-  res.clearCookie('session_token');
+  res.clearCookie('session_token', { path: '/' });
   res.json({ success: true, message: "Logged out successfully." });
 });
 

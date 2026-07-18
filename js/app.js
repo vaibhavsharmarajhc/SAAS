@@ -766,6 +766,19 @@ function initAuthenticationHandlers() {
         } catch (err) {
           console.error("Logout failed:", err);
         }
+        
+        // Close event source connection
+        if (window.tasksEventSource) {
+          window.tasksEventSource.close();
+          window.tasksEventSource = null;
+        }
+
+        // Clear cookie manually for extra guardrail
+        document.cookie = "session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+        // Clear database cache completely
+        db.clearCache();
+
         window.history.pushState({}, '', '/');
         await router();
       }
