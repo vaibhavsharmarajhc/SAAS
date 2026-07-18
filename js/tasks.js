@@ -736,7 +736,7 @@ const tasksModule = {
             </span>
             ${t.desc ? `<span style="font-size:0.75rem; color:var(--text-muted); text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:320px;">${t.desc}</span>` : ''}
             
-            <div style="display:flex; align-items:center; gap:8px; margin-top:2px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-top:2px; flex-wrap:wrap;">
               <!-- Priority badge -->
               <span style="font-size:0.6rem; font-weight:700; color:${pri.border}; background:${pri.bg}; border:1px solid var(--border-color); padding:1px 4px; border-radius:3px;">
                 ${pri.text}
@@ -745,6 +745,10 @@ const tasksModule = {
               <span style="font-size:0.6rem; color:var(--text-muted);"><i data-lucide="tag" style="width:10px; height:10px; display:inline-block; vertical-align:middle;"></i> ${t.project}</span>
               <!-- Due date if any -->
               ${t.dueDate ? `<span style="font-size:0.65rem; color:#f87171; font-weight:600;"><i data-lucide="calendar" style="width:10px; height:10px; display:inline-block; vertical-align:middle; margin-right:2px;"></i> ${formattedDate}</span>` : ''}
+              <!-- Assignor Label if assigned by someone else -->
+              ${t.tenantId !== myId && t.creatorName ? `
+                <span style="font-size:0.65rem; color:#60a5fa; font-weight:600;"><i data-lucide="user" style="width:10px; height:10px; display:inline-block; vertical-align:middle; margin-right:2px;"></i> By: ${t.creatorName}</span>
+              ` : ''}
             </div>
           </div>
         </div>
@@ -865,7 +869,7 @@ const tasksModule = {
     const myUser = db.getUser();
     const myId = myUser ? myUser.id : null;
     const isMyCreated = task.tenantId === myId;
-    document.getElementById('task-detail-creator').textContent = isMyCreated ? 'Self (Owner)' : 'Teammate Colleague';
+    document.getElementById('task-detail-creator').textContent = isMyCreated ? 'Self (Owner)' : (task.creatorName ? `${task.creatorName} (${task.creatorEmail || ''})` : 'Teammate Colleague');
 
     // Show/hide sub-delegate button based on assignee or owner permissions
     const isAssignee = task.assigneeId === myId;
@@ -1349,12 +1353,33 @@ const tasksModule = {
             }
           }
         } else if (data.type === 'comments_changed') {
+          const oldTask = tasksState.tasks.find(t => t.id === data.taskId);
+
           // Soft-refresh
           const tasks = await api.tasks.getAll() || [];
           tasksState.tasks = tasks;
+
+          const updatedTask = tasksState.tasks.find(t => t.id === data.taskId);
+          if (updatedTask && oldTask) {
+            const oldCommentsCount = oldTask.comments ? oldTask.comments.length : 0;
+            const newCommentsCount = updatedTask.comments ? updatedTask.comments.length : 0;
+
+            if (newCommentsCount > oldCommentsCount) {
+              const latestComment = updatedTask.comments[updatedTask.comments.length - 1];
+              const myUser = db.getUser();
+              const myId = myUser ? myUser.id : null;
+
+              if (latestComment.userId !== myId) {
+                this.showInAppNotification(
+                  `New Chat Message from ${latestComment.authorName || 'Teammate'}`,
+                  `Task: "${updatedTask.title}"<br>"${latestComment.text.substring(0, 50)}..."`
+                );
+                this.playNotificationSound();
+              }
+            }
+          }
           
           if (tasksState.currentTaskDetails && tasksState.currentTaskDetails.id === data.taskId) {
-            const updatedTask = tasksState.tasks.find(t => t.id === data.taskId);
             if (updatedTask) {
               tasksState.currentTaskDetails = updatedTask;
               this.renderCommentsList();
@@ -1487,6 +1512,78 @@ const tasksModule = {
           btnProject.disabled = false;
         }
       });
+    }
+  },
+
+  showInAppNotification(title, message) {
+    const container = document.getElementById('notification-toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      background: var(--bg-sidebar);
+      border: 1px solid var(--color-primary);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      padding: 0.75rem 1.25rem;
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      pointer-events: auto;
+      min-width: 250px;
+      max-width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(var(--glass-blur));
+    `;
+
+    toast.innerHTML = `
+      <div style="font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 6px;">
+        <i data-lucide="message-square" style="width: 14px; height: 14px;"></i>
+        <span>${title}</span>
+      </div>
+      <div style="color: var(--text-secondary); line-height: 1.3; font-size: 0.75rem;">${message}</div>
+    `;
+
+    container.appendChild(toast);
+    lucide.createIcons();
+
+    setTimeout(() => {
+      toast.style.transform = 'translateY(0)';
+      toast.style.opacity = '1';
+    }, 10);
+
+    setTimeout(() => {
+      toast.style.transform = 'translateY(20px)';
+      toast.style.opacity = '0';
+      setTimeout(() => {
+        toast.remove();
+      }, 300);
+    }, 4000);
+  },
+
+  playNotificationSound() {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+      osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+      
+      gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+      
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.4);
+    } catch (err) {
+      console.warn("Audio chime block:", err);
     }
   }
 };

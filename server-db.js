@@ -1057,7 +1057,23 @@ async function getTasks(tenantId) {
       currentLevelIds = newIds;
     }
 
-    return mapIds([...repaired, ...allSubTasks]);
+    const finalTasks = [...repaired, ...allSubTasks];
+    for (let t of finalTasks) {
+      try {
+        const creatorObj = await getTenantById(t.tenantId);
+        if (creatorObj) {
+          t.creatorName = creatorObj.lawyerName || 'Unknown Owner';
+          t.creatorEmail = creatorObj.email;
+        } else {
+          t.creatorName = 'System';
+          t.creatorEmail = '';
+        }
+      } catch (err) {
+        t.creatorName = 'System';
+      }
+    }
+
+    return mapIds(finalTasks);
   }
 
   const localDb = readDb();
@@ -1101,7 +1117,23 @@ async function getTasks(tenantId) {
     currentLevelIds = newIds;
   }
 
-  return [...directTasks, ...allSubTasks];
+  const finalTasks = [...directTasks, ...allSubTasks];
+  for (let t of finalTasks) {
+    try {
+      const creatorObj = localDb.tenants.find(u => u.id === t.tenantId);
+      if (creatorObj) {
+        t.creatorName = creatorObj.lawyerName || 'Unknown Owner';
+        t.creatorEmail = creatorObj.email;
+      } else {
+        t.creatorName = 'System';
+        t.creatorEmail = '';
+      }
+    } catch (err) {
+      t.creatorName = 'System';
+    }
+  }
+
+  return finalTasks;
 }
 
 async function getTask(tenantId, id) {
