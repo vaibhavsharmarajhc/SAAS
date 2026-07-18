@@ -132,26 +132,23 @@ const shareModule = {
 
     // 2. Generate WhatsApp bold text template
     const waText = `*${settings.firmName || 'CounselAI'} - Case Update*
-Chambers of *${settings.lawyerName || 'Adv. Vaibhav Sharma'}*
----------------------------------------------
 
 Dear *${client.name}*,
 
-Here is the hearing and status update regarding your matter:
-*${cs.title}*
+Please find below the update regarding your matter, *${cs.title}*:
 
-⚖️ *CNR/Ref:* ${cs.caseNumber}
-🏛️ *Court Forum:* ${cs.court}
-📅 *Next Date of Hearing:* ${formattedDate}
+*Case Reference:* ${cs.caseNumber}
+*Court Forum:* ${cs.court}
+*Next Date:* ${formattedDate}
+*Stage of Matter:* ${summaryText || 'Listed for hearing. Update will follow.'}
 
-📝 *Hearing Stage / Directives:*
-${summaryText || 'Listed for hearing. Update will follow.'}
+*Financial Summary:*
+*Outstanding Fees:* ₹${feeVal.toLocaleString('en-IN')}
 
-💸 *Outstanding Professional Fees:* ₹${feeVal.toLocaleString('en-IN')}
-
-_Please reach out to the chamber if you have any questions or require file revisions._
+Please contact the chamber if you have any questions or require further clarification.
 
 Best regards,
+
 *${settings.lawyerName || 'Adv. Vaibhav Sharma'}*
 *${settings.firmName || 'CounselAI'}*`;
 
