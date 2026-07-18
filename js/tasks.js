@@ -27,6 +27,8 @@ const tasksModule = {
     this.setupViewSwitcher();
     this.setupProjectAddBtn();
     this.setupSubDelegateBtn();
+    this.setupBulkActionsHandlers();
+    this.initSSE();
     window.tasksModule = this;
   },
 
@@ -720,6 +722,9 @@ const tasksModule = {
       <div class="task-item-card" data-task-id="${t.id}" style="border-left: 3px solid ${pri.border};">
         <div style="display:flex; align-items:center; gap:0.75rem; flex-grow:1; min-width:0;">
           
+          <!-- Bulk select checkbox -->
+          <input type="checkbox" class="task-bulk-select-checkbox" data-task-id="${t.id}" style="width: 14px; height: 14px; cursor: pointer; accent-color: var(--color-primary); flex-shrink: 0;" title="Select for Bulk Actions">
+
           <!-- Complete trigger checkbox -->
           <button class="btn-toggle-task-status ${isCompleted ? 'is-completed' : ''}" data-task-id="${t.id}">
             ${isCompleted ? '<i data-lucide="check" style="width:12px; height:12px;"></i>' : ''}
@@ -773,6 +778,13 @@ const tasksModule = {
    * Bind event handlers inside lists
    */
   bindTaskItemEvents(container) {
+    // Bulk select checkbox change listener
+    container.querySelectorAll('.task-bulk-select-checkbox').forEach(chk => {
+      chk.addEventListener('change', () => {
+        this.updateBulkActionsBar();
+      });
+    });
+
     // Toggle Status checkbox click
     container.querySelectorAll('.btn-toggle-task-status').forEach(btn => {
       btn.addEventListener('click', async (e) => {
@@ -1302,6 +1314,179 @@ const tasksModule = {
           resolutionEl.textContent = `Active (${diffHrs.toFixed(1)} hours elapsed)`;
         }
       }
+    }
+  },
+
+  initSSE() {
+    if (window.tasksEventSource) {
+      window.tasksEventSource.close();
+    }
+    
+    const source = new EventSource('/api/events');
+    window.tasksEventSource = source;
+
+    source.onmessage = async (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log("SSE Event received:", data);
+
+        if (data.type === 'tasks_changed' || data.type === 'colleagues_changed') {
+          // Soft-refresh
+          const tasks = await api.tasks.getAll() || [];
+          tasksState.tasks = tasks;
+
+          const colleagues = await api.tasks.getColleagues() || [];
+          tasksState.colleagues = colleagues;
+
+          await this.render();
+          
+          if (tasksState.currentTaskDetails) {
+            const updatedTask = tasksState.tasks.find(t => t.id === tasksState.currentTaskDetails.id);
+            if (updatedTask) {
+              tasksState.currentTaskDetails = updatedTask;
+              this.renderLifecycleTracker(updatedTask);
+              this.renderHierarchyTree(updatedTask);
+            }
+          }
+        } else if (data.type === 'comments_changed') {
+          // Soft-refresh
+          const tasks = await api.tasks.getAll() || [];
+          tasksState.tasks = tasks;
+          
+          if (tasksState.currentTaskDetails && tasksState.currentTaskDetails.id === data.taskId) {
+            const updatedTask = tasksState.tasks.find(t => t.id === data.taskId);
+            if (updatedTask) {
+              tasksState.currentTaskDetails = updatedTask;
+              this.renderCommentsList();
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error handling SSE message:", err);
+      }
+    };
+
+    source.onerror = () => {
+      console.warn("SSE connection lost. Reconnecting...");
+    };
+  },
+
+  updateBulkActionsBar() {
+    const selectedCheckboxes = document.querySelectorAll('.task-bulk-select-checkbox:checked');
+    const bulkBar = document.getElementById('task-bulk-bar');
+    const selectedCountSpan = document.getElementById('bulk-selected-count');
+    
+    if (bulkBar && selectedCountSpan) {
+      if (selectedCheckboxes.length > 0) {
+        selectedCountSpan.textContent = selectedCheckboxes.length;
+        bulkBar.style.display = 'flex';
+      } else {
+        bulkBar.style.display = 'none';
+      }
+    }
+  },
+
+  setupBulkActionsHandlers() {
+    const bulkBar = document.getElementById('task-bulk-bar');
+    if (!bulkBar) return;
+
+    // Clear selection
+    const btnCancel = document.getElementById('btn-bulk-cancel');
+    if (btnCancel) {
+      btnCancel.addEventListener('click', () => {
+        document.querySelectorAll('.task-bulk-select-checkbox:checked').forEach(chk => {
+          chk.checked = false;
+        });
+        this.updateBulkActionsBar();
+      });
+    }
+
+    // Bulk complete
+    const btnComplete = document.getElementById('btn-bulk-complete');
+    if (btnComplete) {
+      btnComplete.addEventListener('click', async () => {
+        const checked = document.querySelectorAll('.task-bulk-select-checkbox:checked');
+        if (checked.length === 0) return;
+        
+        btnComplete.disabled = true;
+        try {
+          for (let chk of checked) {
+            const taskId = chk.getAttribute('data-task-id');
+            await api.tasks.update(taskId, { status: 'completed' });
+          }
+          await this.render();
+          this.updateBulkActionsBar();
+        } catch (err) {
+          alert("Error updating tasks: " + err.message);
+        } finally {
+          btnComplete.disabled = false;
+        }
+      });
+    }
+
+    // Bulk Delete
+    const btnDelete = document.getElementById('btn-bulk-delete');
+    if (btnDelete) {
+      btnDelete.addEventListener('click', async () => {
+        const checked = document.querySelectorAll('.task-bulk-select-checkbox:checked');
+        if (checked.length === 0) return;
+
+        if (confirm(`Are you sure you want to delete these ${checked.length} tasks?`)) {
+          btnDelete.disabled = true;
+          try {
+            for (let chk of checked) {
+              const taskId = chk.getAttribute('data-task-id');
+              await api.tasks.delete(taskId);
+            }
+            await this.render();
+            this.updateBulkActionsBar();
+          } catch (err) {
+            alert("Error deleting tasks: " + err.message);
+          } finally {
+            btnDelete.disabled = false;
+          }
+        }
+      });
+    }
+
+    // Bulk Move to Project
+    const btnProject = document.getElementById('btn-bulk-project');
+    if (btnProject) {
+      btnProject.addEventListener('click', async () => {
+        const checked = document.querySelectorAll('.task-bulk-select-checkbox:checked');
+        if (checked.length === 0) return;
+
+        const projects = this.getProjectCategories();
+        if (projects.length === 0) {
+          alert("No project categories defined. Please create a project first.");
+          return;
+        }
+
+        const projectListStr = projects.map((p, idx) => `${idx + 1}. ${p}`).join('\n');
+        const projIndex = prompt(`Move selected tasks to which project category? Enter number:\n\n${projectListStr}`);
+        if (!projIndex) return;
+
+        const idxVal = parseInt(projIndex.trim()) - 1;
+        if (isNaN(idxVal) || idxVal < 0 || idxVal >= projects.length) {
+          alert("Invalid project selection.");
+          return;
+        }
+
+        const selectedProject = projects[idxVal];
+        btnProject.disabled = true;
+        try {
+          for (let chk of checked) {
+            const taskId = chk.getAttribute('data-task-id');
+            await api.tasks.update(taskId, { project: selectedProject });
+          }
+          await this.render();
+          this.updateBulkActionsBar();
+        } catch (err) {
+          alert("Error moving tasks: " + err.message);
+        } finally {
+          btnProject.disabled = false;
+        }
+      });
     }
   }
 };

@@ -130,6 +130,14 @@ const viewQuickActions = {
 export async function switchView(targetViewId) {
   state.activeView = targetViewId;
 
+  // Auto-close mobile drawer sidebar
+  const sidebar = document.querySelector('.app-sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (sidebar && backdrop) {
+    sidebar.classList.remove('open');
+    backdrop.classList.remove('active');
+  }
+
   // Toggle page visibility
   pageContainers.forEach(container => {
     if (container.id === targetViewId) {
@@ -903,6 +911,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       config.action();
     }
   });
+
+  // 4b. Setup mobile sidebar drawer toggle
+  const sidebar = document.querySelector('.app-sidebar');
+  const toggleBtn = document.getElementById('btn-sidebar-toggle');
+  const backdrop = document.getElementById('sidebar-backdrop');
+
+  if (toggleBtn && sidebar && backdrop) {
+    toggleBtn.addEventListener('click', () => {
+      sidebar.classList.add('open');
+      backdrop.classList.add('active');
+    });
+
+    backdrop.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      backdrop.classList.remove('active');
+    });
+  }
 
   // 5. Sidebar data backup trigger
   sidebarBackupBtn.addEventListener('click', () => {

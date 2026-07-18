@@ -377,6 +377,46 @@ app.post('/api/backup/import', authenticateToken, async (req, res) => {
   }
 });
 
+// ================= SERVER-SENT EVENTS (SSE) REAL-TIME SYNC =================
+
+let sseClients = [];
+
+app.get('/api/events', authenticateToken, (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+  
+  res.write('data: {"type": "connected"}\n\n');
+
+  const client = {
+    id: Date.now(),
+    userId: req.user.id,
+    res
+  };
+
+  sseClients.push(client);
+
+  req.on('close', () => {
+    sseClients = sseClients.filter(c => c.id !== client.id);
+  });
+});
+
+async function broadcastToTeammates(tenantId, data) {
+  try {
+    const colleagues = await db.getColleagues(tenantId);
+    const targetUserIds = [tenantId, ...colleagues.map(c => c.colleagueId)];
+    
+    sseClients.forEach(c => {
+      if (targetUserIds.includes(c.userId)) {
+        c.res.write(`data: ${JSON.stringify(data)}\n\n`);
+      }
+    });
+  } catch (err) {
+    console.error("SSE Broadcast error:", err);
+  }
+}
+
 // ================= TASKS & TEAM ROUTES =================
 
 /**
@@ -403,6 +443,7 @@ app.post('/api/colleagues', authenticateToken, async (req, res) => {
   try {
     const relation = await db.addColleague(req.user.id, email, role || 'work', name || null);
     res.status(201).json(relation);
+    broadcastToTeammates(req.user.id, { type: 'colleagues_changed' });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -427,6 +468,7 @@ app.post('/api/tasks', authenticateToken, async (req, res) => {
   try {
     const newTask = await db.addTask(req.user.id, req.body);
     res.status(201).json(newTask);
+    broadcastToTeammates(req.user.id, { type: 'tasks_changed' });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -439,6 +481,7 @@ app.put('/api/tasks/:id', authenticateToken, async (req, res) => {
   try {
     const updated = await db.updateTask(req.user.id, req.params.id, req.body);
     res.json(updated);
+    broadcastToTeammates(req.user.id, { type: 'tasks_changed' });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -451,6 +494,7 @@ app.delete('/api/tasks/:id', authenticateToken, async (req, res) => {
   try {
     await db.deleteTask(req.user.id, req.params.id);
     res.json({ success: true });
+    broadcastToTeammates(req.user.id, { type: 'tasks_changed' });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -463,6 +507,7 @@ app.post('/api/tasks/:id/comments', authenticateToken, async (req, res) => {
   try {
     const comment = await db.addTaskComment(req.user.id, req.params.id, req.body);
     res.status(201).json(comment);
+    broadcastToTeammates(req.user.id, { type: 'comments_changed', taskId: req.params.id });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -478,6 +523,15 @@ app.use('/js', express.static(path.join(__dirname, 'js')));
 
 // Serve images from /images
 app.use('/images', express.static(path.join(__dirname, 'images')));
+
+app.get('/manifest.json', (req, res) => {
+  res.sendFile(path.join(__dirname, 'manifest.json'));
+});
+
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.sendFile(path.join(__dirname, 'sw.js'));
+});
 
 // Serve index.html as main entry route with diagnostic error logging
 app.get('*', (req, res) => {
