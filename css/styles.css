@@ -88,7 +88,7 @@ body {
   background-color: var(--bg-main);
   color: var(--text-primary);
   line-height: 1.5;
-  overflow: auto;
+  overflow-x: hidden;
   transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
@@ -2130,5 +2130,60 @@ input:-webkit-autofill:active {
   .table-custom td strong,
   .table-custom td span.badge {
     white-space: nowrap !important;
+  }
+}
+
+/* Mobile viewport width & scroll optimizations */
+
+/* Collapse/hide landing page navigation items on phone viewports */
+@media (max-width: 768px) {
+  .marketing-nav {
+    padding: 1rem !important;
+  }
+  .marketing-logo {
+    font-size: 1.4rem !important;
+  }
+  .marketing-links {
+    display: none !important;
+  }
+  .marketing-actions {
+    gap: 0.5rem !important;
+  }
+  .btn-nav-login {
+    padding: 0.4rem 0.75rem !important;
+    font-size: 0.85rem !important;
+  }
+  .btn-nav-register {
+    padding: 0.4rem 0.85rem !important;
+    font-size: 0.85rem !important;
+  }
+  
+  /* Compact landing page features preview panels */
+  .features-preview-panel {
+    min-width: 100% !important;
+    padding: 1.25rem !important;
+  }
+}
+
+/* Calendar grid cell scaling on phone screens */
+@media (max-width: 600px) {
+  .calendar-grid-header > div {
+    font-size: 0.7rem !important;
+    padding: 0.25rem 0 !important;
+  }
+  .calendar-grid-cell {
+    min-height: 55px !important;
+    padding: 0.25rem !important;
+  }
+  .calendar-cell-date {
+    font-size: 0.75rem !important;
+  }
+  .calendar-cell-events {
+    gap: 2px !important;
+  }
+  .calendar-mini-event {
+    font-size: 0.6rem !important;
+    padding: 1px 3px !important;
+    border-radius: 2px !important;
   }
 }
