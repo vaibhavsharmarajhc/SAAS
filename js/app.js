@@ -778,6 +778,9 @@ function initAuthenticationHandlers() {
 
         // Clear database cache completely
         db.clearCache();
+        
+        // Reset initialization flag so modules rebinding triggers on next login
+        appInitialized = false;
 
         window.history.pushState({}, '', '/');
         await router();
