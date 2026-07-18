@@ -1,7 +1,7 @@
-const CACHE_NAME = 'trackmychambers-cache-v11';
+const CACHE_NAME = 'trackmychambers-cache-v12';
 const ASSETS = [
   '/dashboard',
-  '/css/styles.css?v=1.0.10',
+  '/css/styles.css?v=1.0.11',
   '/js/app.js',
   '/js/tasks.js',
   '/js/dashboard.js',
