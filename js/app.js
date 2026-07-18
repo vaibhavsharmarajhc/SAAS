@@ -800,15 +800,15 @@ function initGlobalSearch() {
     // Render cases
     if (matchingCases.length > 0) {
       const header = document.createElement('div');
-      header.style.padding = '0.5rem 1rem; font-size: 0.7rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.03);';
+      header.style.padding = '0.5rem 1rem; font-size: 0.7rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-color);';
       header.textContent = 'Cases';
       searchResults.appendChild(header);
 
       matchingCases.slice(0, 5).forEach(c => {
         const item = document.createElement('div');
-        item.style.padding = '0.6rem 1rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.02); display: flex; flex-direction: column; gap: 2px;';
+        item.style.padding = '0.6rem 1rem; cursor: pointer; border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 2px; transition: background 0.15s;';
         item.innerHTML = `
-          <div style="font-size: 0.85rem; font-weight: 600; color: #fff;">${c.title}</div>
+          <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">${c.title}</div>
           <div style="font-size: 0.7rem; color: var(--text-muted);">${c.caseNumber || 'No case number'} ${c.cnrNumber ? '• CNR: ' + c.cnrNumber : ''}</div>
         `;
         item.addEventListener('click', async () => {
@@ -824,7 +824,7 @@ function initGlobalSearch() {
             }
           }, 100);
         });
-        item.addEventListener('mouseover', () => item.style.background = 'rgba(255,255,255,0.03)');
+        item.addEventListener('mouseover', () => item.style.background = 'rgba(217, 119, 6, 0.06)');
         item.addEventListener('mouseout', () => item.style.background = 'transparent');
         searchResults.appendChild(item);
       });
@@ -833,15 +833,15 @@ function initGlobalSearch() {
     // Render clients
     if (matchingClients.length > 0) {
       const header = document.createElement('div');
-      header.style.padding = '0.5rem 1rem; font-size: 0.7rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.03); margin-top: 0.5rem;';
+      header.style.padding = '0.5rem 1rem; font-size: 0.7rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-color); margin-top: 0.5rem;';
       header.textContent = 'Clients';
       searchResults.appendChild(header);
 
       matchingClients.slice(0, 5).forEach(cl => {
         const item = document.createElement('div');
-        item.style.padding = '0.6rem 1rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.02); display: flex; flex-direction: column; gap: 2px;';
+        item.style.padding = '0.6rem 1rem; cursor: pointer; border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 2px; transition: background 0.15s;';
         item.innerHTML = `
-          <div style="font-size: 0.85rem; font-weight: 600; color: #fff;">${cl.name}</div>
+          <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">${cl.name}</div>
           <div style="font-size: 0.7rem; color: var(--text-muted);">${cl.phone || 'No phone'} • ${cl.email || 'No email'}</div>
         `;
         item.addEventListener('click', async () => {
@@ -857,7 +857,7 @@ function initGlobalSearch() {
             }
           }, 100);
         });
-        item.addEventListener('mouseover', () => item.style.background = 'rgba(255,255,255,0.03)');
+        item.addEventListener('mouseover', () => item.style.background = 'rgba(217, 119, 6, 0.06)');
         item.addEventListener('mouseout', () => item.style.background = 'transparent');
         searchResults.appendChild(item);
       });
