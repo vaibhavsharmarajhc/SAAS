@@ -2263,3 +2263,49 @@ input:-webkit-autofill:active {
     display: flex !important;
   }
 }
+
+/* Stack dashboard preview tables into vertical card lists on mobile viewports */
+@media (max-width: 600px) {
+  #dashboard-hearings-table-body,
+  #dashboard-dues-table-body {
+    display: block !important;
+  }
+  
+  #dashboard-hearings-table-body tr,
+  #dashboard-dues-table-body tr {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0.75rem 0.5rem !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    gap: 0.35rem !important;
+    align-items: flex-start !important;
+  }
+  
+  #dashboard-hearings-table-body tr:last-child,
+  #dashboard-dues-table-body tr:last-child {
+    border-bottom: none !important;
+  }
+  
+  #dashboard-hearings-table-body td,
+  #dashboard-dues-table-body td {
+    display: block !important;
+    padding: 0 !important;
+    border: none !important;
+    width: 100% !important;
+    text-align: left !important;
+  }
+  
+  /* Retain centered empty states */
+  #dashboard-hearings-table-body tr:has([colspan]),
+  #dashboard-dues-table-body tr:has([colspan]) {
+    display: block !important;
+    text-align: center !important;
+    padding: 1.5rem 0 !important;
+    border: none !important;
+  }
+  
+  /* Hide standard headers */
+  #dashboard-page thead {
+    display: none !important;
+  }
+}
