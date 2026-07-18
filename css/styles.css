@@ -1382,7 +1382,7 @@ input:checked + .slider:before {
 }
 
 @media (max-width: 900px) {
-  #diary-page > .diary-layout {
+  .diary-layout {
     grid-template-columns: 1fr !important;
     gap: 1.5rem !important;
   }
@@ -2215,5 +2215,34 @@ input:-webkit-autofill:active {
   /* Scale down header page titles to prevent text clipping */
   .page-title-section h2 {
     font-size: 1.3rem !important;
+  }
+}
+
+/* Task Manager Mobile optimizations */
+@media (max-width: 768px) {
+  /* Allow view switching tabs to wrap on small screens */
+  .task-view-tabs {
+    flex-wrap: wrap !important;
+    gap: 0.35rem !important;
+  }
+  .task-view-tabs button {
+    flex: 1 1 auto !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Stack task card columns vertically on small phones to prevent horizontal crowding */
+  .task-item-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+    word-break: break-word !important;
+  }
+  .task-item-card > div:last-child {
+    justify-content: flex-end !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.04) !important;
+    padding-top: 0.4rem !important;
   }
 }
