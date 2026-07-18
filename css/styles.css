@@ -2362,7 +2362,10 @@ input:-webkit-autofill:active {
   }
   
   #dashboard-referrals-table-body td:nth-child(4) span.badge {
-    white-space: nowrap !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    display: inline-block !important;
+    max-width: 100% !important;
     margin-bottom: 0.25rem !important;
   }
   
