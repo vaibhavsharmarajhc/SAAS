@@ -1,7 +1,7 @@
-const CACHE_NAME = 'trackmychambers-cache-v1';
+const CACHE_NAME = 'trackmychambers-cache-v2';
 const ASSETS = [
   '/dashboard',
-  '/css/styles.css',
+  '/css/styles.css?v=1.0.1',
   '/js/app.js',
   '/js/tasks.js',
   '/js/dashboard.js',
@@ -13,11 +13,29 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (e) => {
+  self.skipWaiting(); // Force waiting worker to take over
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS).catch(err => {
         console.warn("Service worker asset pre-caching failed (expected for runtime auth paths):", err);
       });
+    })
+  );
+});
+
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            console.log("Removing old cache:", key);
+            return caches.delete(key);
+          }
+        })
+      );
+    }).then(() => {
+      return self.clients.claim(); // Take control of open tabs immediately
     })
   );
 });
