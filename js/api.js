@@ -215,6 +215,20 @@ const api = {
         body: { email, role, name }
       });
     }
+  },
+  notifications: {
+    async getAll() {
+      return await fetchAPI('/api/notifications');
+    },
+    async markRead(id) {
+      return await fetchAPI(`/api/notifications/${id}/read`, { method: 'PUT' });
+    },
+    async markAllRead() {
+      return await fetchAPI('/api/notifications/read-all', { method: 'POST' });
+    },
+    async clear() {
+      return await fetchAPI('/api/notifications/clear', { method: 'DELETE' });
+    }
   }
 };
 

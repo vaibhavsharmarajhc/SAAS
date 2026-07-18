@@ -1282,6 +1282,98 @@ async function addTaskComment(tenantId, id, commentData) {
   return null;
 }
 
+async function getNotifications(userId) {
+  const db = await getDb();
+  if (db) {
+    const list = await db.collection('notifications')
+      .find({ recipientId: userId })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .toArray();
+    return mapIds(list);
+  }
+  const localDb = readDb();
+  localDb.notifications = localDb.notifications || [];
+  return localDb.notifications
+    .filter(n => n.recipientId === userId)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 50);
+}
+
+async function addNotification(userId, notifData) {
+  const newNotif = {
+    id: "notif_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
+    recipientId: userId,
+    actorName: notifData.actorName || "Teammate",
+    taskId: notifData.taskId,
+    taskTitle: notifData.taskTitle,
+    actionText: notifData.actionText || "updated a task",
+    read: false,
+    createdAt: new Date().toISOString()
+  };
+
+  const db = await getDb();
+  if (db) {
+    await db.collection('notifications').insertOne(toMongoDoc(newNotif));
+    return newNotif;
+  }
+  const localDb = readDb();
+  localDb.notifications = localDb.notifications || [];
+  localDb.notifications.push(newNotif);
+  writeDb(localDb);
+  return newNotif;
+}
+
+async function markNotificationRead(userId, notifId) {
+  const db = await getDb();
+  if (db) {
+    await db.collection('notifications').updateOne(
+      { id: notifId, recipientId: userId },
+      { $set: { read: true } }
+    );
+    return true;
+  }
+  const localDb = readDb();
+  localDb.notifications = localDb.notifications || [];
+  const notif = localDb.notifications.find(n => n.id === notifId && n.recipientId === userId);
+  if (notif) {
+    notif.read = true;
+    writeDb(localDb);
+  }
+  return true;
+}
+
+async function markAllNotificationsRead(userId) {
+  const db = await getDb();
+  if (db) {
+    await db.collection('notifications').updateMany(
+      { recipientId: userId },
+      { $set: { read: true } }
+    );
+    return true;
+  }
+  const localDb = readDb();
+  localDb.notifications = localDb.notifications || [];
+  localDb.notifications.forEach(n => {
+    if (n.recipientId === userId) n.read = true;
+  });
+  writeDb(localDb);
+  return true;
+}
+
+async function clearNotifications(userId) {
+  const db = await getDb();
+  if (db) {
+    await db.collection('notifications').deleteMany({ recipientId: userId });
+    return true;
+  }
+  const localDb = readDb();
+  localDb.notifications = localDb.notifications || [];
+  localDb.notifications = localDb.notifications.filter(n => n.recipientId !== userId);
+  writeDb(localDb);
+  return true;
+}
+
 module.exports = {
   initDatabase,
   getDb,
@@ -1314,5 +1406,10 @@ module.exports = {
   addTask,
   updateTask,
   deleteTask,
-  addTaskComment
+  addTaskComment,
+  getNotifications,
+  addNotification,
+  markNotificationRead,
+  markAllNotificationsRead,
+  clearNotifications
 };

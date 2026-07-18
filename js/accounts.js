@@ -212,7 +212,7 @@ const accountsModule = {
         <td>${t.date}</td>
         <td>
           <div style="font-weight:600; color:var(--text-primary);">${client ? client.name : 'Unknown'}</div>
-          ${linkedCase ? `<div style="font-size:0.75rem; color:var(--text-secondary);">${linkedCase.title}</div>` : `<div style="font-size:0.75rem; color:var(--text-muted);">Standalone account</div>`}
+          ${linkedCase ? `<div style="font-size:0.75rem; color:var(--color-primary); cursor:pointer; text-decoration:underline;" onclick="viewCaseDetails('${t.caseId}')">${linkedCase.title}</div>` : `<div style="font-size:0.75rem; color:var(--text-muted);">Standalone account</div>`}
         </td>
         <td>${t.description}</td>
         <td><span class="badge ${typeBadgeClass}">${t.type}</span></td>

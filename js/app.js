@@ -34,7 +34,20 @@ import diary from './diary.js';
 import accounts from './accounts.js';
 import share from './share.js';
 import tasks from './tasks.js';
+import notificationsModule from './notifications.js';
 window.tasksModule = tasks;
+window.notificationsModule = notificationsModule;
+window.casesModule = cases;
+window.accountsModule = accounts;
+window.clientsModule = clients;
+window.dashboardModule = dashboard;
+
+window.viewCaseDetails = function(caseId) {
+  if (!caseId) return;
+  if (window.casesModule && typeof window.casesModule.showCaseDossier === 'function') {
+    window.casesModule.showCaseDossier(caseId);
+  }
+};
 
 // Application State
 const state = {
@@ -488,6 +501,7 @@ async function router() {
           accounts.init();
           share.init();
           tasks.init();
+          notificationsModule.init();
           appInitialized = true;
         }
 

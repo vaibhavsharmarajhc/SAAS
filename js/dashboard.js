@@ -122,7 +122,7 @@ const dashboardModule = {
       // Clicking the row redirects to Case Registry view
       row.style.cursor = 'pointer';
       row.addEventListener('click', () => {
-        window.switchView('cases-page');
+        window.viewCaseDetails(c.id);
       });
       tableBody.appendChild(row);
     });

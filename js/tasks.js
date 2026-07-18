@@ -1385,6 +1385,14 @@ const tasksModule = {
               this.renderCommentsList();
             }
           }
+        } else if (data.type === 'notifications_changed') {
+          if (window.notificationsModule) {
+            await window.notificationsModule.loadAll();
+            const dropdown = document.getElementById('notification-dropdown-menu');
+            if (dropdown && dropdown.style.display === 'flex') {
+              window.notificationsModule.renderDropdownList();
+            }
+          }
         }
       } catch (err) {
         console.error("Error handling SSE message:", err);

@@ -115,12 +115,6 @@ const clientsModule = {
     
     const retainerAmount = parseFloat(document.getElementById('billing-amount').value) || 0;
     const retainerDesc = document.getElementById('billing-desc').value.trim();
-    const conflictChecked = document.getElementById('conflict-check').checked;
-
-    if (!conflictChecked) {
-      alert("Please confirm that the Conflict-of-Interest check has been completed.");
-      return;
-    }
 
     // 1. Create client
     const newClient = await db.addClient({ name, type, email, phone, address });
@@ -146,8 +140,8 @@ const clientsModule = {
         clientId: newClient.id,
         caseId: newCase ? newCase.id : null,
         amount: retainerAmount,
-        type: 'Billed',
-        description: retainerDesc || 'Initial retainer fee.'
+        type: 'Received',
+        description: retainerDesc || 'Advance payment.'
       });
     }
 
@@ -330,7 +324,7 @@ const clientsModule = {
         casesMarkup += `
           <div style="padding:0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); margin-bottom:0.5rem; background-color: rgba(255,255,255,0.01);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <strong style="font-size:0.9rem; color:var(--text-primary);">${cs.title}</strong>
+              <strong style="font-size:0.9rem; color:var(--color-primary); cursor:pointer; text-decoration:underline;" onclick="viewCaseDetails('${cs.id}')">${cs.title}</strong>
               <span class="badge ${cs.status === 'Active' ? 'badge-active' : 'badge-closed'}">${cs.status}</span>
             </div>
             <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem;">

@@ -853,7 +853,29 @@
         
 
 
-        <div class="header-actions" style="flex-shrink:0;">
+        <div class="header-actions" style="flex-shrink:0; display:flex; align-items:center; gap:0.75rem;">
+          <!-- Notification Bell Dropdown -->
+          <div class="notification-container" style="position:relative;">
+            <button class="btn btn-secondary" id="btn-notification-bell" style="padding:0.4rem; border-radius:50%; width:38px; height:38px; display:flex; align-items:center; justify-content:center; position:relative; background:transparent; border:1px solid var(--border-color); color:var(--text-primary); cursor:pointer;">
+              <i data-lucide="bell" style="width:18px; height:18px;"></i>
+              <span id="notification-badge" style="display:none; position:absolute; top:2px; right:2px; background:var(--color-danger); width:8px; height:8px; border-radius:50%;"></span>
+            </button>
+            
+            <!-- Dropdown Menu -->
+            <div id="notification-dropdown-menu" style="display:none; position:absolute; top:calc(100% + 8px); right:0; width:320px; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:1005; padding:0.5rem 0; backdrop-filter:blur(var(--glass-blur)); max-height:360px; overflow-y:auto; flex-direction:column;">
+              <div style="padding:0.5rem 1rem; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; font-size:0.8rem;">
+                <strong style="color:var(--text-primary);">Notifications</strong>
+                <a href="#" id="btn-notification-mark-all-read" style="color:var(--color-primary); text-decoration:none; font-weight:600; font-size:0.75rem;">Mark all read</a>
+              </div>
+              <div id="notification-list-items" style="display:flex; flex-direction:column; overflow-y:auto; max-height:280px;">
+                <!-- Populated dynamically -->
+              </div>
+              <div style="padding:0.5rem 1rem; border-top:1px solid var(--border-color); text-align:center; font-size:0.75rem;">
+                <a href="#" id="btn-notification-clear-all" style="color:var(--text-muted); text-decoration:none;">Clear all notifications</a>
+              </div>
+            </div>
+          </div>
+
           <button class="btn btn-primary" id="header-quick-action-btn">
             <i data-lucide="plus"></i> <span>Quick Action</span>
           </button>
@@ -1108,27 +1130,20 @@
                 </div>
                 <div class="form-row">
                   <button type="button" class="btn btn-secondary" style="flex:1;" id="wiz-back-2"><i data-lucide="arrow-left"></i> Profile</button>
-                  <button type="button" class="btn btn-primary" style="flex:1;" id="wiz-next-2">Next: Billing <i data-lucide="arrow-right"></i></button>
+                  <button type="button" class="btn btn-primary" style="flex:1;" id="wiz-next-2">Next: Advance Fee <i data-lucide="arrow-right"></i></button>
                 </div>
               </div>
 
-              <!-- Step 3: Billing Retainer & Conflict Verification -->
+              <!-- Step 3: Advance Fee Details -->
               <div class="wizard-form-step" id="wiz-content-3" style="display:none;">
-                <h4 style="margin-bottom:1rem; font-size:1rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Retainer & Conflict Verification</h4>
+                <h4 style="margin-bottom:1rem; font-size:1rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Advance Fee Details</h4>
                 <div class="form-group">
-                  <label class="form-label">Professional Retainer Fee (₹) *</label>
-                  <input type="number" class="form-control" id="billing-amount" value="50000" min="0">
+                  <label class="form-label">Advance Fee Received (₹)</label>
+                  <input type="number" class="form-control" id="billing-amount" value="0" min="0">
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Retainer Description</label>
-                  <input type="text" class="form-control" id="billing-desc" value="Initial Professional Retainer Fee" placeholder="Retainer details...">
-                </div>
-                <div class="form-group" style="margin-top:1.5rem;">
-                  <label class="form-label" style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
-                    <input type="checkbox" id="conflict-check" required>
-                    <span>Conflict-of-Interest Check Verified *</span>
-                  </label>
-                  <small style="display:block; color:var(--text-muted); margin-top:0.2rem;">Verify Track My Chambers does not represent opponents or conflict with corporate relationships.</small>
+                  <label class="form-label">Fee Description</label>
+                  <input type="text" class="form-control" id="billing-desc" value="Advance Payment" placeholder="Advance details...">
                 </div>
                 <div class="form-row" style="margin-top:1.5rem;">
                   <button type="button" class="btn btn-secondary" style="flex:1;" id="wiz-back-3"><i data-lucide="arrow-left"></i> Case Info</button>
