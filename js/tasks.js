@@ -1367,12 +1367,11 @@ const tasksModule = {
             if (newCommentsCount > oldCommentsCount) {
               const latestComment = updatedTask.comments[updatedTask.comments.length - 1];
               const myUser = db.getUser();
-              const myId = myUser ? myUser.id : null;
 
-              if (latestComment.userId !== myId) {
+              if (myUser && latestComment.senderEmail && latestComment.senderEmail.toLowerCase() !== myUser.email.toLowerCase()) {
                 this.showInAppNotification(
-                  `New Chat Message from ${latestComment.authorName || 'Teammate'}`,
-                  `Task: "${updatedTask.title}"<br>"${latestComment.text.substring(0, 50)}..."`
+                  `New Chat Message from ${latestComment.senderName || 'Teammate'}`,
+                  `Task: "${updatedTask.title}"<br>"${(latestComment.content || '').substring(0, 50)}..."`
                 );
                 this.playNotificationSound();
               }
