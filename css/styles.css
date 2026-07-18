@@ -2099,7 +2099,10 @@ input:-webkit-autofill:active {
 }
 
 /* Compacting header controls on narrow screen sizes */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0 1rem !important;
+  }
   #header-quick-action-btn {
     padding: 0.5rem !important;
     border-radius: 50% !important;
