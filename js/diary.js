@@ -373,6 +373,42 @@ const diaryModule = {
   renderYearView(container, date) {
     const year = date.getFullYear();
     const cases = db.getCases();
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile) {
+      // List the months and show how many cases are listed each month
+      let yearHtml = `<div class="mobile-year-list" style="display:flex; flex-direction:column; gap:0.75rem; width:100%; margin-top:0.5rem;">`;
+      const monthNamesFull = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      
+      for (let month = 0; month < 12; month++) {
+        // Count total hearings in this month
+        let totalMonthHearings = 0;
+        const totalDays = new Date(year, month + 1, 0).getDate();
+        for (let day = 1; day <= totalDays; day++) {
+          const dateStr = this.formatDateStr(year, month, day);
+          const dayHearings = this.getHearingsForDate(dateStr);
+          totalMonthHearings += dayHearings.length;
+        }
+        
+        const hasHearings = totalMonthHearings > 0;
+        const badgeColor = hasHearings ? 'var(--color-primary)' : 'var(--text-muted)';
+        const badgeBg = hasHearings ? 'var(--color-primary-glow)' : 'rgba(255,255,255,0.03)';
+        const borderStyle = hasHearings ? '1px solid var(--color-primary)' : '1px solid var(--border-color)';
+        
+        yearHtml += `
+          <div class="card mini-month-list-item" style="display:flex; justify-content:space-between; align-items:center; padding:0.85rem 1.25rem; margin-bottom:0; border:${borderStyle};">
+            <span style="font-weight:600; font-size:0.95rem; color:var(--text-primary);">${monthNamesFull[month]}</span>
+            <span class="badge" style="background:${badgeBg}; color:${badgeColor}; font-weight:700; font-size:0.8rem; padding:0.25rem 0.6rem; border-radius:10px;">
+              ${totalMonthHearings} Case(s)
+            </span>
+          </div>
+        `;
+      }
+      
+      yearHtml += `</div>`;
+      container.innerHTML = yearHtml;
+      return;
+    }
 
     let yearHtml = `<div class="year-grid">`;
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];

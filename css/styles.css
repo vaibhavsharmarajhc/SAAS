@@ -2457,3 +2457,78 @@ input:-webkit-autofill:active {
     display: none !important;
   }
 }
+
+/* Optimize Daily Diary calendar views for mobile viewports */
+@media (max-width: 600px) {
+  /* Month view sizing overrides */
+  .month-grid {
+    gap: 1px !important;
+  }
+  
+  .day-name-cell {
+    padding: 0.35rem 0.05rem !important;
+    font-size: 0.55rem !important;
+  }
+  
+  .day-cell {
+    min-height: 48px !important;
+    padding: 0.15rem !important;
+  }
+  
+  .day-number {
+    font-size: 0.65rem !important;
+    font-weight: 700 !important;
+  }
+  
+  .day-events {
+    margin-top: 0.1rem !important;
+    gap: 1px !important;
+  }
+  
+  .event-badge {
+    font-size: 0.5rem !important;
+    padding: 0.5px 1px !important;
+    height: 12px !important;
+    line-height: 11px !important;
+    border-radius: 2px !important;
+    margin-bottom: 0px !important;
+    max-width: 100% !important;
+  }
+
+  /* Week view layout and vertical stacking overrides */
+  .week-row {
+    flex-direction: column !important;
+    min-height: auto !important;
+  }
+  
+  .week-day-header {
+    width: 100% !important;
+    flex-direction: row !important;
+    gap: 0.5rem !important;
+    padding: 0.4rem 0.75rem !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    background-color: rgba(255, 255, 255, 0.01) !important;
+  }
+  
+  .week-day-header .day-num {
+    font-size: 1.15rem !important;
+  }
+  
+  .week-day-header .day-name {
+    font-size: 0.65rem !important;
+  }
+  
+  .week-events-list {
+    padding: 0.6rem 0.75rem !important;
+    gap: 0.4rem !important;
+  }
+  
+  /* Make sure week list event items wrap and sit inside screen boundary */
+  .week-events-list > .card {
+    width: 100% !important;
+    margin-bottom: 0 !important;
+  }
+}

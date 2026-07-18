@@ -79,7 +79,7 @@ const viewQuickActions = {
   },
   'dashboard-page': {
     text: 'Log Payment',
-    icon: 'plus',
+    icon: 'indian-rupee',
     action: () => {
       switchView('accounts-page');
       setTimeout(() => {
