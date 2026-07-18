@@ -1363,6 +1363,31 @@ input:checked + .slider:before {
   }
 }
 
+/* Responsive Grid collapses for mobile and tablet screens */
+@media (max-width: 768px) {
+  .grid-cols-4,
+  .grid-cols-3,
+  .grid-cols-2 {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+}
+
+/* Override inline grid columns for features pages */
+@media (max-width: 1024px) {
+  #clients-page > .grid-cols-3 {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+}
+
+@media (max-width: 900px) {
+  #diary-page > .diary-layout {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+}
+
 /* Sidebar Spin Animation */
 @keyframes spin {
   from { transform: rotate(0deg); }
@@ -2052,3 +2077,55 @@ input:-webkit-autofill:active {
   color: var(--color-primary) !important;
 }
 
+/* Mobile Responsive Styling Rules */
+
+/* Horizontal swipe-scrolling for Kanban board columns on smaller screens */
+@media (max-width: 900px) {
+  .kanban-board-container {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    gap: 1rem !important;
+    scroll-snap-type: x mandatory !important;
+    padding-bottom: 0.75rem !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .kanban-column {
+    flex-shrink: 0 !important;
+    width: 290px !important;
+    min-width: 290px !important;
+    scroll-snap-align: start !important;
+  }
+}
+
+/* Compacting header controls on narrow screen sizes */
+@media (max-width: 600px) {
+  #header-quick-action-btn {
+    padding: 0.5rem !important;
+    border-radius: 50% !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    justify-content: center !important;
+  }
+  #header-quick-action-btn span {
+    display: none !important;
+  }
+}
+
+/* Tables, lists, and layout cards text wrapping adjustments */
+@media (max-width: 768px) {
+  .card {
+    padding: 1.25rem !important;
+  }
+  .table-custom th,
+  .table-custom td {
+    padding: 0.6rem 0.75rem !important;
+    font-size: 0.8rem !important;
+  }
+  .table-custom td a,
+  .table-custom td strong,
+  .table-custom td span.badge {
+    white-space: nowrap !important;
+  }
+}
