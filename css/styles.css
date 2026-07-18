@@ -2309,3 +2309,65 @@ input:-webkit-autofill:active {
     display: none !important;
   }
 }
+
+/* Stack Referral Network table into a vertical list on mobile viewports */
+@media (max-width: 600px) {
+  #dashboard-referrals-table-body {
+    display: block !important;
+  }
+  
+  #dashboard-referrals-table-body tr {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0.85rem 0.5rem !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    gap: 0.4rem !important;
+    align-items: flex-start !important;
+  }
+  
+  #dashboard-referrals-table-body tr:last-child {
+    border-bottom: none !important;
+  }
+  
+  #dashboard-referrals-table-body td {
+    display: block !important;
+    padding: 0 !important;
+    border: none !important;
+    width: 100% !important;
+    text-align: left !important;
+  }
+  
+  /* Referrer Name */
+  #dashboard-referrals-table-body td:nth-child(1) {
+    margin-bottom: 0.15rem !important;
+  }
+  
+  /* Cases count and revenue side-by-side */
+  #dashboard-referrals-table-body td:nth-child(2) {
+    display: inline-block !important;
+    width: auto !important;
+    margin-right: 0.75rem !important;
+  }
+  
+  #dashboard-referrals-table-body td:nth-child(3) {
+    display: inline-block !important;
+    width: auto !important;
+  }
+  
+  /* Cases badges list (allow wrap) */
+  #dashboard-referrals-table-body td:nth-child(4) {
+    margin-top: 0.25rem !important;
+    white-space: normal !important;
+    max-width: 100% !important;
+  }
+  
+  #dashboard-referrals-table-body td:nth-child(4) span.badge {
+    white-space: nowrap !important;
+    margin-bottom: 0.25rem !important;
+  }
+  
+  /* Hide referral network table headers */
+  .dashboard-referrals-card thead {
+    display: none !important;
+  }
+}
