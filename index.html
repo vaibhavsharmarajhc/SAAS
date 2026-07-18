@@ -7,7 +7,7 @@
   <!-- SEO & Styling Meta -->
   <meta name="description" content="Premium Case Diary, Billing, Client Onboarding, and Practice Management Suite for Track My Chambers.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.4">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.5">
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Chart.js CDN -->
@@ -791,6 +791,9 @@
         <li class="menu-item active" data-target="dashboard-page">
           <a href="#"><i data-lucide="layout-dashboard"></i> Dashboard</a>
         </li>
+        <li class="menu-item mobile-only" data-target="overview-page">
+          <a href="#"><i data-lucide="bar-chart-2"></i> Practice Overview</a>
+        </li>
         <li class="menu-item" data-target="clients-page">
           <a href="#"><i data-lucide="users"></i> Clients Onboarding</a>
         </li>
@@ -943,7 +946,7 @@
         </div>
 
         <!-- Charts Layout -->
-        <div class="grid-cols-2">
+        <div class="grid-cols-2 dashboard-charts-grid">
           <div class="card" style="position: relative; min-height: 290px; display: flex; flex-direction: column;">
             <div class="section-header">
               <h3>Case Type Breakdown</h3>
@@ -1015,7 +1018,7 @@
         </div>
 
         <!-- Referral Network & Revenue Contributions -->
-        <div class="card" style="margin-top: 1.5rem;">
+        <div class="card dashboard-referrals-card" style="margin-top: 1.5rem;">
           <div class="section-header" style="border-bottom:1px solid var(--border-color); padding-bottom:0.75rem; margin-bottom:1rem;">
             <div>
               <h3 style="font-family:'Playfair Display', serif; font-size:1.25rem;">Referral Network & Revenue Contributions</h3>
@@ -1038,6 +1041,11 @@
             </table>
           </div>
         </div>
+      </div>
+
+      <!-- Practice Overview View Container -->
+      <div id="overview-page" class="page-container" style="display: none;">
+        <!-- Charts and referrals cards are moved here dynamically on mobile viewports -->
       </div>
 
       <!-- Clients Onboarding & Directory View Container -->

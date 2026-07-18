@@ -172,7 +172,8 @@ export async function switchView(targetViewId) {
   // Update header text based on page
   const pageTitle = targetViewId.split('-')[0];
   const capitalizedTitle = pageTitle.charAt(0).toUpperCase() + pageTitle.slice(1);
-  headerPageTitle.textContent = capitalizedTitle === 'Clients' ? 'Clients Onboarding' : 
+  headerPageTitle.textContent = targetViewId === 'overview-page' ? 'Practice Overview' :
+                                capitalizedTitle === 'Clients' ? 'Clients Onboarding' : 
                                 capitalizedTitle === 'Accounts' ? 'Accounts & Income Ledger' : 
                                 capitalizedTitle === 'Share' ? 'Client Intimation' : 
                                 capitalizedTitle === 'Tasks' ? 'Task Manager' : capitalizedTitle;
@@ -216,6 +217,7 @@ async function refreshPageView(viewId) {
 
   switch (viewId) {
     case 'dashboard-page':
+    case 'overview-page':
       dashboard.render();
       break;
     case 'clients-page':
@@ -481,7 +483,7 @@ async function router() {
         updateDbStatusBadge();
       }
     }
-  } else if (path === '/dashboard' || path.startsWith('/dashboard-page') || path.startsWith('/clients-page') || path.startsWith('/cases-page') || path.startsWith('/diary-page') || path.startsWith('/accounts-page') || path.startsWith('/share-page') || path.startsWith('/tasks-page') || path.startsWith('/settings-page')) {
+  } else if (path === '/dashboard' || path.startsWith('/dashboard-page') || path.startsWith('/overview-page') || path.startsWith('/clients-page') || path.startsWith('/cases-page') || path.startsWith('/diary-page') || path.startsWith('/accounts-page') || path.startsWith('/share-page') || path.startsWith('/tasks-page') || path.startsWith('/settings-page')) {
     if (!isAuthenticated) {
       window.history.pushState({}, '', '/login');
       router();
@@ -504,6 +506,8 @@ async function router() {
           notificationsModule.init();
           appInitialized = true;
         }
+
+        setupMobileOverviewPage();
 
         // Determine view from path
         let targetView = 'dashboard-page';
@@ -1404,3 +1408,36 @@ function initFeaturesTabs() {
     });
   });
 }
+
+function setupMobileOverviewPage() {
+  const isMobile = window.innerWidth <= 768;
+  const overviewPage = document.getElementById('overview-page');
+  const dashboardPage = document.getElementById('dashboard-page');
+  
+  if (!overviewPage || !dashboardPage) return;
+  
+  const dashboardCharts = document.querySelector('.dashboard-charts-grid');
+  const dashboardReferrals = document.querySelector('.dashboard-referrals-card');
+  
+  if (isMobile) {
+    if (dashboardCharts && dashboardCharts.parentElement !== overviewPage) {
+      overviewPage.appendChild(dashboardCharts);
+    }
+    if (dashboardReferrals && dashboardReferrals.parentElement !== overviewPage) {
+      overviewPage.appendChild(dashboardReferrals);
+    }
+  } else {
+    const kpiContainer = document.getElementById('dashboard-kpis');
+    if (kpiContainer) {
+      if (dashboardCharts && dashboardCharts.parentElement !== dashboardPage) {
+        kpiContainer.parentNode.insertBefore(dashboardCharts, kpiContainer.nextSibling);
+      }
+      if (dashboardReferrals && dashboardReferrals.parentElement !== dashboardPage) {
+        dashboardPage.appendChild(dashboardReferrals);
+      }
+    }
+  }
+}
+
+// Bind resize listener for responsive layout swapping
+window.addEventListener('resize', setupMobileOverviewPage);

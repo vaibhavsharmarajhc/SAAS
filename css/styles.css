@@ -2246,3 +2246,17 @@ input:-webkit-autofill:active {
     padding-top: 0.4rem !important;
   }
 }
+
+/* Mobile-only visibility classes */
+.mobile-only {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  li.mobile-only {
+    display: list-item !important;
+  }
+  .mobile-only {
+    display: flex !important;
+  }
+}
