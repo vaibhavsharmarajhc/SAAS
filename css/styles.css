@@ -435,7 +435,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .kpi-info .kpi-value {
-  font-size: 1.8rem;
+  font-size: 1.45rem;
   font-weight: 700;
   color: var(--text-primary);
   font-family: 'Inter', sans-serif;
@@ -2130,6 +2130,9 @@ input:-webkit-autofill:active {
   .table-custom td strong,
   .table-custom td span.badge {
     white-space: nowrap !important;
+  }
+  .kpi-info .kpi-value {
+    font-size: 1.25rem !important;
   }
 }
 
