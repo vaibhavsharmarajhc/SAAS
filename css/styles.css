@@ -129,6 +129,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Sidebar Navigation */
 .app-sidebar {
   width: var(--sidebar-width);
+  height: 100vh;
   background-color: var(--bg-sidebar);
   border-right: 1px solid var(--border-color);
   display: flex;
@@ -136,6 +137,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 1.5rem;
   z-index: 10;
   transition: background-color var(--transition-normal);
+  overflow-y: auto;
 }
 
 .brand-section {
@@ -1055,9 +1057,9 @@ textarea.form-control {
 }
 
 .share-preview-card {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  border: 1px solid rgba(217, 119, 6, 0.3);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .share-brand {

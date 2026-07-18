@@ -124,7 +124,7 @@ const shareModule = {
         <div><span>Status Directive:</span> <p style="margin-top:0.15rem; color:var(--text-primary); line-height:1.3;">${summaryText || 'Case in progress.'}</p></div>
       </div>
 
-      <div style="border-top:1px dashed rgba(255,255,255,0.1); padding-top:0.75rem; display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;">
+      <div style="border-top:1px dashed var(--border-color); padding-top:0.75rem; display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;">
         <span style="color:var(--text-muted);">Outstanding Professional Fees:</span>
         <strong style="color:${feeVal > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-size:1.05rem;">₹${feeVal.toLocaleString('en-IN')}</strong>
       </div>
