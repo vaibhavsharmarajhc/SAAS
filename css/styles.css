@@ -1837,6 +1837,15 @@ input:checked + .slider:before {
   background-color: #0b0f19;
   background-image: radial-gradient(at 0% 0%, rgba(112, 26, 39, 0.15) 0px, transparent 50%),
                     radial-gradient(at 100% 100%, rgba(217, 119, 6, 0.1) 0px, transparent 50%);
+  
+  /* Force premium dark theme tokens to prevent white-on-white input contrast clashes */
+  --bg-sidebar: #111827 !important;
+  --bg-card: rgba(30, 41, 59, 0.45) !important;
+  --border-color: rgba(255, 255, 255, 0.08) !important;
+  --bg-input: rgba(0, 0, 0, 0.25) !important;
+  --text-primary: #f8fafc !important;
+  --text-secondary: #94a3b8 !important;
+  --text-muted: #64748b !important;
 }
 
 /* Password Toggle Field Utilities */
