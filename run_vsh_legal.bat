@@ -1,7 +1,7 @@
 @echo off
-title CounselAI Practice Manager
+title Track My Chambers Practice Manager
 echo ==========================================================
-echo   CounselAI Practice Manager Launcher
+echo   Track My Chambers Practice Manager Launcher
 echo   Adv. Vaibhav Sharma - Chambers Administration
 echo ==========================================================
 echo.

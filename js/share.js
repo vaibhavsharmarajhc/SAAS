@@ -131,7 +131,7 @@ const shareModule = {
     `;
 
     // 2. Generate WhatsApp bold text template
-    const waText = `*${settings.firmName || 'CounselAI'} - Case Update*
+    const waText = `*${settings.firmName || 'Track My Chambers'} - Case Update*
 
 Dear *${client.name}*,
 
@@ -150,7 +150,7 @@ Please contact the chamber if you have any questions or require further clarific
 Best regards,
 
 *${settings.lawyerName || 'Adv. Vaibhav Sharma'}*
-*${settings.firmName || 'CounselAI'}*`;
+*${settings.firmName || 'Track My Chambers'}*`;
 
     const textarea = document.getElementById('share-text-rendered');
     textarea.value = waText;
@@ -169,7 +169,7 @@ Best regards,
     waBtn.href = waLink;
 
     // 4. Set up Email Mailto Link
-    const emailSubject = encodeURIComponent(`${settings.firmName || 'CounselAI'} Case Status Update - ${cs.title}`);
+    const emailSubject = encodeURIComponent(`${settings.firmName || 'Track My Chambers'} Case Status Update - ${cs.title}`);
     const emailBody = encodeURIComponent(waText.replace(/\*/g, '')); // Strip WhatsApp asterisks for email
     const emailLink = `mailto:${client.email || ''}?subject=${emailSubject}&body=${emailBody}`;
     

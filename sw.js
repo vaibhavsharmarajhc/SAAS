@@ -1,4 +1,4 @@
-const CACHE_NAME = 'counselai-cache-v1';
+const CACHE_NAME = 'trackmychambers-cache-v1';
 const ASSETS = [
   '/dashboard',
   '/css/styles.css',

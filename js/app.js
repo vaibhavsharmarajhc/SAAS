@@ -260,7 +260,7 @@ function setTheme(theme) {
  */
 function loadSettingsForm() {
   const settings = db.getSettings();
-  document.getElementById('settings-firm-name').value = settings.firmName || 'CounselAI';
+  document.getElementById('settings-firm-name').value = settings.firmName || 'Track My Chambers';
   document.getElementById('settings-lawyer-name').value = settings.lawyerName || 'Adv. Vaibhav Sharma';
   document.getElementById('settings-currency').value = settings.currency || 'INR';
   updateBrandingHeaders();
@@ -272,7 +272,7 @@ export function updateBrandingHeaders() {
   const lawyerName = document.querySelector('.lawyer-name');
   const avatar = document.querySelector('.lawyer-avatar');
 
-  if (brandName) brandName.textContent = settings.firmName || 'CounselAI';
+  if (brandName) brandName.textContent = settings.firmName || 'Track My Chambers';
   if (lawyerName) lawyerName.textContent = settings.lawyerName || 'Adv. Vaibhav Sharma';
   
   if (avatar && settings.lawyerName) {

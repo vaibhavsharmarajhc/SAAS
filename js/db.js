@@ -11,7 +11,7 @@ class LegalDB {
     this.cache = {
       user: null,
       settings: {
-        firmName: "CounselAI",
+        firmName: "Track My Chambers",
         lawyerName: "Adv. Vaibhav Sharma",
         currency: "INR",
         theme: "light"
@@ -272,7 +272,7 @@ class LegalDB {
     const emptyBackup = {
       version: "1.0.0",
       settings: {
-        firmName: "CounselAI",
+        firmName: "Track My Chambers",
         lawyerName: "Adv. Vaibhav Sharma",
         currency: "INR",
         theme: "light"

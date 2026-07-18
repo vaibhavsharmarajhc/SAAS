@@ -1,5 +1,5 @@
 /**
- * CounselAI - Case & Practice Manager Tasks Module
+ * Track My Chambers - Case & Practice Manager Tasks Module
  * Implements Todoist-style filters (Inbox, Today, Upcoming), Teammates, and Collaboration Comments.
  */
 

@@ -1,6 +1,6 @@
 {
-  "name": "CounselAI Practice Manager",
-  "short_name": "CounselAI",
+  "name": "Track My Chambers Practice Manager",
+  "short_name": "Track My Chambers",
   "description": "Premium Analytics & Workflow Management for Legal Chambers",
   "start_url": "/dashboard",
   "display": "standalone",

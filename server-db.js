@@ -224,7 +224,7 @@ async function createTenant(email, password, firmName, lawyerName) {
     email: email.toLowerCase(),
     passwordHash,
     settings: {
-      firmName: firmName || "CounselAI",
+      firmName: firmName || "Track My Chambers",
       lawyerName: lawyerName || "Adv. Vaibhav Sharma",
       currency: "INR",
       theme: "light"

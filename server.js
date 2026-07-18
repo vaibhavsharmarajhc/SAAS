@@ -549,7 +549,7 @@ app.get('*', (req, res) => {
 // Start Server
 app.listen(PORT, () => {
   console.log(`==========================================================`);
-  console.log(`  CounselAI Multi-Tenant SaaS server running at http://localhost:${PORT}`);
+  console.log(`  Track My Chambers Multi-Tenant SaaS server running at http://localhost:${PORT}`);
   console.log(`  Start developer watch server with npm run dev`);
   console.log(`==========================================================`);
 });
