@@ -2187,3 +2187,33 @@ input:-webkit-autofill:active {
     border-radius: 2px !important;
   }
 }
+
+/* Stacking search-filter-bar controls vertically on mobile to prevent overflow */
+@media (max-width: 768px) {
+  .search-filter-bar {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    align-items: stretch !important;
+  }
+  .search-filter-bar > * {
+    width: 100% !important;
+    flex: none !important;
+  }
+}
+
+/* Stacking section headers (card titles and page actions) on narrow viewports */
+@media (max-width: 600px) {
+  .section-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+  .section-header > * {
+    width: 100% !important;
+  }
+  
+  /* Scale down header page titles to prevent text clipping */
+  .page-title-section h2 {
+    font-size: 1.3rem !important;
+  }
+}
