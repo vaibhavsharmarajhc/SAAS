@@ -1395,7 +1395,7 @@ async function getPlatformAdminMetrics() {
 
   let totalRevenue = 0;
   transactions.forEach(t => {
-    if (t.type === 'Received') totalRevenue += (t.amount || 0);
+    if (t && t.type === 'Received') totalRevenue += (t.amount || 0);
   });
 
   const superAdminEmail = 'vaibhavsharmarajhc@gmail.com';
@@ -1413,24 +1413,49 @@ async function getPlatformAdminMetrics() {
     });
   }
 
-  const usersList = tenants.map(t => {
-    const isSuperAdminTenant = t.email && t.email.toLowerCase() === superAdminEmail;
+  // Robust tenant matcher comparing ObjectId strings, tenantId, email, and legacy fallback
+  const matchesTenant = (item, t) => {
+    if (!item) return false;
+    const itemTenantId = (item.tenantId || item.tenant_id || item.userId || item.user_id || '').toString();
+    const tId = (t.id || (t._id ? t._id.toString() : '')).toString();
+    const tEmail = (t.email || '').toLowerCase();
+    const isSuperAdminTenant = tEmail === superAdminEmail;
 
-    const userClients = clients.filter(c => c.tenantId === t.id || (isSuperAdminTenant && !c.tenantId));
-    const userCases = cases.filter(c => c.tenantId === t.id || (isSuperAdminTenant && !c.tenantId));
-    const userTasks = tasks.filter(tk => tk.tenantId === t.id || (isSuperAdminTenant && !tk.tenantId));
-    const userTxs = transactions.filter(tr => (tr.tenantId === t.id || (isSuperAdminTenant && !tr.tenantId)) && tr.type === 'Received');
+    if (itemTenantId && tId && itemTenantId === tId) return true;
+    if (itemTenantId && tEmail && itemTenantId.toLowerCase() === tEmail) return true;
+    if (item.email && tEmail && item.email.toLowerCase() === tEmail) return true;
+
+    // Attribute untagged/legacy records or unmatched IDs to Super Admin tenant
+    if (isSuperAdminTenant) {
+      if (!itemTenantId) return true;
+      const matchAnyOther = tenants.some(otherT => {
+        if (otherT.email && otherT.email.toLowerCase() === superAdminEmail) return false;
+        const oId = (otherT.id || (otherT._id ? otherT._id.toString() : '')).toString();
+        const oEmail = (otherT.email || '').toLowerCase();
+        return (oId && itemTenantId === oId) || (oEmail && itemTenantId.toLowerCase() === oEmail);
+      });
+      if (!matchAnyOther) return true;
+    }
+    return false;
+  };
+
+  const usersList = tenants.map(t => {
+    const userClients = clients.filter(c => matchesTenant(c, t));
+    const userCases = cases.filter(c => matchesTenant(c, t));
+    const userTasks = tasks.filter(tk => matchesTenant(tk, t));
+    const userTxs = transactions.filter(tr => matchesTenant(tr, t) && tr.type === 'Received');
     const userRev = userTxs.reduce((sum, tr) => sum + (tr.amount || 0), 0);
 
     let status = 'High';
     if (userCases.length <= 2 && userTasks.length <= 3) status = 'New';
     else if (userCases.length <= 10) status = 'Moderate';
 
+    const isSuperAdminTenant = t.email && t.email.toLowerCase() === superAdminEmail;
     const lawyerName = t.settings?.lawyerName || t.lawyerName || (isSuperAdminTenant ? 'Adv. Vaibhav Sharma' : (t.email ? t.email.split('@')[0] : 'Advocate'));
     const firmName = t.settings?.firmName || t.firmName || (isSuperAdminTenant ? 'VSH Legal Chambers' : 'Chambers');
 
     return {
-      id: t.id,
+      id: t.id || (t._id ? t._id.toString() : '1'),
       lawyerName,
       firmName,
       email: t.email,
