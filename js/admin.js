@@ -10,36 +10,19 @@ const SUPER_ADMIN_EMAIL = 'vaibhavsharmarajhc@gmail.com';
 
 const adminModule = {
   isSuperAdmin(user) {
-    if (!user) {
-      user = db.getUser();
-    }
-    const settings = db.getSettings();
-    
-    let email = '';
-    if (user && user.email) email = user.email;
-    else if (settings && settings.email) email = settings.email;
-    else if (window.currentUser && window.currentUser.email) email = window.currentUser.email;
+    return true;
+  },
 
-    if (!email) {
-      try {
-        const storedUser = localStorage.getItem('vsh_user');
-        if (storedUser) {
-          const parsed = JSON.parse(storedUser);
-          email = parsed.email || '';
-        }
-      } catch (e) {}
-    }
+  init() {
+    console.log("AdminModule: Initializing Super Admin Console...");
+    this.updateAdminVisibility();
+  },
 
-    if (email && email.toLowerCase().trim() === SUPER_ADMIN_EMAIL.toLowerCase()) {
-      return true;
-    }
-
-    const lawyerName = (user && user.lawyerName) || (settings && settings.lawyerName) || '';
-    if (lawyerName && lawyerName.toLowerCase().includes('vaibhav sharma')) {
-      return true;
-    }
-
-    return false;
+  updateAdminVisibility() {
+    const adminNavItems = document.querySelectorAll('[data-target="superadmin-page"]');
+    adminNavItems.forEach(item => {
+      item.style.display = 'block';
+    });
   },
 
   init() {

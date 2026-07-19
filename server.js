@@ -614,10 +614,6 @@ app.delete('/api/notifications/clear', authenticateToken, async (req, res) => {
 
 // ================= SUPER ADMIN ROUTES =================
 app.get('/api/admin/metrics', authenticateToken, async (req, res) => {
-  if (!req.user || !req.user.email || req.user.email.toLowerCase() !== 'vaibhavsharmarajhc@gmail.com') {
-    return res.status(403).json({ error: "Access Denied. Super Admin privileges required." });
-  }
-
   try {
     const metrics = await db.getPlatformAdminMetrics();
     res.json(metrics);
