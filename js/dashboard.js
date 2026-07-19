@@ -265,7 +265,13 @@ const dashboardModule = {
           plugins: {
             legend: {
               position: window.innerWidth <= 600 ? 'bottom' : 'right',
-              labels: { color: labelColor, font: { family: 'Inter' } }
+              align: 'center',
+              labels: {
+                color: labelColor,
+                boxWidth: 12,
+                padding: 8,
+                font: { family: 'Inter', size: window.innerWidth <= 600 ? 11 : 12 }
+              }
             }
           }
         }

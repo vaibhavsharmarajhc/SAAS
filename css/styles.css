@@ -2889,4 +2889,30 @@ input:-webkit-autofill:active {
     padding: 0.2rem 0.45rem !important;
     font-size: 0.68rem !important;
   }
+
+  /* Practice Overview Chart height expansion on mobile so labels & bars do not get cut off */
+  #caseTypeChart,
+  #revenueByCaseTypeChart {
+    max-height: 320px !important;
+    height: 320px !important;
+  }
+  
+  #overview-page .card {
+    min-height: auto !important;
+    height: auto !important;
+    padding-bottom: 1rem !important;
+  }
+  
+  /* Work Flow Kanban Columns auto-adjusting height on mobile */
+  .kanban-column {
+    min-height: auto !important;
+    height: auto !important;
+    padding: 0.75rem !important;
+  }
+  
+  .kanban-cards {
+    min-height: auto !important;
+    height: auto !important;
+    gap: 0.5rem !important;
+  }
 }

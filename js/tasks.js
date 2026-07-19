@@ -1082,7 +1082,9 @@ const tasksModule = {
 
       let html = '';
       if (col.list.length === 0) {
-        html = `<div style="font-size:0.7rem; color:var(--text-muted); text-align:center; padding:1.5rem 0;">No tasks</div>`;
+        const isMobile = window.innerWidth <= 600;
+        const emptyPadding = isMobile ? '0.4rem 0.5rem' : '1.5rem 0';
+        html = `<div style="font-size:0.75rem; color:var(--text-muted); text-align:center; padding:${emptyPadding}; opacity:0.7;">No tasks</div>`;
       } else {
         col.list.forEach(t => {
           const initials = t.assigneeName ? t.assigneeName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'ME';
