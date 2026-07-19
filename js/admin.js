@@ -25,22 +25,6 @@ const adminModule = {
     });
   },
 
-  init() {
-    console.log("AdminModule: Initializing Super Admin Console...");
-    this.updateAdminVisibility();
-  },
-
-  updateAdminVisibility() {
-    const user = db.getUser();
-    const isAdmin = this.isSuperAdmin(user);
-    
-    // Toggle sidebar menu item visibility for both desktop and mobile
-    const adminNavItems = document.querySelectorAll('[data-target="superadmin-page"]');
-    adminNavItems.forEach(item => {
-      item.style.display = isAdmin ? 'block' : 'none';
-    });
-  },
-
   async render() {
     const user = db.getUser();
     if (!this.isSuperAdmin(user)) {
