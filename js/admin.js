@@ -26,7 +26,7 @@ const adminModule = {
   },
 
   async render() {
-    const container = document.getElementById('superadmin-page-content');
+    const container = document.getElementById('superadmin-page-content') || document.getElementById('superadmin-page');
     if (!container) return;
 
     let data = null;

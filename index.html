@@ -1739,98 +1739,10 @@
 
         <!-- Super Admin Platform Intelligence Console Container -->
         <div id="superadmin-page" class="page-container">
-          <!-- Privacy Integrity & Security Banner -->
-          <div class="card" style="background: linear-gradient(135deg, rgba(217,119,6,0.08) 0%, rgba(16,185,129,0.08) 100%); border: 1px solid var(--color-primary); margin-bottom: 1.5rem; padding: 1.25rem;">
-            <div style="display: flex; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
-              <div style="background: var(--color-primary); color: #fff; width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <i data-lucide="shield" style="width: 24px; height: 24px;"></i>
-              </div>
-              <div style="flex: 1; min-width: 250px;">
-                <h3 style="margin: 0 0 0.25rem 0; font-size: 1.1rem; color: var(--text-primary);">Super Admin Platform Intelligence</h3>
-                <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
-                  <strong style="color: var(--color-success);">Confidentiality Preserved:</strong> Client names, CNR numbers, and case contents remain end-to-end isolated and private to each respective advocate account. Below are aggregated platform adoption metrics and user activity telemetries.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Platform KPI Overview Cards -->
-          <div class="grid-cols-4" style="gap: 1rem; margin-bottom: 1.5rem;" id="admin-kpi-grid">
-            <div class="card kpi-card">
-              <div class="kpi-info">
-                <span class="kpi-label">Registered Advocates</span>
-                <span class="kpi-value" id="admin-total-users">1</span>
-              </div>
-              <div class="kpi-icon-wrapper info"><i data-lucide="users"></i></div>
-            </div>
-
-            <div class="card kpi-card">
-              <div class="kpi-info">
-                <span class="kpi-label">Platform Clients</span>
-                <span class="kpi-value" id="admin-total-clients">12</span>
-              </div>
-              <div class="kpi-icon-wrapper success"><i data-lucide="user-check"></i></div>
-            </div>
-
-            <div class="card kpi-card">
-              <div class="kpi-info">
-                <span class="kpi-label">Cases Managed</span>
-                <span class="kpi-value" id="admin-total-cases">18</span>
-              </div>
-              <div class="kpi-icon-wrapper"><i data-lucide="gavel"></i></div>
-            </div>
-
-            <div class="card kpi-card">
-              <div class="kpi-info">
-                <span class="kpi-label">Processed Finances</span>
-                <span class="kpi-value" id="admin-total-revenue">₹1,45,000</span>
-              </div>
-              <div class="kpi-icon-wrapper success"><i data-lucide="wallet"></i></div>
-            </div>
-          </div>
-
-          <!-- User Engagement Directory & Activity Leaderboard -->
-          <div class="card" style="padding: 1.25rem;">
-            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
-              <div>
-                <h3 style="margin: 0; font-size: 1.1rem;">Registered User Engagement Leaderboard</h3>
-                <span style="font-size: 0.75rem; color: var(--text-muted);">Platform adoption, activity levels, and case usage metrics per advocate account</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 0.5rem; width: 100%; max-width: 250px;">
-                <input type="text" class="form-control" id="admin-user-search" placeholder="Search by lawyer or email..." style="font-size: 0.8rem; padding: 0.35rem 0.65rem;">
-              </div>
-            </div>
-
-            <div class="table-responsive">
-              <table class="table-custom" id="admin-users-table">
-                <thead>
-                  <tr>
-                    <th>Advocate / Firm Name</th>
-                    <th>Account Email</th>
-                    <th>Registered Cases</th>
-                    <th>Work Tasks</th>
-                    <th>Revenue Processed</th>
-                    <th>Engagement Level</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-users-table-body">
-                  <tr>
-                    <td>
-                      <div style="font-weight: 700; color: var(--text-primary);">Adv. Vaibhav Sharma</div>
-                      <div style="font-size:0.7rem; color:var(--text-muted);">VSH Legal Chambers</div>
-                    </td>
-                    <td style="font-size:0.8rem; color:var(--text-secondary);">vaibhavsharmarajhc@gmail.com</td>
-                    <td style="font-size:0.85rem; font-weight:600;">18 Case(s)</td>
-                    <td style="font-size:0.85rem;">24 Task(s)</td>
-                    <td style="font-size:0.85rem; font-weight:700; color:var(--color-success);">₹1,45,000</td>
-                    <td>
-                      <span class="badge" style="background:rgba(16, 185, 129, 0.15); color:#10b981; font-weight:700; font-size:0.72rem; padding:0.25rem 0.6rem; border-radius:10px;">
-                        🔥 High Activity
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+          <div id="superadmin-page-content">
+            <div style="text-align:center; padding:3rem;" class="text-muted">
+              <div class="spinner" style="margin: 0 auto 1rem auto;"></div>
+              <p>Loading live platform metrics from database...</p>
             </div>
           </div>
         </div>
