@@ -2666,3 +2666,41 @@ input:-webkit-autofill:active {
     display: none !important;
   }
 }
+
+/* Stack diary view controls vertically on mobile viewports so month label sits above calendar */
+@media (max-width: 600px) {
+  .diary-controls {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+  }
+  
+  .calendar-view-selector {
+    width: 100% !important;
+    justify-content: space-around !important;
+  }
+  
+  .calendar-view-selector button {
+    flex: 1 !important;
+    text-align: center !important;
+  }
+  
+  .calendar-navigation {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+  }
+  
+  /* Month name / Current view label - List it vertically down above the calendar */
+  .current-view-label {
+    order: 3 !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin-top: 0.5rem !important;
+    font-size: 1.2rem !important;
+    display: block !important;
+  }
+}

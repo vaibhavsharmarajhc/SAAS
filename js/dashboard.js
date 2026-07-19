@@ -264,7 +264,7 @@ const dashboardModule = {
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              position: 'right',
+              position: window.innerWidth <= 600 ? 'bottom' : 'right',
               labels: { color: labelColor, font: { family: 'Inter' } }
             }
           }

@@ -265,9 +265,9 @@ const diaryModule = {
         hearings.forEach(h => {
           eventsHtml += `
             <div class="week-event-card" style="cursor:pointer;" data-case-id="${h.id}">
-              <div style="font-weight:600; color:var(--text-primary); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${h.title}</div>
-              <div style="color:var(--text-secondary); font-size:0.7rem;">Court: ${h.court}</div>
-              <div style="color:var(--color-primary); font-size:0.65rem; margin-top:0.25rem;">Stage: ${h.stage}</div>
+              <div style="font-weight:600; color:var(--text-primary); word-break:break-word; white-space:normal;">${h.title}</div>
+              <div style="color:var(--text-secondary); font-size:0.7rem; word-break:break-word; white-space:normal;">Court: ${h.court}</div>
+              <div style="color:var(--color-primary); font-size:0.65rem; margin-top:0.25rem; word-break:break-word; white-space:normal;">Stage: ${h.stage}</div>
             </div>
           `;
         });
@@ -396,7 +396,7 @@ const diaryModule = {
         const borderStyle = hasHearings ? '1px solid var(--color-primary)' : '1px solid var(--border-color)';
         
         yearHtml += `
-          <div class="card mini-month-list-item" style="display:flex; justify-content:space-between; align-items:center; padding:0.85rem 1.25rem; margin-bottom:0; border:${borderStyle};">
+          <div class="card mini-month-list-item" data-month="${month}" style="display:flex; justify-content:space-between; align-items:center; padding:0.85rem 1.25rem; margin-bottom:0; border:${borderStyle}; cursor:pointer;">
             <span style="font-weight:600; font-size:0.95rem; color:var(--text-primary);">${monthNamesFull[month]}</span>
             <span class="badge" style="background:${badgeBg}; color:${badgeColor}; font-weight:700; font-size:0.8rem; padding:0.25rem 0.6rem; border-radius:10px;">
               ${totalMonthHearings} Case(s)
@@ -407,6 +407,22 @@ const diaryModule = {
       
       yearHtml += `</div>`;
       container.innerHTML = yearHtml;
+      
+      // Bind click listeners
+      container.querySelectorAll('[data-month]').forEach(el => {
+        el.addEventListener('click', () => {
+          const mIndex = parseInt(el.getAttribute('data-month'), 10);
+          calendarState.activeView = 'month';
+          calendarState.currentDate = new Date(year, mIndex, 1);
+          
+          const selectorBtns = document.querySelectorAll('.calendar-view-selector .view-btn');
+          selectorBtns.forEach(b => b.classList.remove('active'));
+          const monthBtn = document.getElementById('view-month-btn');
+          if (monthBtn) monthBtn.classList.add('active');
+          
+          this.renderActiveView();
+        });
+      });
       return;
     }
 
@@ -415,8 +431,8 @@ const diaryModule = {
 
     for (let month = 0; month < 12; month++) {
       yearHtml += `
-        <div class="mini-month-card">
-          <div class="mini-month-name">${monthNames[month]}</div>
+        <div class="mini-month-card" data-month="${month}" style="cursor:pointer; display:flex; flex-direction:column; justify-content:space-between;">
+          <div class="mini-month-name" style="transition: color var(--transition-fast);">${monthNames[month]}</div>
           <div class="mini-month-grid">
       `;
 
@@ -455,6 +471,22 @@ const diaryModule = {
 
     yearHtml += `</div>`;
     container.innerHTML = yearHtml;
+
+    // Bind click listeners for desktop month cards
+    container.querySelectorAll('[data-month]').forEach(el => {
+      el.addEventListener('click', () => {
+        const mIndex = parseInt(el.getAttribute('data-month'), 10);
+        calendarState.activeView = 'month';
+        calendarState.currentDate = new Date(year, mIndex, 1);
+        
+        const selectorBtns = document.querySelectorAll('.calendar-view-selector .view-btn');
+        selectorBtns.forEach(b => b.classList.remove('active'));
+        const monthBtn = document.getElementById('view-month-btn');
+        if (monthBtn) monthBtn.classList.add('active');
+        
+        this.renderActiveView();
+      });
+    });
   },
 
   /**
