@@ -2808,4 +2808,85 @@ input:-webkit-autofill:active {
     text-align: center !important;
     word-break: break-all !important;
   }
+
+  /* Match font size & style of Today's Hearings Diary and High Outstanding Dues to KPI blocks on mobile */
+  #dashboard-page .card .section-header h3 {
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: var(--text-muted) !important;
+    margin: 0 !important;
+  }
+  
+  #dashboard-view-diary-link,
+  #dashboard-view-accounts-link {
+    font-size: 0.68rem !important;
+    padding: 0.2rem 0.45rem !important;
+  }
+  
+  /* Today's Hearings Diary Items on mobile */
+  #dashboard-hearings-table-body tr {
+    padding: 0.5rem 0.65rem !important;
+    margin-bottom: 0.35rem !important;
+    background: var(--bg-sidebar) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-sm) !important;
+  }
+  
+  #dashboard-hearings-table-body td div:first-child {
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+  }
+  
+  #dashboard-hearings-table-body td div:nth-child(2) {
+    font-size: 0.68rem !important;
+    color: var(--text-muted) !important;
+  }
+  
+  #dashboard-hearings-table-body td:nth-child(2) {
+    font-size: 0.68rem !important;
+    color: var(--text-muted) !important;
+  }
+  
+  #dashboard-hearings-table-body .badge {
+    font-size: 0.65rem !important;
+    padding: 0.15rem 0.4rem !important;
+  }
+  
+  /* High Outstanding Dues Items on mobile */
+  #dashboard-dues-table-body tr {
+    padding: 0.5rem 0.65rem !important;
+    margin-bottom: 0.35rem !important;
+    background: var(--bg-sidebar) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-sm) !important;
+  }
+  
+  #dashboard-dues-table-body td div:first-child {
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+  }
+  
+  #dashboard-dues-table-body td div:nth-child(2) {
+    font-size: 0.68rem !important;
+    color: var(--text-muted) !important;
+  }
+  
+  #dashboard-dues-table-body td:nth-child(2) {
+    font-size: 0.68rem !important;
+    color: var(--text-muted) !important;
+  }
+  
+  #dashboard-dues-table-body td:nth-child(3) {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+  }
+  
+  #dashboard-dues-table-body button {
+    padding: 0.2rem 0.45rem !important;
+    font-size: 0.68rem !important;
+  }
 }
