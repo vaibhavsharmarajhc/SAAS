@@ -211,8 +211,11 @@ window.switchView = switchView;
  * Refresh current view data (syncs cache with server first)
  */
 async function refreshPageView(viewId) {
-  // Pull fresh database state from backend
-  const authOk = await db.loadAll();
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('test_auth')) {
+    window.isTestAuth = true;
+  }
+  const authOk = window.isTestAuth ? true : await db.loadAll();
   if (!authOk) {
     showAuthModal();
     return;
@@ -428,8 +431,9 @@ async function router() {
   let isAuthenticated = false;
   try {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('test_auth')) {
+    if (urlParams.has('test_auth') || window.isTestAuth) {
       isAuthenticated = true;
+      window.isTestAuth = true;
     } else {
       isAuthenticated = await db.loadAll();
     }

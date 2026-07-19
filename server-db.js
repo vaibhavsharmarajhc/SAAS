@@ -1374,9 +1374,6 @@ async function clearNotifications(userId) {
   return true;
 }
 
-module.exports = {
-  initDatabase,
-  getDb,
 async function getPlatformAdminMetrics() {
   const db = await getDb();
   let tenants = [], clients = [], cases = [], transactions = [], tasks = [];

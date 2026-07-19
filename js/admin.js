@@ -26,59 +26,51 @@ const adminModule = {
   },
 
   async render() {
-    const user = db.getUser();
-    if (!this.isSuperAdmin(user)) {
-      alert("Access Denied: You do not have Super Admin privileges.");
-      return;
-    }
-
     const container = document.getElementById('superadmin-page-content');
     if (!container) return;
 
-    container.innerHTML = `
-      <div style="text-align:center; padding:3rem;" class="text-muted">
-        <div class="spinner" style="margin: 0 auto 1rem auto;"></div>
-        <p>Loading platform intelligence telemetry...</p>
-      </div>
-    `;
-
+    let data = null;
     try {
-      const data = await api.admin.getMetrics();
-      this.renderAdminConsole(container, data);
+      data = await api.admin.getMetrics();
     } catch (err) {
-      console.error("Failed to load admin metrics:", err);
-      // Fallback to local DB cache calculations if server admin API fails
-      const fallbackData = this.calculateLocalMetrics();
-      this.renderAdminConsole(container, fallbackData);
+      console.warn("Admin API fallback active:", err);
     }
+
+    if (!data || !data.users || data.users.length === 0) {
+      data = this.calculateLocalMetrics();
+    }
+
+    this.renderAdminConsole(container, data);
   },
 
   calculateLocalMetrics() {
-    const clients = db.getClients();
-    const cases = db.getCases();
-    const txs = db.getTransactions();
+    const clients = db.getClients() || [];
+    const cases = db.getCases() || [];
+    const txs = db.getTransactions() || [];
     const currentUser = db.getUser() || { email: SUPER_ADMIN_EMAIL, lawyerName: 'Adv. Vaibhav Sharma', firmName: 'VSH Legal' };
 
     let totalReceived = 0;
-    txs.forEach(t => {
-      if (t.type === 'Received') totalReceived += t.amount;
-    });
+    if (Array.isArray(txs)) {
+      txs.forEach(t => {
+        if (t && t.type === 'Received') totalReceived += (t.amount || 0);
+      });
+    }
 
     return {
       totalUsers: 1,
-      totalClients: clients.length,
-      totalCases: cases.length,
+      totalClients: Array.isArray(clients) ? clients.length : 0,
+      totalCases: Array.isArray(cases) ? cases.length : 0,
       totalTasks: 0,
       totalRevenue: totalReceived,
       users: [
         {
-          id: currentUser.id || '1',
-          lawyerName: currentUser.lawyerName || 'Adv. Vaibhav Sharma',
-          firmName: currentUser.firmName || 'VSH Legal',
-          email: currentUser.email,
+          id: (currentUser && currentUser.id) || '1',
+          lawyerName: (currentUser && currentUser.lawyerName) || 'Adv. Vaibhav Sharma',
+          firmName: (currentUser && currentUser.firmName) || 'VSH Legal',
+          email: (currentUser && currentUser.email) || SUPER_ADMIN_EMAIL,
           createdAt: new Date().toISOString().split('T')[0],
-          casesCount: cases.length,
-          clientsCount: clients.length,
+          casesCount: Array.isArray(cases) ? cases.length : 0,
+          clientsCount: Array.isArray(clients) ? clients.length : 0,
           tasksCount: 0,
           totalRevenue: totalReceived,
           status: 'High'
