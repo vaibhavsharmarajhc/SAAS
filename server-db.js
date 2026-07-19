@@ -1395,24 +1395,44 @@ async function getPlatformAdminMetrics() {
 
   let totalRevenue = 0;
   transactions.forEach(t => {
-    if (t.type === 'Received') totalRevenue += t.amount || 0;
+    if (t.type === 'Received') totalRevenue += (t.amount || 0);
   });
 
+  const superAdminEmail = 'vaibhavsharmarajhc@gmail.com';
+  const hasSuperAdmin = tenants.some(t => t.email && t.email.toLowerCase() === superAdminEmail);
+  if (!hasSuperAdmin) {
+    tenants.unshift({
+      id: 'superadmin_tenant',
+      email: superAdminEmail,
+      lawyerName: 'Adv. Vaibhav Sharma',
+      firmName: 'VSH Legal Chambers',
+      settings: {
+        lawyerName: 'Adv. Vaibhav Sharma',
+        firmName: 'VSH Legal Chambers'
+      }
+    });
+  }
+
   const usersList = tenants.map(t => {
-    const userClients = clients.filter(c => c.tenantId === t.id || c.clientId === t.id);
-    const userCases = cases.filter(c => c.tenantId === t.id);
-    const userTasks = tasks.filter(tk => tk.tenantId === t.id);
-    const userTxs = transactions.filter(tr => tr.tenantId === t.id && tr.type === 'Received');
+    const isSuperAdminTenant = t.email && t.email.toLowerCase() === superAdminEmail;
+
+    const userClients = clients.filter(c => c.tenantId === t.id || (isSuperAdminTenant && !c.tenantId));
+    const userCases = cases.filter(c => c.tenantId === t.id || (isSuperAdminTenant && !c.tenantId));
+    const userTasks = tasks.filter(tk => tk.tenantId === t.id || (isSuperAdminTenant && !tk.tenantId));
+    const userTxs = transactions.filter(tr => (tr.tenantId === t.id || (isSuperAdminTenant && !tr.tenantId)) && tr.type === 'Received');
     const userRev = userTxs.reduce((sum, tr) => sum + (tr.amount || 0), 0);
 
     let status = 'High';
     if (userCases.length <= 2 && userTasks.length <= 3) status = 'New';
     else if (userCases.length <= 10) status = 'Moderate';
 
+    const lawyerName = t.settings?.lawyerName || t.lawyerName || (isSuperAdminTenant ? 'Adv. Vaibhav Sharma' : (t.email ? t.email.split('@')[0] : 'Advocate'));
+    const firmName = t.settings?.firmName || t.firmName || (isSuperAdminTenant ? 'VSH Legal Chambers' : 'Chambers');
+
     return {
       id: t.id,
-      lawyerName: t.lawyerName || 'Advocate',
-      firmName: t.firmName || 'Chambers',
+      lawyerName,
+      firmName,
       email: t.email,
       createdAt: t.createdAt || new Date().toISOString().split('T')[0],
       casesCount: userCases.length,

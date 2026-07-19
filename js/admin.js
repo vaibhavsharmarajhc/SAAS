@@ -47,7 +47,8 @@ const adminModule = {
     const clients = db.getClients() || [];
     const cases = db.getCases() || [];
     const txs = db.getTransactions() || [];
-    const currentUser = db.getUser() || { email: SUPER_ADMIN_EMAIL, lawyerName: 'Adv. Vaibhav Sharma', firmName: 'VSH Legal' };
+    const tasks = db.getTasks() || [];
+    const currentUser = db.getUser() || { email: SUPER_ADMIN_EMAIL, lawyerName: 'Adv. Vaibhav Sharma', firmName: 'VSH Legal Chambers' };
 
     let totalReceived = 0;
     if (Array.isArray(txs)) {
@@ -56,24 +57,27 @@ const adminModule = {
       });
     }
 
+    const lawyerName = currentUser.settings?.lawyerName || currentUser.lawyerName || 'Adv. Vaibhav Sharma';
+    const firmName = currentUser.settings?.firmName || currentUser.firmName || 'VSH Legal Chambers';
+
     return {
       totalUsers: 1,
       totalClients: Array.isArray(clients) ? clients.length : 0,
       totalCases: Array.isArray(cases) ? cases.length : 0,
-      totalTasks: 0,
+      totalTasks: Array.isArray(tasks) ? tasks.length : 0,
       totalRevenue: totalReceived,
       users: [
         {
           id: (currentUser && currentUser.id) || '1',
-          lawyerName: (currentUser && currentUser.lawyerName) || 'Adv. Vaibhav Sharma',
-          firmName: (currentUser && currentUser.firmName) || 'VSH Legal',
+          lawyerName,
+          firmName,
           email: (currentUser && currentUser.email) || SUPER_ADMIN_EMAIL,
           createdAt: new Date().toISOString().split('T')[0],
           casesCount: Array.isArray(cases) ? cases.length : 0,
           clientsCount: Array.isArray(clients) ? clients.length : 0,
-          tasksCount: 0,
+          tasksCount: Array.isArray(tasks) ? tasks.length : 0,
           totalRevenue: totalReceived,
-          status: 'High'
+          status: cases.length > 5 ? 'High' : (cases.length > 2 ? 'Moderate' : 'New')
         }
       ]
     };
