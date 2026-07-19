@@ -1,8 +1,8 @@
-const CACHE_NAME = 'trackmychambers-cache-v23';
+const CACHE_NAME = 'trackmychambers-cache-v24';
 const ASSETS = [
   '/dashboard',
-  '/css/styles.css?v=1.0.22',
-  '/js/app.js',
+  '/css/styles.css?v=1.0.24',
+  '/js/app.js?v=1.0.24',
   '/js/tasks.js',
   '/js/dashboard.js',
   '/js/clients.js',
@@ -45,17 +45,20 @@ self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET' || e.request.url.includes('/api/')) {
     return;
   }
+  // Network-First Strategy: always fetch live updates from server, fallback to cache if offline
   e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      return cachedResponse || fetch(e.request).then((networkResponse) => {
-        if (networkResponse.status === 200) {
+    fetch(e.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
           const responseClone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(e.request, responseClone);
           });
         }
         return networkResponse;
-      });
-    })
+      })
+      .catch(() => {
+        return caches.match(e.request);
+      })
   );
 });

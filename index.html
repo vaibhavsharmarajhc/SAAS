@@ -16,8 +16,11 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(reg => console.log('Service Worker Registered!', reg))
+        navigator.serviceWorker.register('/sw.js?v=24')
+          .then(reg => {
+            reg.update();
+            console.log('Service Worker Auto-Updated!', reg);
+          })
           .catch(err => console.error('Service Worker registration failed: ', err));
       });
     }
@@ -2477,6 +2480,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/app.js?v=1.0.24"></script>
 </body>
 </html>
