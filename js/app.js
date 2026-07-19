@@ -56,9 +56,9 @@ const state = {
   activeView: 'dashboard-page',
 };
 
-// DOM Elements
-const sidebarMenuItems = document.querySelectorAll('.sidebar-menu .menu-item');
-const pageContainers = document.querySelectorAll('.page-container');
+// DOM Elements (evaluated dynamically per router call)
+const getSidebarMenuItems = () => document.querySelectorAll('.sidebar-menu .menu-item');
+const getPageContainers = () => document.querySelectorAll('.page-container');
 const headerPageTitle = document.getElementById('header-page-title');
 const headerQuickActionBtn = document.getElementById('header-quick-action-btn');
 const themeToggleCheckbox = document.getElementById('theme-toggle-checkbox');
@@ -154,7 +154,7 @@ export async function switchView(targetViewId) {
   }
 
   // Toggle page visibility
-  pageContainers.forEach(container => {
+  getPageContainers().forEach(container => {
     if (container.id === targetViewId) {
       container.classList.add('active');
     } else {
@@ -163,7 +163,7 @@ export async function switchView(targetViewId) {
   });
 
   // Toggle active menu state
-  sidebarMenuItems.forEach(item => {
+  getSidebarMenuItems().forEach(item => {
     if (item.getAttribute('data-target') === targetViewId) {
       item.classList.add('active');
     } else {
@@ -489,7 +489,7 @@ async function router() {
         updateDbStatusBadge();
       }
     }
-  } else if (path === '/dashboard' || path.startsWith('/dashboard-page') || path.startsWith('/overview-page') || path.startsWith('/clients-page') || path.startsWith('/cases-page') || path.startsWith('/diary-page') || path.startsWith('/accounts-page') || path.startsWith('/share-page') || path.startsWith('/tasks-page') || path.startsWith('/settings-page')) {
+  } else if (path === '/dashboard' || path.startsWith('/dashboard-page') || path.startsWith('/overview-page') || path.startsWith('/clients-page') || path.startsWith('/cases-page') || path.startsWith('/diary-page') || path.startsWith('/accounts-page') || path.startsWith('/share-page') || path.startsWith('/tasks-page') || path.startsWith('/settings-page') || path.startsWith('/superadmin-page')) {
     if (!isAuthenticated) {
       window.history.pushState({}, '', '/login');
       router();
@@ -510,6 +510,7 @@ async function router() {
           share.init();
           tasks.init();
           notificationsModule.init();
+          adminModule.init();
           appInitialized = true;
         }
 
@@ -924,7 +925,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initModals();
 
   // 3. Setup routing events for sidebar items (HTML5 history)
-  sidebarMenuItems.forEach(item => {
+  getSidebarMenuItems().forEach(item => {
     item.addEventListener('click', async (e) => {
       e.preventDefault();
       const target = item.getAttribute('data-target');
