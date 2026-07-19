@@ -1377,6 +1377,68 @@ async function clearNotifications(userId) {
 module.exports = {
   initDatabase,
   getDb,
+async function getPlatformAdminMetrics() {
+  const db = await getDb();
+  let tenants = [], clients = [], cases = [], transactions = [], tasks = [];
+
+  if (db) {
+    tenants = await db.collection('tenants').find({}).toArray();
+    clients = await db.collection('clients').find({}).toArray();
+    cases = await db.collection('cases').find({}).toArray();
+    transactions = await db.collection('transactions').find({}).toArray();
+    tasks = await db.collection('tasks').find({}).toArray();
+  } else {
+    const localDb = readDb();
+    tenants = localDb.tenants || [];
+    clients = localDb.clients || [];
+    cases = localDb.cases || [];
+    transactions = localDb.transactions || [];
+    tasks = localDb.tasks || [];
+  }
+
+  let totalRevenue = 0;
+  transactions.forEach(t => {
+    if (t.type === 'Received') totalRevenue += t.amount || 0;
+  });
+
+  const usersList = tenants.map(t => {
+    const userClients = clients.filter(c => c.tenantId === t.id || c.clientId === t.id);
+    const userCases = cases.filter(c => c.tenantId === t.id);
+    const userTasks = tasks.filter(tk => tk.tenantId === t.id);
+    const userTxs = transactions.filter(tr => tr.tenantId === t.id && tr.type === 'Received');
+    const userRev = userTxs.reduce((sum, tr) => sum + (tr.amount || 0), 0);
+
+    let status = 'High';
+    if (userCases.length <= 2 && userTasks.length <= 3) status = 'New';
+    else if (userCases.length <= 10) status = 'Moderate';
+
+    return {
+      id: t.id,
+      lawyerName: t.lawyerName || 'Advocate',
+      firmName: t.firmName || 'Chambers',
+      email: t.email,
+      createdAt: t.createdAt || new Date().toISOString().split('T')[0],
+      casesCount: userCases.length,
+      clientsCount: userClients.length,
+      tasksCount: userTasks.length,
+      totalRevenue: userRev,
+      status
+    };
+  });
+
+  return {
+    totalUsers: tenants.length,
+    totalClients: clients.length,
+    totalCases: cases.length,
+    totalTasks: tasks.length,
+    totalRevenue,
+    users: usersList
+  };
+}
+
+module.exports = {
+  getDb,
+  initDatabase,
   getTenantByEmail,
   getTenantById,
   setTenantResetCode,
@@ -1411,5 +1473,6 @@ module.exports = {
   addNotification,
   markNotificationRead,
   markAllNotificationsRead,
-  clearNotifications
+  clearNotifications,
+  getPlatformAdminMetrics
 };

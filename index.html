@@ -7,7 +7,7 @@
   <!-- SEO & Styling Meta -->
   <meta name="description" content="Premium Case Diary, Billing, Client Onboarding, and Practice Management Suite for Track My Chambers.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.18">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.19">
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Chart.js CDN -->
@@ -814,6 +814,9 @@
         </li>
         <li class="menu-item" data-target="settings-page">
           <a href="#"><i data-lucide="settings"></i> System Settings</a>
+        </li>
+        <li class="menu-item" data-target="superadmin-page" style="display:none;">
+          <a href="#"><i data-lucide="shield-check"></i> Super Admin</a>
         </li>
       </ul>
 
@@ -1729,6 +1732,14 @@
             </div>
           </div>
         </div>
+
+        <!-- Super Admin Platform Intelligence Console Container -->
+        <div id="superadmin-page" class="page-container">
+          <div id="superadmin-page-content">
+            <!-- Dynamically rendered by admin.js -->
+          </div>
+        </div>
+      </div>
       </div>
     </main>
   </div>

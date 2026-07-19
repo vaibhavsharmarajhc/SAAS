@@ -612,6 +612,21 @@ app.delete('/api/notifications/clear', authenticateToken, async (req, res) => {
   }
 });
 
+// ================= SUPER ADMIN ROUTES =================
+app.get('/api/admin/metrics', authenticateToken, async (req, res) => {
+  if (!req.user || !req.user.email || req.user.email.toLowerCase() !== 'vaibhavsharmarajhc@gmail.com') {
+    return res.status(403).json({ error: "Access Denied. Super Admin privileges required." });
+  }
+
+  try {
+    const metrics = await db.getPlatformAdminMetrics();
+    res.json(metrics);
+  } catch (err) {
+    console.error("Failed to compile admin metrics:", err);
+    res.status(500).json({ error: "Failed to compile admin metrics." });
+  }
+});
+
 // ================= SERVE STATIC CLIENT ASSETS =================
 
 // Serve styles.css from /css

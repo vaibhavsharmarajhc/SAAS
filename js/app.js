@@ -35,12 +35,14 @@ import accounts from './accounts.js';
 import share from './share.js';
 import tasks from './tasks.js';
 import notificationsModule from './notifications.js';
+import adminModule from './admin.js';
 window.tasksModule = tasks;
 window.notificationsModule = notificationsModule;
 window.casesModule = cases;
 window.accountsModule = accounts;
 window.clientsModule = clients;
 window.dashboardModule = dashboard;
+window.adminModule = adminModule;
 
 window.viewCaseDetails = function(caseId) {
   if (!caseId) return;
@@ -176,7 +178,8 @@ export async function switchView(targetViewId) {
                                 capitalizedTitle === 'Clients' ? 'Clients Onboarding' : 
                                 capitalizedTitle === 'Accounts' ? 'Accounts & Income Ledger' : 
                                 capitalizedTitle === 'Share' ? 'Client Intimation' : 
-                                capitalizedTitle === 'Tasks' ? 'Task Manager' : capitalizedTitle;
+                                capitalizedTitle === 'Tasks' ? 'Task Manager' : 
+                                capitalizedTitle === 'Superadmin' ? 'Super Admin Console' : capitalizedTitle;
 
   if (targetViewId === 'tasks-page' && typeof window.tasksModule !== 'undefined') {
     window.tasksModule.render();
@@ -237,6 +240,9 @@ async function refreshPageView(viewId) {
       break;
     case 'settings-page':
       loadSettingsForm();
+      break;
+    case 'superadmin-page':
+      adminModule.render();
       break;
   }
 }
@@ -1105,6 +1111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
  
   // 11. Run router to handle initial page load route
+  adminModule.updateAdminVisibility();
   await router();
 });
 

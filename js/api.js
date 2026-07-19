@@ -179,6 +179,12 @@ const api = {
     }
   },
 
+  admin: {
+    async getMetrics() {
+      return await fetchAPI('/api/admin/metrics');
+    }
+  },
+
   tasks: {
     async getAll() {
       return await fetchAPI('/api/tasks');
