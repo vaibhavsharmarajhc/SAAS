@@ -2677,12 +2677,20 @@ input:-webkit-autofill:active {
   
   .calendar-view-selector {
     width: 100% !important;
-    justify-content: space-around !important;
+    display: flex !important;
+    box-sizing: border-box !important;
+    padding: 0.2rem !important;
+    gap: 2px !important;
   }
   
-  .calendar-view-selector button {
-    flex: 1 !important;
+  .calendar-view-selector .view-btn {
+    flex: 1 1 0px !important;
+    min-width: 0 !important;
+    padding: 0.35rem 0.2rem !important;
+    font-size: 0.78rem !important;
     text-align: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
   }
   
   .calendar-navigation {
