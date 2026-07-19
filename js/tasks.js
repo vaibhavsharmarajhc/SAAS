@@ -1097,7 +1097,7 @@ const tasksModule = {
                 ${formattedDate ? `<span style="color: #f87171;"><i data-lucide="calendar" style="width: 10px; height: 10px; display: inline-block;"></i> ${formattedDate}</span>` : ''}
               </div>
               <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 4px; margin-top: 2px;">
-                <select class="form-control" style="font-size: 0.6rem; padding: 1px 4px; height: auto; width: 85px;" onclick="event.stopPropagation();" onchange="window.tasksModule.updateTaskKanbanStatus('${t.id}', this.value)">
+                <select class="form-control" style="font-size: 0.7rem; padding: 2px 6px; height: auto; width: auto; max-width: 120px;" onclick="event.stopPropagation();" ontouchstart="event.stopPropagation();" onchange="window.tasksModule.updateTaskKanbanStatus('${t.id}', this.value)">
                   <option value="todo" ${status === 'todo' ? 'selected' : ''}>To Do</option>
                   <option value="in-progress" ${status === 'in-progress' ? 'selected' : ''}>In Progress</option>
                   <option value="in-review" ${status === 'in-review' ? 'selected' : ''}>In Review</option>

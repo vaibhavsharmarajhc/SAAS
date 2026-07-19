@@ -29,14 +29,28 @@ const accountsModule = {
     const txs = db.getTransactions();
     const clients = db.getClients();
 
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+
+    let monthlyIncome = 0;
+    let annualIncome = 0;
     let cumulativeIncome = 0;
     let feesBilled = 0;
     let disbursementsBilled = 0;
     let unpaidDues = 0;
 
     txs.forEach(t => {
-      if (t.type === 'Received') cumulativeIncome += t.amount;
-      else if (t.type === 'Billed') feesBilled += t.amount;
+      const tDate = new Date(t.date);
+      if (t.type === 'Received') {
+        cumulativeIncome += t.amount;
+        if (tDate.getFullYear() === currentYear) {
+          annualIncome += t.amount;
+          if (tDate.getMonth() === currentMonth) {
+            monthlyIncome += t.amount;
+          }
+        }
+      } else if (t.type === 'Billed') feesBilled += t.amount;
       else if (t.type === 'Disbursed') disbursementsBilled += t.amount;
     });
 
@@ -44,6 +58,11 @@ const accountsModule = {
       const balance = db.getClientBalance(c.id);
       unpaidDues += balance.outstanding;
     });
+
+    const elMonthly = document.getElementById('ledger-monthly-income');
+    const elAnnual = document.getElementById('ledger-annual-income');
+    if (elMonthly) elMonthly.textContent = '₹' + monthlyIncome.toLocaleString('en-IN');
+    if (elAnnual) elAnnual.textContent = '₹' + annualIncome.toLocaleString('en-IN');
 
     document.getElementById('ledger-cumulative-income').textContent = '₹' + cumulativeIncome.toLocaleString('en-IN');
     document.getElementById('ledger-fees-billed').textContent = '₹' + feesBilled.toLocaleString('en-IN');

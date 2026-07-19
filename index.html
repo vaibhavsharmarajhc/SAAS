@@ -7,7 +7,7 @@
   <!-- SEO & Styling Meta -->
   <meta name="description" content="Premium Case Diary, Billing, Client Onboarding, and Practice Management Suite for Track My Chambers.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.15">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.16">
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Chart.js CDN -->
@@ -912,7 +912,7 @@
             <div class="kpi-icon-wrapper info"><i data-lucide="gavel"></i></div>
           </div>
           <!-- Onboarded Clients -->
-          <div class="card kpi-card">
+          <div class="card kpi-card kpi-card-clients">
             <div class="kpi-info">
               <span class="kpi-label">Active Clients</span>
               <span class="kpi-value" id="kpi-active-clients">0</span>
@@ -1281,7 +1281,22 @@
       <!-- Accounts Ledger and professional billing tracker -->
       <div id="accounts-page" class="page-container">
         <!-- Account Overview Panel -->
-        <div class="grid-cols-4" style="margin-bottom:1.5rem;">
+        <!-- Income & Outstanding Financial KPIs -->
+        <div class="grid-cols-3" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+          <div class="card kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Monthly Income</span>
+              <span class="kpi-value" id="ledger-monthly-income">₹0</span>
+            </div>
+            <div class="kpi-icon-wrapper success"><i data-lucide="calendar"></i></div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Annual Income</span>
+              <span class="kpi-value" id="ledger-annual-income">₹0</span>
+            </div>
+            <div class="kpi-icon-wrapper success"><i data-lucide="trending-up"></i></div>
+          </div>
           <div class="card kpi-card">
             <div class="kpi-info">
               <span class="kpi-label">Cumulative Income</span>
@@ -1318,10 +1333,10 @@
             <h3 style="font-family:'Playfair Display', serif; font-size:1.15rem; margin:0;">Professional Income Analysis</h3>
             <div style="display:flex; align-items:center; gap:0.5rem;">
               <span style="font-size:0.8rem; color:var(--text-secondary);">View:</span>
-              <select class="form-control" id="income-chart-view-select" style="width:180px; padding:0.25rem 0.5rem; font-size:0.8rem; height:auto;">
-                <option value="2026">Current Year (2026)</option>
-                <option value="2025">Year 2025</option>
-                <option value="2024">Year 2024</option>
+              <select class="form-control" id="income-chart-view-select" style="width:200px; padding:0.25rem 0.5rem; font-size:0.8rem; height:auto;">
+                <option value="2026">Month-Wise Income (2026)</option>
+                <option value="2025">Month-Wise Income (2025)</option>
+                <option value="2024">Month-Wise Income (2024)</option>
                 <option value="year-wise">Year-Wise Comparison</option>
               </select>
             </div>

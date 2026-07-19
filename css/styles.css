@@ -2712,3 +2712,100 @@ input:-webkit-autofill:active {
     display: block !important;
   }
 }
+
+/* Dashboard Mobile: Hide Active Clients and scale down remaining KPI cards */
+@media (max-width: 768px) {
+  .kpi-card-clients {
+    display: none !important;
+  }
+}
+
+@media (max-width: 600px) {
+  #dashboard-page .kpi-card {
+    padding: 0.65rem 0.85rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  #dashboard-page .kpi-label {
+    font-size: 0.68rem !important;
+    margin-bottom: 0.1rem !important;
+  }
+  #dashboard-page .kpi-value {
+    font-size: 1.05rem !important;
+  }
+  #dashboard-page .kpi-icon-wrapper {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  #dashboard-page .kpi-icon-wrapper svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  
+  /* Task Manager Mobile: Align & resize Add Task button, vertical Kanban, & Workload fixes */
+  #tasks-page .card > div:first-child {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+  }
+  
+  #btn-add-task-manager {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 0.45rem 0.75rem !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .task-view-tabs {
+    width: 100% !important;
+    flex-wrap: wrap !important;
+  }
+  
+  .task-view-tabs button {
+    flex: 1 !important;
+    justify-content: center !important;
+    padding: 0.35rem 0.2rem !important;
+    font-size: 0.72rem !important;
+  }
+  
+  /* Stack Kanban columns vertically on mobile viewports */
+  .kanban-board-container {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-x: visible !important;
+    gap: 1.25rem !important;
+  }
+  
+  .kanban-column {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+  
+  /* Fix Workload Management (Capacity planner) mobile overflow */
+  #capacity-planner-list > div > div:first-child {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.4rem !important;
+  }
+  
+  #capacity-planner-list span {
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+  
+  /* System Settings Mobile Overflow Fix */
+  #settings-page .settings-section > div {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+  }
+  
+  #settings-page .settings-section button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  
+  #selected-backup-filename {
+    text-align: center !important;
+    word-break: break-all !important;
+  }
+}
