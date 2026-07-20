@@ -49,10 +49,21 @@ const portalModule = {
 
   calculateLocalPortal(token) {
     const clients = db.getClients() || [];
-    const client = clients.find(c => c.accessToken === token || c.id === token);
+    const client = clients.find(c => (c.accessToken && c.accessToken === token) || (c.id && String(c.id) === String(token)));
     if (!client) return null;
 
-    const cases = db.getCasesForClient(client.id) || [];
+    const allCases = db.getCases() || [];
+    const cases = allCases.filter(cs => {
+      if (!cs) return false;
+      const csClientId = (cs.clientId || cs.client_id || '').toString();
+      const cId = (client.id || '').toString();
+
+      if (csClientId && cId && csClientId === cId) return true;
+      if (cs.clientName && client.name && cs.clientName.toLowerCase().trim() === client.name.toLowerCase().trim()) return true;
+      if (cs.client && client.name && String(cs.client).toLowerCase().trim() === client.name.toLowerCase().trim()) return true;
+      return false;
+    });
+
     const settings = db.getSettings() || {};
 
     return {
@@ -68,13 +79,13 @@ const portalModule = {
       },
       cases: cases.map(cs => ({
         id: cs.id,
-        caseNumber: cs.caseNumber || 'N/A',
-        title: cs.title,
-        court: cs.court || 'Court Forum',
-        caseType: cs.caseType || 'General',
+        caseNumber: cs.caseNumber || cs.cnrNumber || 'N/A',
+        title: cs.title || cs.caseTitle || 'Legal Matter',
+        court: cs.court || cs.forum || 'Court Forum',
+        caseType: cs.caseType || cs.type || 'General',
         status: cs.status || 'Active',
         stage: cs.stage || 'In Progress',
-        nextHearingDate: cs.nextHearingDate || null,
+        nextHearingDate: cs.nextHearingDate || cs.nextDate || null,
         hearings: cs.hearings || []
       }))
     };

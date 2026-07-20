@@ -1484,28 +1484,55 @@ async function getPublicClientPortalData(token) {
   let client = null, casesList = [], tenantInfo = null;
 
   if (db) {
-    client = await db.collection('clients').findOne({ accessToken: token });
+    client = await db.collection('clients').findOne({
+      $or: [
+        { accessToken: token },
+        { id: token },
+        { email: token }
+      ]
+    });
+
     if (!client) {
-      client = await db.collection('clients').findOne({ id: token });
+      const allClients = await db.collection('clients').find({}).toArray();
+      client = allClients.find(c => (c.accessToken && c.accessToken === token) || (c.id && String(c.id) === String(token)) || (c._id && c._id.toString() === String(token)));
     }
+
     if (!client) return null;
 
     const tenantId = client.tenantId;
     if (tenantId) {
       tenantInfo = await db.collection('tenants').findOne({ id: tenantId });
     }
-    casesList = await db.collection('cases').find({ clientId: client.id }).toArray();
-    if (casesList.length === 0 && tenantId) {
-      casesList = await db.collection('cases').find({ tenantId, clientId: client.id }).toArray();
-    }
+
+    const allCases = await db.collection('cases').find({}).toArray();
+    casesList = allCases.filter(cs => {
+      if (!cs) return false;
+      const csClientId = (cs.clientId || cs.client_id || '').toString();
+      const cId = (client.id || (client._id ? client._id.toString() : '')).toString();
+
+      if (csClientId && cId && csClientId === cId) return true;
+      if (cs.clientName && client.name && cs.clientName.toLowerCase().trim() === client.name.toLowerCase().trim()) return true;
+      if (cs.client && client.name && String(cs.client).toLowerCase().trim() === client.name.toLowerCase().trim()) return true;
+      return false;
+    });
+
   } else {
     const localDb = readDb();
     const clients = localDb.clients || [];
-    client = clients.find(c => c.accessToken === token || c.id === token);
+    client = clients.find(c => (c.accessToken && c.accessToken === token) || (c.id && String(c.id) === String(token)));
     if (!client) return null;
 
     const cases = localDb.cases || [];
-    casesList = cases.filter(cs => cs.clientId === client.id);
+    casesList = cases.filter(cs => {
+      if (!cs) return false;
+      const csClientId = (cs.clientId || cs.client_id || '').toString();
+      const cId = (client.id || '').toString();
+
+      if (csClientId && cId && csClientId === cId) return true;
+      if (cs.clientName && client.name && cs.clientName.toLowerCase().trim() === client.name.toLowerCase().trim()) return true;
+      if (cs.client && client.name && String(cs.client).toLowerCase().trim() === client.name.toLowerCase().trim()) return true;
+      return false;
+    });
 
     const tenants = localDb.tenants || [];
     tenantInfo = tenants.find(t => t.id === client.tenantId);
@@ -1516,14 +1543,14 @@ async function getPublicClientPortalData(token) {
   }
 
   const publicCases = casesList.map(cs => ({
-    id: cs.id,
-    caseNumber: cs.caseNumber || 'N/A',
-    title: cs.title,
-    court: cs.court || 'Court Forum',
-    caseType: cs.caseType || 'General',
+    id: cs.id || (cs._id ? cs._id.toString() : '1'),
+    caseNumber: cs.caseNumber || cs.cnrNumber || 'N/A',
+    title: cs.title || cs.caseTitle || 'Legal Matter',
+    court: cs.court || cs.forum || 'Court Forum',
+    caseType: cs.caseType || cs.type || 'General',
     status: cs.status || 'Active',
     stage: cs.stage || 'In Progress',
-    nextHearingDate: cs.nextHearingDate || null,
+    nextHearingDate: cs.nextHearingDate || cs.nextDate || null,
     hearings: (cs.hearings || []).map(h => ({
       date: h.date,
       stage: h.stage,
@@ -1536,7 +1563,7 @@ async function getPublicClientPortalData(token) {
 
   return {
     client: {
-      id: client.id,
+      id: client.id || (client._id ? client._id.toString() : '1'),
       name: client.name,
       type: client.type || 'Individual',
       accessToken: client.accessToken
