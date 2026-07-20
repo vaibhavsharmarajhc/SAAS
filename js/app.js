@@ -439,6 +439,8 @@ async function router() {
     if (urlParams.has('test_auth') || window.isTestAuth) {
       isAuthenticated = true;
       window.isTestAuth = true;
+    } else if (path.startsWith('/portal') || path.startsWith('/portal-page')) {
+      isAuthenticated = false;
     } else {
       isAuthenticated = await db.loadAll();
     }

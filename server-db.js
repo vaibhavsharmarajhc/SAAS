@@ -302,6 +302,7 @@ async function getClient(tenantId, id) {
 async function addClient(tenantId, clientData) {
   const newClient = {
     id: "c_" + Date.now(),
+    accessToken: "pt_" + Math.random().toString(36).substring(2, 11) + Date.now().toString(36),
     tenantId,
     name: clientData.name || "",
     type: clientData.type || "Individual",
@@ -1484,24 +1485,29 @@ async function getPublicClientPortalData(token) {
   let client = null, casesList = [], tenantInfo = null;
 
   if (db) {
-    client = await db.collection('clients').findOne({
-      $or: [
-        { accessToken: token },
-        { id: token },
-        { email: token }
-      ]
-    });
+    const allClients = await db.collection('clients').find({}).toArray();
+    client = allClients.find(c => {
+      if (!c) return false;
+      const cAccessToken = c.accessToken || '';
+      const cId = (c.id || (c._id ? c._id.toString() : '')).toString();
+      const cEmail = (c.email || '').toLowerCase();
+      const tokenLower = token.toLowerCase();
 
-    if (!client) {
-      const allClients = await db.collection('clients').find({}).toArray();
-      client = allClients.find(c => (c.accessToken && c.accessToken === token) || (c.id && String(c.id) === String(token)) || (c._id && c._id.toString() === String(token)));
-    }
+      return (cAccessToken && cAccessToken === token) ||
+             (cId && cId === token) ||
+             (cEmail && cEmail === tokenLower);
+    });
 
     if (!client) return null;
 
     const tenantId = client.tenantId;
     if (tenantId) {
-      tenantInfo = await db.collection('tenants').findOne({ id: tenantId });
+      tenantInfo = await db.collection('tenants').findOne({
+        $or: [
+          { id: tenantId },
+          { email: tenantId }
+        ]
+      });
     }
 
     const allCases = await db.collection('cases').find({}).toArray();
@@ -1519,7 +1525,18 @@ async function getPublicClientPortalData(token) {
   } else {
     const localDb = readDb();
     const clients = localDb.clients || [];
-    client = clients.find(c => (c.accessToken && c.accessToken === token) || (c.id && String(c.id) === String(token)));
+    client = clients.find(c => {
+      if (!c) return false;
+      const cAccessToken = c.accessToken || '';
+      const cId = (c.id || '').toString();
+      const cEmail = (c.email || '').toLowerCase();
+      const tokenLower = token.toLowerCase();
+
+      return (cAccessToken && cAccessToken === token) ||
+             (cId && cId === token) ||
+             (cEmail && cEmail === tokenLower);
+    });
+
     if (!client) return null;
 
     const cases = localDb.cases || [];
