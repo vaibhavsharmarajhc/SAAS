@@ -1483,19 +1483,23 @@ async function getPublicClientPortalData(token) {
   if (!token) return null;
   const db = await getDb();
   let client = null, casesList = [], tenantInfo = null;
+  const tokenClean = String(token).toLowerCase().trim();
 
   if (db) {
     const allClients = await db.collection('clients').find({}).toArray();
     client = allClients.find(c => {
       if (!c) return false;
-      const cAccessToken = c.accessToken || '';
-      const cId = (c.id || (c._id ? c._id.toString() : '')).toString();
-      const cEmail = (c.email || '').toLowerCase();
-      const tokenLower = token.toLowerCase();
+      const cAccessToken = (c.accessToken || '').toString();
+      const cId = (c.id || '').toString();
+      const cMongoId = c._id ? c._id.toString() : '';
+      const cEmail = (c.email || '').toLowerCase().trim();
+      const cName = (c.name || '').toLowerCase().trim();
 
       return (cAccessToken && cAccessToken === token) ||
              (cId && cId === token) ||
-             (cEmail && cEmail === tokenLower);
+             (cMongoId && cMongoId === token) ||
+             (cEmail && cEmail === tokenClean) ||
+             (cName && cName === tokenClean);
     });
 
     if (!client) return null;
@@ -1510,15 +1514,25 @@ async function getPublicClientPortalData(token) {
       });
     }
 
+    if (!tenantInfo) {
+      tenantInfo = await db.collection('tenants').findOne({ email: 'vaibhavsharmarajhc@gmail.com' });
+    }
+
+    const cId = (client.id || '').toString();
+    const cMongoId = client._id ? client._id.toString() : '';
+    const cToken = (client.accessToken || '').toString();
+    const cName = (client.name || '').toLowerCase().trim();
+
     const allCases = await db.collection('cases').find({}).toArray();
     casesList = allCases.filter(cs => {
       if (!cs) return false;
       const csClientId = (cs.clientId || cs.client_id || '').toString();
-      const cId = (client.id || (client._id ? client._id.toString() : '')).toString();
+      const csClientName = (cs.clientName || cs.client || '').toString().toLowerCase().trim();
 
       if (csClientId && cId && csClientId === cId) return true;
-      if (cs.clientName && client.name && cs.clientName.toLowerCase().trim() === client.name.toLowerCase().trim()) return true;
-      if (cs.client && client.name && String(cs.client).toLowerCase().trim() === client.name.toLowerCase().trim()) return true;
+      if (csClientId && cMongoId && csClientId === cMongoId) return true;
+      if (csClientId && cToken && csClientId === cToken) return true;
+      if (cName && csClientName && (csClientName === cName || csClientName.includes(cName) || cName.includes(csClientName))) return true;
       return false;
     });
 
@@ -1527,27 +1541,32 @@ async function getPublicClientPortalData(token) {
     const clients = localDb.clients || [];
     client = clients.find(c => {
       if (!c) return false;
-      const cAccessToken = c.accessToken || '';
+      const cAccessToken = (c.accessToken || '').toString();
       const cId = (c.id || '').toString();
-      const cEmail = (c.email || '').toLowerCase();
-      const tokenLower = token.toLowerCase();
+      const cEmail = (c.email || '').toLowerCase().trim();
+      const cName = (c.name || '').toLowerCase().trim();
 
       return (cAccessToken && cAccessToken === token) ||
              (cId && cId === token) ||
-             (cEmail && cEmail === tokenLower);
+             (cEmail && cEmail === tokenClean) ||
+             (cName && cName === tokenClean);
     });
 
     if (!client) return null;
+
+    const cId = (client.id || '').toString();
+    const cToken = (client.accessToken || '').toString();
+    const cName = (client.name || '').toLowerCase().trim();
 
     const cases = localDb.cases || [];
     casesList = cases.filter(cs => {
       if (!cs) return false;
       const csClientId = (cs.clientId || cs.client_id || '').toString();
-      const cId = (client.id || '').toString();
+      const csClientName = (cs.clientName || cs.client || '').toString().toLowerCase().trim();
 
       if (csClientId && cId && csClientId === cId) return true;
-      if (cs.clientName && client.name && cs.clientName.toLowerCase().trim() === client.name.toLowerCase().trim()) return true;
-      if (cs.client && client.name && String(cs.client).toLowerCase().trim() === client.name.toLowerCase().trim()) return true;
+      if (csClientId && cToken && csClientId === cToken) return true;
+      if (cName && csClientName && (csClientName === cName || csClientName.includes(cName) || cName.includes(csClientName))) return true;
       return false;
     });
 

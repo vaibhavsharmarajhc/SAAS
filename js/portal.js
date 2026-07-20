@@ -49,18 +49,35 @@ const portalModule = {
 
   calculateLocalPortal(token) {
     const clients = db.getClients() || [];
-    const client = clients.find(c => (c.accessToken && c.accessToken === token) || (c.id && String(c.id) === String(token)));
+    const tokenClean = String(token || '').toLowerCase().trim();
+    const client = clients.find(c => {
+      if (!c) return false;
+      const cAccessToken = (c.accessToken || '').toString();
+      const cId = (c.id || '').toString();
+      const cEmail = (c.email || '').toLowerCase().trim();
+      const cName = (c.name || '').toLowerCase().trim();
+
+      return (cAccessToken && cAccessToken === token) ||
+             (cId && cId === token) ||
+             (cEmail && cEmail === tokenClean) ||
+             (cName && cName === tokenClean);
+    });
+
     if (!client) return null;
+
+    const cId = (client.id || '').toString();
+    const cToken = (client.accessToken || '').toString();
+    const cName = (client.name || '').toLowerCase().trim();
 
     const allCases = db.getCases() || [];
     const cases = allCases.filter(cs => {
       if (!cs) return false;
       const csClientId = (cs.clientId || cs.client_id || '').toString();
-      const cId = (client.id || '').toString();
+      const csClientName = (cs.clientName || cs.client || '').toString().toLowerCase().trim();
 
       if (csClientId && cId && csClientId === cId) return true;
-      if (cs.clientName && client.name && cs.clientName.toLowerCase().trim() === client.name.toLowerCase().trim()) return true;
-      if (cs.client && client.name && String(cs.client).toLowerCase().trim() === client.name.toLowerCase().trim()) return true;
+      if (csClientId && cToken && csClientId === cToken) return true;
+      if (cName && csClientName && (csClientName === cName || csClientName.includes(cName) || cName.includes(csClientName))) return true;
       return false;
     });
 
