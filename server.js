@@ -266,6 +266,29 @@ app.delete('/api/clients/:id', authenticateToken, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Failed to delete client profile." });
   }
+app.post('/api/clients/:id/regenerate-token', authenticateToken, async (req, res) => {
+  try {
+    const newToken = await db.regenerateClientToken(req.user.id, req.params.id);
+    res.json({ success: true, accessToken: newToken });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to regenerate client access token." });
+  }
+});
+
+/**
+ * Public Client Access Portal Endpoint (No session auth required)
+ */
+app.get('/api/portal/:token', async (req, res) => {
+  try {
+    const portalData = await db.getPublicClientPortalData(req.params.token);
+    if (!portalData) {
+      return res.status(404).json({ error: "Client access portal link invalid or expired." });
+    }
+    res.json(portalData);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load client case portal." });
+  }
+});
 });
 
 /**

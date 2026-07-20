@@ -1478,6 +1478,99 @@ async function getPlatformAdminMetrics() {
   };
 }
 
+async function getPublicClientPortalData(token) {
+  if (!token) return null;
+  const db = await getDb();
+  let client = null, casesList = [], tenantInfo = null;
+
+  if (db) {
+    client = await db.collection('clients').findOne({ accessToken: token });
+    if (!client) {
+      client = await db.collection('clients').findOne({ id: token });
+    }
+    if (!client) return null;
+
+    const tenantId = client.tenantId;
+    if (tenantId) {
+      tenantInfo = await db.collection('tenants').findOne({ id: tenantId });
+    }
+    casesList = await db.collection('cases').find({ clientId: client.id }).toArray();
+    if (casesList.length === 0 && tenantId) {
+      casesList = await db.collection('cases').find({ tenantId, clientId: client.id }).toArray();
+    }
+  } else {
+    const localDb = readDb();
+    const clients = localDb.clients || [];
+    client = clients.find(c => c.accessToken === token || c.id === token);
+    if (!client) return null;
+
+    const cases = localDb.cases || [];
+    casesList = cases.filter(cs => cs.clientId === client.id);
+
+    const tenants = localDb.tenants || [];
+    tenantInfo = tenants.find(t => t.id === client.tenantId);
+  }
+
+  if (!client.accessToken) {
+    client.accessToken = token;
+  }
+
+  const publicCases = casesList.map(cs => ({
+    id: cs.id,
+    caseNumber: cs.caseNumber || 'N/A',
+    title: cs.title,
+    court: cs.court || 'Court Forum',
+    caseType: cs.caseType || 'General',
+    status: cs.status || 'Active',
+    stage: cs.stage || 'In Progress',
+    nextHearingDate: cs.nextHearingDate || null,
+    hearings: (cs.hearings || []).map(h => ({
+      date: h.date,
+      stage: h.stage,
+      notes: h.notes || ''
+    }))
+  }));
+
+  const lawyerName = tenantInfo?.settings?.lawyerName || tenantInfo?.lawyerName || 'Adv. Vaibhav Sharma';
+  const firmName = tenantInfo?.settings?.firmName || tenantInfo?.firmName || 'VSH Legal Chambers';
+
+  return {
+    client: {
+      id: client.id,
+      name: client.name,
+      type: client.type || 'Individual',
+      accessToken: client.accessToken
+    },
+    chambers: {
+      lawyerName,
+      firmName
+    },
+    cases: publicCases
+  };
+}
+
+async function regenerateClientToken(tenantId, clientId) {
+  const db = await getDb();
+  const newToken = 'pt_' + Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
+
+  if (db) {
+    await db.collection('clients').updateOne(
+      { id: clientId },
+      { $set: { accessToken: newToken } }
+    );
+  } else {
+    const localDb = readDb();
+    localDb.clients = localDb.clients || [];
+    const idx = localDb.clients.findIndex(c => c.id === clientId);
+    if (idx !== -1) {
+      localDb.clients[idx].accessToken = newToken;
+      writeDb(localDb);
+    }
+  }
+
+  return newToken;
+}
+
 module.exports = {
   getDb,
   initDatabase,
@@ -1516,5 +1609,7 @@ module.exports = {
   markNotificationRead,
   markAllNotificationsRead,
   clearNotifications,
-  getPlatformAdminMetrics
+  getPlatformAdminMetrics,
+  getPublicClientPortalData,
+  regenerateClientToken
 };

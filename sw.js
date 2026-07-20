@@ -1,8 +1,8 @@
-const CACHE_NAME = 'trackmychambers-cache-v27';
+const CACHE_NAME = 'trackmychambers-cache-v28';
 const ASSETS = [
   '/dashboard',
-  '/css/styles.css?v=1.0.27',
-  '/js/app.js?v=1.0.27',
+  '/css/styles.css?v=1.0.28',
+  '/js/app.js?v=1.0.28',
   '/js/tasks.js',
   '/js/dashboard.js',
   '/js/clients.js',
@@ -10,7 +10,8 @@ const ASSETS = [
   '/js/diary.js',
   '/js/accounts.js',
   '/js/share.js',
-  '/js/admin.js'
+  '/js/admin.js',
+  '/js/portal.js'
 ];
 
 self.addEventListener('install', (e) => {

@@ -208,8 +208,9 @@ const clientsModule = {
         <td>${c.onboardingDate}</td>
         <td style="${balanceStyle}">₹${balance.outstanding.toLocaleString('en-IN')}</td>
         <td>
-          <div style="display:flex; gap:0.5rem;">
+          <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
             <button class="btn btn-secondary btn-dossier" style="padding:0.25rem 0.5rem; font-size:0.75rem;" data-id="${c.id}"><i data-lucide="folder" style="width:12px; height:12px;"></i> Dossier</button>
+            <button class="btn btn-secondary btn-copy-portal" style="padding:0.25rem 0.5rem; font-size:0.75rem;" data-id="${c.id}"><i data-lucide="link" style="width:12px; height:12px;"></i> Copy Link</button>
             <button class="btn btn-danger btn-delete-client" style="padding:0.25rem 0.5rem; font-size:0.75rem;" data-id="${c.id}"><i data-lucide="trash-2" style="width:12px; height:12px;"></i></button>
           </div>
         </td>
@@ -217,6 +218,7 @@ const clientsModule = {
 
       // Event handlers
       row.querySelector('.btn-dossier').addEventListener('click', () => this.showClientDossier(c.id));
+      row.querySelector('.btn-copy-portal').addEventListener('click', () => this.copyClientPortalLink(c.id));
       row.querySelector('.btn-delete-client').addEventListener('click', () => this.deleteClient(c.id));
 
       tableBody.appendChild(row);
@@ -225,16 +227,37 @@ const clientsModule = {
     lucide.createIcons();
   },
 
-  /**
-   * Delete Client Action
-   */
-  async deleteClient(id) {
+  copyClientPortalLink(id) {
     const client = db.getClient(id);
     if (!client) return;
 
-    if (confirm(`Are you sure you want to delete client "${client.name}"? This will also permanently delete all associated cases and billing history!`)) {
-      await db.deleteClient(id);
+    let token = client.accessToken || client.id;
+    const portalUrl = `${window.location.origin}/portal?token=${token}`;
+
+    try {
+      navigator.clipboard.writeText(portalUrl);
+      alert(`Client Access Portal Link copied to clipboard:\n\n${portalUrl}`);
+    } catch (err) {
+      prompt("Copy Client Access Portal Link below:", portalUrl);
+    }
+  },
+
+  async regeneratePortalLink(id) {
+    const client = db.getClient(id);
+    if (!client) return;
+
+    if (confirm(`Regenerate portal access link for "${client.name}"? The previous link will stop working instantly.`)) {
+      try {
+        const res = await api.clients.regenerateToken(id);
+        if (res && res.accessToken) {
+          client.accessToken = res.accessToken;
+        }
+      } catch (e) {
+        client.accessToken = 'pt_' + Math.random().toString(36).substring(2, 11);
+      }
       this.render();
+      this.showClientDossier(id);
+      this.copyClientPortalLink(id);
     }
   },
 
@@ -372,6 +395,20 @@ const clientsModule = {
           <h1 style="color: ${balance.outstanding > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-size:1.8rem; font-family:'Inter',sans-serif; font-weight:700;">
             ₹${balance.outstanding.toLocaleString('en-IN')}
           </h1>
+        </div>
+      </div>
+
+      <!-- Client Access Portal Link Card -->
+      <div class="card" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%); border: 1px solid var(--color-primary); margin-bottom: 1.5rem; padding: 1rem 1.25rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+          <div>
+            <h4 style="margin:0 0 0.2rem 0; font-size:0.95rem; color:var(--text-primary);">Client Direct Access Portal Link</h4>
+            <span style="font-size:0.78rem; color:var(--text-secondary);">Direct link for client to track case progress and hearing dates (no password required, fees hidden).</span>
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-primary" onclick="clientsModule.copyClientPortalLink('${client.id}')" style="padding:0.35rem 0.75rem; font-size:0.8rem;"><i data-lucide="copy"></i> Copy Portal Link</button>
+            <button class="btn btn-secondary" onclick="clientsModule.regeneratePortalLink('${client.id}')" style="padding:0.35rem 0.75rem; font-size:0.8rem;"><i data-lucide="refresh-cw"></i> Regenerate Link</button>
+          </div>
         </div>
       </div>
 

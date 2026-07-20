@@ -36,6 +36,7 @@ import share from './share.js';
 import tasks from './tasks.js';
 import notificationsModule from './notifications.js';
 import adminModule from './admin.js';
+import portalModule from './portal.js';
 window.tasksModule = tasks;
 window.notificationsModule = notificationsModule;
 window.casesModule = cases;
@@ -43,6 +44,7 @@ window.accountsModule = accounts;
 window.clientsModule = clients;
 window.dashboardModule = dashboard;
 window.adminModule = adminModule;
+window.portalModule = portalModule;
 
 window.viewCaseDetails = function(caseId) {
   if (!caseId) return;
@@ -246,6 +248,9 @@ async function refreshPageView(viewId) {
       break;
     case 'superadmin-page':
       adminModule.render();
+      break;
+    case 'portal-page':
+      portalModule.render();
       break;
   }
 }
@@ -493,6 +498,25 @@ async function router() {
         updateDbStatusBadge();
       }
     }
+  } else if (path.startsWith('/portal') || path.startsWith('/portal-page')) {
+    if (dashboardApp) {
+      dashboardApp.style.display = 'flex';
+      document.body.classList.add('app-active');
+      
+      const sidebar = document.querySelector('.app-sidebar');
+      if (sidebar) sidebar.style.display = 'none';
+      const header = document.querySelector('.app-header');
+      if (header) header.style.display = 'none';
+
+      getPageContainers().forEach(container => {
+        if (container.id === 'portal-page') {
+          container.classList.add('active');
+        } else {
+          container.classList.remove('active');
+        }
+      });
+      portalModule.render();
+    }
   } else if (path === '/dashboard' || path.startsWith('/dashboard-page') || path.startsWith('/overview-page') || path.startsWith('/clients-page') || path.startsWith('/cases-page') || path.startsWith('/diary-page') || path.startsWith('/accounts-page') || path.startsWith('/share-page') || path.startsWith('/tasks-page') || path.startsWith('/settings-page') || path.startsWith('/superadmin-page')) {
     if (!isAuthenticated) {
       window.history.pushState({}, '', '/login');
@@ -501,6 +525,11 @@ async function router() {
       if (dashboardApp) {
         dashboardApp.style.display = 'flex';
         document.body.classList.add('app-active');
+        
+        const sidebar = document.querySelector('.app-sidebar');
+        if (sidebar) sidebar.style.display = '';
+        const header = document.querySelector('.app-header');
+        if (header) header.style.display = '';
         
         // Initialize dashboard modules once
         if (!appInitialized) {

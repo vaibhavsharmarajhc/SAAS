@@ -104,6 +104,18 @@ const api = {
       return await fetchAPI(`/api/clients/${id}`, {
         method: 'DELETE'
       });
+    },
+
+    async regenerateToken(id) {
+      return await fetchAPI(`/api/clients/${id}/regenerate-token`, {
+        method: 'POST'
+      });
+    }
+  },
+
+  portal: {
+    async get(token) {
+      return await fetchAPI(`/api/portal/${token}`);
     }
   },
 
