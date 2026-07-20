@@ -266,6 +266,7 @@ app.delete('/api/clients/:id', authenticateToken, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Failed to delete client profile." });
   }
+});
 app.post('/api/clients/:id/regenerate-token', authenticateToken, async (req, res) => {
   try {
     const newToken = await db.regenerateClientToken(req.user.id, req.params.id);
@@ -288,7 +289,6 @@ app.get('/api/portal/:token', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Failed to load client case portal." });
   }
-});
 });
 
 /**

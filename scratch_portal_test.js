@@ -6,7 +6,7 @@ async function testPortal() {
   console.log("Starting local server...");
   const server = spawn('node', ['server.js'], { cwd: __dirname });
 
-  await new Promise(r => setTimeout(r, 3500));
+  await new Promise(r => setTimeout(r, 4500));
 
   try {
     console.log("Launching headless browser...");
@@ -15,6 +15,11 @@ async function testPortal() {
 
     page.on('console', msg => console.log('BROWSER LOG:', msg.text()));
     page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
+    page.on('response', resp => {
+      if (resp.url().includes('/api/')) {
+        console.log(`API RESPONSE [${resp.status()}]: ${resp.url()}`);
+      }
+    });
 
     console.log("Navigating to public client portal link http://localhost:8080/portal?token=c_1_t_1784283098735...");
     await page.goto('http://localhost:8080/portal?token=c_1_t_1784283098735', { waitUntil: 'networkidle' });

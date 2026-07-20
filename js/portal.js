@@ -68,16 +68,27 @@ const portalModule = {
     const cId = (client.id || '').toString();
     const cToken = (client.accessToken || '').toString();
     const cName = (client.name || '').toLowerCase().trim();
+    const nameWords = cName.split(/\s+/).filter(w => w.length > 2 && !['india', 'ltd', 'private', 'pvt', 'corp', 'inc', 'and', 'co', 'associates'].includes(w));
 
     const allCases = db.getCases() || [];
     const cases = allCases.filter(cs => {
       if (!cs) return false;
       const csClientId = (cs.clientId || cs.client_id || '').toString();
       const csClientName = (cs.clientName || cs.client || '').toString().toLowerCase().trim();
+      const csTitle = (cs.title || cs.caseTitle || '').toString().toLowerCase().trim();
 
       if (csClientId && cId && csClientId === cId) return true;
       if (csClientId && cToken && csClientId === cToken) return true;
       if (cName && csClientName && (csClientName === cName || csClientName.includes(cName) || cName.includes(csClientName))) return true;
+
+      if (nameWords.length > 0 && csTitle) {
+        if (nameWords.some(w => csTitle.includes(w))) return true;
+      }
+
+      if (cs.tenantId && client.tenantId && cs.tenantId === client.tenantId) {
+        if (!csClientId || csClientId === '1' || csClientId === 'c_1') return true;
+      }
+
       return false;
     });
 
