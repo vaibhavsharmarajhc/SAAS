@@ -388,10 +388,17 @@ async function getCase(tenantId, id) {
 }
 
 async function addCase(tenantId, caseObj) {
+  let clientName = caseObj.clientName || "";
+  try {
+    const clientDoc = await getClient(tenantId, caseObj.clientId);
+    if (clientDoc && clientDoc.name) clientName = clientDoc.name;
+  } catch (e) {}
+
   const newCase = {
     id: "case_" + Date.now(),
     tenantId,
     clientId: caseObj.clientId,
+    clientName,
     caseNumber: caseObj.caseNumber || "N/A",
     title: caseObj.title || "",
     court: caseObj.court || "",
@@ -1485,6 +1492,11 @@ async function getPublicClientPortalData(token) {
   let client = null, casesList = [], tenantInfo = null;
   const tokenClean = String(token).toLowerCase().trim();
 
+  const getNum = str => {
+    const m = String(str).match(/c_(\d+)/i) || String(str).match(/client_(\d+)/i) || String(str).match(/^(\d+)$/);
+    return m ? m[1] : null;
+  };
+
   if (db) {
     const allClients = await db.collection('clients').find({}).toArray();
     client = allClients.find(c => {
@@ -1522,18 +1534,23 @@ async function getPublicClientPortalData(token) {
     const cMongoId = client._id ? client._id.toString() : '';
     const cToken = (client.accessToken || '').toString();
     const cName = (client.name || '').toLowerCase().trim();
+    const cNum = getNum(cId) || getNum(tokenClean);
     const nameWords = cName.split(/\s+/).filter(w => w.length > 2 && !['india', 'ltd', 'private', 'pvt', 'corp', 'inc', 'and', 'co', 'associates'].includes(w));
 
+    const tenantClients = tenantId ? allClients.filter(c => c.tenantId === tenantId) : [];
     const allCases = await db.collection('cases').find({}).toArray();
+
     casesList = allCases.filter(cs => {
       if (!cs) return false;
       const csClientId = (cs.clientId || cs.client_id || '').toString();
       const csClientName = (cs.clientName || cs.client || '').toString().toLowerCase().trim();
       const csTitle = (cs.title || cs.caseTitle || '').toString().toLowerCase().trim();
+      const csNum = getNum(csClientId);
 
       if (csClientId && cId && csClientId === cId) return true;
       if (csClientId && cMongoId && csClientId === cMongoId) return true;
       if (csClientId && cToken && csClientId === cToken) return true;
+      if (csNum && cNum && csNum === cNum) return true;
       if (cName && csClientName && (csClientName === cName || csClientName.includes(cName) || cName.includes(csClientName))) return true;
 
       if (nameWords.length > 0 && csTitle) {
@@ -1541,7 +1558,7 @@ async function getPublicClientPortalData(token) {
       }
 
       if (cs.tenantId && client.tenantId && cs.tenantId === client.tenantId) {
-        if (!csClientId || csClientId === '1' || csClientId === 'c_1') return true;
+        if (!csClientId || csClientId === '1' || csClientId === 'c_1' || tenantClients.length <= 1) return true;
       }
 
       return false;
@@ -1568,17 +1585,21 @@ async function getPublicClientPortalData(token) {
     const cId = (client.id || '').toString();
     const cToken = (client.accessToken || '').toString();
     const cName = (client.name || '').toLowerCase().trim();
+    const cNum = getNum(cId) || getNum(tokenClean);
     const nameWords = cName.split(/\s+/).filter(w => w.length > 2 && !['india', 'ltd', 'private', 'pvt', 'corp', 'inc', 'and', 'co', 'associates'].includes(w));
 
+    const tenantClients = clients.filter(c => c.tenantId === client.tenantId);
     const cases = localDb.cases || [];
     casesList = cases.filter(cs => {
       if (!cs) return false;
       const csClientId = (cs.clientId || cs.client_id || '').toString();
       const csClientName = (cs.clientName || cs.client || '').toString().toLowerCase().trim();
       const csTitle = (cs.title || cs.caseTitle || '').toString().toLowerCase().trim();
+      const csNum = getNum(csClientId);
 
       if (csClientId && cId && csClientId === cId) return true;
       if (csClientId && cToken && csClientId === cToken) return true;
+      if (csNum && cNum && csNum === cNum) return true;
       if (cName && csClientName && (csClientName === cName || csClientName.includes(cName) || cName.includes(csClientName))) return true;
 
       if (nameWords.length > 0 && csTitle) {
@@ -1586,7 +1607,7 @@ async function getPublicClientPortalData(token) {
       }
 
       if (cs.tenantId && client.tenantId && cs.tenantId === client.tenantId) {
-        if (!csClientId || csClientId === '1' || csClientId === 'c_1') return true;
+        if (!csClientId || csClientId === '1' || csClientId === 'c_1' || tenantClients.length <= 1) return true;
       }
 
       return false;
