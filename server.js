@@ -288,6 +288,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     res.json({ 
       success: true, 
       code: emailResult.sent ? undefined : resetCode,
+      emailError: emailResult.sent ? undefined : (emailResult.error || "Email delivery skipped"),
       message: emailResult.sent
         ? "A verification code has been sent to your email address."
         : "A verification code has been generated. For testing, it is displayed below." 

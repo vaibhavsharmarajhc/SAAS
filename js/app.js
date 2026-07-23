@@ -768,9 +768,9 @@ function initAuthenticationHandlers() {
       if (res && res.success) {
         forgotSuccessBanner.innerHTML = `
           <strong style="color: var(--color-success); display: flex; align-items: center; gap: 4px; margin-bottom: 0.25rem;">
-            <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> Recovery Code Sent
+            <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> ${res.code ? 'Recovery Code Generated' : 'Recovery Code Sent'}
           </strong>
-          A 6-digit recovery code has been sent to your email address. Please check your inbox (and spam folder).<br>
+          ${res.code ? 'Email dispatch notice: ' + (res.emailError || 'Resend testing mode') + '<br>Check your inbox or use the recovery code below:' : 'A 6-digit recovery code has been sent to your email address. Please check your inbox (and spam folder).'}
           ${res.code ? `<div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed rgba(255,255,255,0.08);">Local Testing Code: <strong style="font-size: 1.1rem; color: var(--color-primary);">${res.code}</strong></div>` : ''}
         `;
         forgotSuccessBanner.style.display = 'block';
