@@ -56,13 +56,13 @@ app.get('/api/status', async (req, res) => {
 
 // ================= EMAIL UTILITIES (RESEND API INTEGRATION) =================
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const RESEND_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'Track My Chambers <onboarding@resend.dev>';
-
 async function sendEmail({ to, subject, html }) {
-  if (!RESEND_API_KEY) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'Track My Chambers <onboarding@resend.dev>';
+
+  if (!apiKey) {
     console.warn(`[Resend Email Warning] RESEND_API_KEY is not defined. Email logging fallback:\nTo: ${to}\nSubject: ${subject}`);
-    return { sent: false };
+    return { sent: false, error: "RESEND_API_KEY omitted" };
   }
 
   try {
@@ -70,10 +70,10 @@ async function sendEmail({ to, subject, html }) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        from: RESEND_FROM_EMAIL,
+        from: fromEmail,
         to: [to],
         subject: subject,
         html: html
@@ -83,7 +83,7 @@ async function sendEmail({ to, subject, html }) {
     const data = await response.json();
     if (!response.ok) {
       console.error("[Resend API Error]:", data);
-      return { sent: false, error: data };
+      return { sent: false, error: data.message || data.name || "Resend API error" };
     }
     console.log(`[Resend Email Success] Sent email ID: ${data.id}`);
     return { sent: true, id: data.id };
