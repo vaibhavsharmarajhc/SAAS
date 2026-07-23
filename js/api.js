@@ -71,6 +71,18 @@ const api = {
         method: 'POST',
         body: { currentPassword, newPassword }
       });
+    },
+    async forgotPassword(email) {
+      return await fetchAPI('/api/auth/forgot-password', {
+        method: 'POST',
+        body: { email }
+      });
+    },
+    async resetPassword(email, code, newPassword) {
+      return await fetchAPI('/api/auth/reset-password', {
+        method: 'POST',
+        body: { email, code, newPassword }
+      });
     }
   },
 
