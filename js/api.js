@@ -52,6 +52,20 @@ const api = {
       });
     },
 
+    async sendSignupOTP(email, password, firmName, lawyerName) {
+      return await fetchAPI('/api/auth/send-signup-otp', {
+        method: 'POST',
+        body: { email, password, firmName, lawyerName }
+      });
+    },
+
+    async verifySignupOTP(email, otp) {
+      return await fetchAPI('/api/auth/verify-signup-otp', {
+        method: 'POST',
+        body: { email, otp }
+      });
+    },
+
     async logout() {
       return await fetchAPI('/api/auth/logout', {
         method: 'POST'

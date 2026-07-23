@@ -609,14 +609,54 @@ function initPasswordToggleHandlers() {
           icon.setAttribute('data-lucide', 'eye');
           lucide.createIcons();
         }
-      }
-    });
-  });
+function showAuthView(viewName) {
+  const loginForm = document.getElementById('auth-login-form');
+  const signupForm = document.getElementById('auth-signup-form');
+  const signupOtpForm = document.getElementById('auth-signup-otp-form');
+  const forgotForm = document.getElementById('auth-forgot-form');
+  const resetForm = document.getElementById('auth-reset-form');
+  const modalTitle = document.getElementById('auth-modal-title');
+
+  if (loginForm) loginForm.style.display = viewName === 'login' ? 'block' : 'none';
+  if (signupForm) signupForm.style.display = viewName === 'signup' ? 'block' : 'none';
+  if (signupOtpForm) signupOtpForm.style.display = viewName === 'otp' ? 'block' : 'none';
+  if (forgotForm) forgotForm.style.display = viewName === 'forgot' ? 'block' : 'none';
+  if (resetForm) resetForm.style.display = viewName === 'reset' ? 'block' : 'none';
+
+  if (modalTitle) {
+    if (viewName === 'login') modalTitle.textContent = 'Login to Chambers';
+    else if (viewName === 'signup') modalTitle.textContent = 'Register Chamber';
+    else if (viewName === 'otp') modalTitle.textContent = 'Verify Email OTP';
+    else if (viewName === 'forgot') modalTitle.textContent = 'Forgot Password';
+    else if (viewName === 'reset') modalTitle.textContent = 'Reset Password';
+  }
+}
+
+let pendingSignupState = null;
+let otpTimerInterval = null;
+
+function startOtpTimer(seconds = 900) {
+  if (otpTimerInterval) clearInterval(otpTimerInterval);
+  const countEl = document.getElementById('auth-otp-timer-count');
+  let remaining = seconds;
+
+  otpTimerInterval = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) {
+      clearInterval(otpTimerInterval);
+      if (countEl) countEl.textContent = 'Expired';
+      return;
+    }
+    const m = Math.floor(remaining / 60).toString().padStart(2, '0');
+    const s = (remaining % 60).toString().padStart(2, '0');
+    if (countEl) countEl.textContent = `${m}:${s}`;
+  }, 1000);
 }
 
 function initAuthenticationHandlers() {
   const loginForm = document.getElementById('auth-login-form');
   const signupForm = document.getElementById('auth-signup-form');
+  const signupOtpForm = document.getElementById('auth-signup-otp-form');
   
   const loginEmail = document.getElementById('auth-login-email');
   const loginPass = document.getElementById('auth-login-password');
@@ -627,6 +667,11 @@ function initAuthenticationHandlers() {
   const signupFirm = document.getElementById('auth-signup-firm');
   const signupLawyer = document.getElementById('auth-signup-lawyer');
   const signupError = document.getElementById('auth-signup-error');
+
+  const otpInput = document.getElementById('auth-signup-otp-input');
+  const otpError = document.getElementById('auth-signup-otp-error');
+  const otpBanner = document.getElementById('auth-signup-otp-banner');
+  const resendOtpBtn = document.getElementById('auth-resend-otp-btn');
   
   const switchToSignup = document.getElementById('auth-switch-to-signup');
   const switchToLogin = document.getElementById('auth-switch-to-login');
@@ -647,6 +692,17 @@ function initAuthenticationHandlers() {
 
   const switchToForgot = document.getElementById('auth-switch-to-forgot');
   const backToLoginLinks = document.querySelectorAll('.auth-back-to-login');
+
+  // Check URL params for logout notice
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('logout')) {
+    loginError.style.background = 'rgba(16, 185, 129, 0.15)';
+    loginError.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+    loginError.style.color = '#34d399';
+    loginError.innerHTML = `<i data-lucide="check-circle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> You have been logged out successfully.`;
+    loginError.style.display = 'flex';
+    lucide.createIcons();
+  }
 
   // Toggle views using URL states
   switchToSignup.addEventListener('click', (e) => {
@@ -684,6 +740,7 @@ function initAuthenticationHandlers() {
     e.preventDefault();
     loginError.style.display = 'none';
     loginError.innerHTML = '';
+    loginError.style.background = '';
     loginEmail.classList.remove('auth-input-error');
     loginPass.classList.remove('auth-input-error');
 
@@ -707,12 +764,16 @@ function initAuthenticationHandlers() {
       loginEmail.classList.add('auth-input-error');
       loginPass.classList.add('auth-input-error');
       
+      loginError.style.background = '';
+      loginError.style.borderColor = '';
+      loginError.style.color = 'var(--color-danger)';
       loginError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Invalid credentials."}`;
       loginError.style.display = 'flex';
       lucide.createIcons();
     }
   });
 
+  // Signup form submit: Send OTP
   signupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     signupError.style.display = 'none';
@@ -726,23 +787,113 @@ function initAuthenticationHandlers() {
 
     try {
       submitBtn.disabled = true;
-      submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Creating Account...`;
+      submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Sending Verification OTP...`;
       lucide.createIcons();
 
-      await api.auth.signup(signupEmail.value, signupPass.value, signupFirm.value, signupLawyer.value);
+      pendingSignupState = {
+        email: signupEmail.value.trim(),
+        password: signupPass.value,
+        firmName: signupFirm.value.trim(),
+        lawyerName: signupLawyer.value.trim()
+      };
+
+      const res = await api.auth.sendSignupOTP(
+        pendingSignupState.email,
+        pendingSignupState.password,
+        pendingSignupState.firmName,
+        pendingSignupState.lawyerName
+      );
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnHtml;
+
+      showAuthView('otp');
+      startOtpTimer(900); // 15 mins
+
+      if (res && res.code) {
+        otpBanner.innerHTML = `
+          <strong>Testing Fallback Mode:</strong> Resend email dispatch notice: ${res.emailError || 'Testing environment'}.<br>
+          For testing, your 6-digit OTP code is: <strong style="font-size: 1.1rem; color: var(--color-primary);">${res.code}</strong>
+        `;
+        otpBanner.style.display = 'block';
+      } else {
+        otpBanner.style.display = 'none';
+      }
+    } catch (err) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnHtml;
+      
+      inputs.forEach(i => i.classList.add('auth-input-error'));
+      signupError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Registration failed."}`;
+      signupError.style.display = 'flex';
+      lucide.createIcons();
+    }
+  });
+
+  // Verify Signup OTP Form Submit
+  signupOtpForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    otpError.style.display = 'none';
+    otpError.innerHTML = '';
+
+    const submitBtn = signupOtpForm.querySelector('button[type="submit"]');
+    const originalBtnHtml = submitBtn.innerHTML;
+
+    try {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Verifying OTP...`;
+      lucide.createIcons();
+
+      if (!pendingSignupState || !pendingSignupState.email) {
+        throw new Error("Registration session lost. Please fill out the signup form again.");
+      }
+
+      await api.auth.verifySignupOTP(pendingSignupState.email, otpInput.value);
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnHtml;
       signupForm.reset();
+      signupOtpForm.reset();
       
       window.history.pushState({}, '', '/dashboard');
       await router();
     } catch (err) {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnHtml;
-      
-      inputs.forEach(i => i.classList.add('auth-input-error'));
-      
-      signupError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Signup failed."}`;
-      signupError.style.display = 'flex';
+      otpError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Verification failed."}`;
+      otpError.style.display = 'flex';
       lucide.createIcons();
+    }
+  });
+
+  // Resend OTP button
+  resendOtpBtn.addEventListener('click', async () => {
+    if (!pendingSignupState || !pendingSignupState.email) return;
+    try {
+      resendOtpBtn.disabled = true;
+      resendOtpBtn.textContent = 'Sending...';
+
+      const res = await api.auth.sendSignupOTP(
+        pendingSignupState.email,
+        pendingSignupState.password,
+        pendingSignupState.firmName,
+        pendingSignupState.lawyerName
+      );
+
+      resendOtpBtn.disabled = false;
+      resendOtpBtn.textContent = 'Resend OTP';
+      startOtpTimer(900);
+
+      if (res && res.code) {
+        otpBanner.innerHTML = `
+          <strong>Testing Fallback Mode:</strong> Fresh OTP generated: <strong style="font-size: 1.1rem; color: var(--color-primary);">${res.code}</strong>
+        `;
+        otpBanner.style.display = 'block';
+      }
+    } catch (err) {
+      resendOtpBtn.disabled = false;
+      resendOtpBtn.textContent = 'Resend OTP';
+      alert("Failed to resend OTP: " + err.message);
     }
   });
 
@@ -782,7 +933,7 @@ function initAuthenticationHandlers() {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnHtml;
       forgotEmail.classList.add('auth-input-error');
-      forgotError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Failed to process request."}`;
+      forgotError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Request failed."}`;
       forgotError.style.display = 'flex';
       lucide.createIcons();
     }
@@ -835,6 +986,13 @@ function initAuthenticationHandlers() {
           window.tasksEventSource = null;
         }
 
+        // Reset global test flags and local storage
+        window.isTestAuth = false;
+        try {
+          localStorage.clear();
+          sessionStorage.clear();
+        } catch (e) {}
+
         // Clear cookie manually for extra guardrail
         document.cookie = "session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
@@ -844,7 +1002,7 @@ function initAuthenticationHandlers() {
         // Reset initialization flag so modules rebinding triggers on next login
         appInitialized = false;
 
-        window.history.pushState({}, '', '/');
+        window.history.pushState({}, '', '/login?logout=1');
         await router();
       }
     });

@@ -7,16 +7,16 @@
   <!-- SEO & Styling Meta -->
   <meta name="description" content="Premium Case Diary, Billing, Client Onboarding, and Practice Management Suite for Track My Chambers.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.38">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.39">
   <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
   <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <!-- PWA Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=38')
+        navigator.serviceWorker.register('/sw.js?v=39')
           .then(reg => {
             reg.update();
             console.log('Service Worker Auto-Updated!', reg);
@@ -2514,6 +2514,28 @@
         </div>
       </form>
 
+      <!-- Signup OTP Verification View -->
+      <form id="auth-signup-otp-form" style="display: none;">
+        <div class="modal-body" style="padding: 1rem 0;">
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.4;">
+            A 6-digit Email Verification OTP code has been sent to your email address. Enter it below to activate your chamber account.
+          </p>
+          <div class="form-group">
+            <label class="form-label">6-Digit Verification OTP *</label>
+            <input type="text" class="form-control" id="auth-signup-otp-input" required placeholder="123456" maxlength="6" style="letter-spacing: 0.2em; font-size: 1.2rem; text-align: center;" autocomplete="one-time-code">
+          </div>
+          <div id="auth-signup-otp-error" style="color: var(--color-danger); font-size: 0.8rem; margin-top: 0.5rem; display: none; align-items: center; gap: 4px;"></div>
+          <div id="auth-signup-otp-banner" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm); padding: 0.75rem; margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-primary); display: none; line-height: 1.4;"></div>
+        </div>
+        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 0.75rem;">
+          <button type="submit" class="btn btn-primary" style="width: 100%;"><i data-lucide="check-circle"></i> Verify OTP & Activate Account</button>
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; margin-top: 0.25rem;">
+            <span id="auth-otp-timer-span" style="color: var(--text-muted);">OTP expires in: <strong id="auth-otp-timer-count">15:00</strong></span>
+            <button type="button" id="auth-resend-otp-btn" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Resend OTP</button>
+          </div>
+        </div>
+      </form>
+
       <!-- Forgot Password View -->
       <form id="auth-forgot-form" style="display: none;">
         <div class="modal-body" style="padding: 1rem 0;">
@@ -2584,6 +2606,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.38"></script>
+  <script type="module" src="js/app.js?v=1.0.39"></script>
 </body>
 </html>

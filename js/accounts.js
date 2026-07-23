@@ -4,6 +4,7 @@
  */
 
 import db from './db.js';
+import historyManager from './history.js';
 
 let incomeChartInstance = null;
 
@@ -151,8 +152,20 @@ const accountsModule = {
         return;
       }
 
-      await db.addTransaction({ clientId, caseId, date, type, amount, description });
+      const tx = await db.addTransaction({ clientId, caseId, date, type, amount, description });
       
+      historyManager.push({
+        description: `Financial entry (${type} ₹${amount}) logged`,
+        undo: async () => {
+          await db.deleteTransaction(tx.id);
+          this.render();
+        },
+        redo: async () => {
+          await db.addTransaction(tx);
+          this.render();
+        }
+      });
+
       // Dispatch a custom event to notify other modules to refresh
       document.dispatchEvent(new CustomEvent('transactionLogged', { detail: { clientId, caseId } }));
       

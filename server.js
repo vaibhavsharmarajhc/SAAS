@@ -18,6 +18,14 @@ const JWT_SECRET = process.env.JWT_SECRET || 'vsh_secret_chambers_key_998877';
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
+// Security Headers & Cache-Control Middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
 // Initialize database
 db.initDatabase();
 
@@ -183,10 +191,134 @@ async function sendResetCodeEmail(to, resetCode) {
   return sendEmail({ to, subject: "Track My Chambers - Password Recovery Code", html });
 }
 
+async function sendSignupOTPEmail(to, otpCode) {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #0b0f19; color: #f1f5f9; padding: 2rem 1rem; margin: 0; }
+        .card { max-width: 500px; margin: 0 auto; background: #111827; border: 1px solid #1f2937; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header { background: #1e1b4b; padding: 1.25rem 2rem; border-bottom: 2px solid #d97706; text-align: center; }
+        .logo { font-size: 1.4rem; font-weight: 700; color: #d97706; text-transform: uppercase; letter-spacing: 0.05em; font-family: 'Georgia', serif; }
+        .body { padding: 2rem; line-height: 1.6; text-align: center; }
+        h2 { font-size: 1.25rem; color: #fff; margin-top: 0; }
+        .code-box { background-color: #0b0f19; border: 1px dashed #d97706; font-size: 2.2rem; font-weight: 700; color: #d97706; padding: 1rem; letter-spacing: 0.3em; margin: 1.5rem 0; border-radius: 6px; display: inline-block; width: 80%; }
+        .footer { font-size: 0.75rem; color: #4b5563; text-align: center; padding: 1.5rem; background: #0b0f19; border-top: 1px solid #1f2937; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <div class="logo">Track My Chambers</div>
+        </div>
+        <div class="body">
+          <h2>Verify Your Registration Email</h2>
+          <p style="text-align: left; color: #cbd5e1;">Welcome to Track My Chambers! Please use the 6-digit verification OTP code below to finalize your advocate chamber registration:</p>
+          <div class="code-box">${otpCode}</div>
+          <p style="text-align: left; font-size: 0.85rem; color: #94a3b8; margin-top: 1rem;">This OTP code is valid for <strong>15 minutes</strong>. If you did not initiate this registration, you can safely ignore this email.</p>
+        </div>
+        <div class="footer">
+          VSH Legal Chambers &bull; Adv. Vaibhav Sharma &bull; Track My Chambers Practice Manager
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({ to, subject: "Track My Chambers - Email Verification OTP", html });
+}
+
 // ================= AUTH ROUTES =================
 
 /**
- * Register New Tenant (Signup)
+ * Send Signup Registration OTP
+ */
+app.post('/api/auth/send-signup-otp', async (req, res) => {
+  const { email, password, firmName, lawyerName } = req.body;
+  if (!email || !password || !firmName || !lawyerName) {
+    return res.status(400).json({ error: "All registration fields are required." });
+  }
+
+  try {
+    const existing = await db.getTenantByEmail(email);
+    if (existing) {
+      return res.status(400).json({ error: "An account with this email address already exists." });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = Date.now() + 15 * 60 * 1000; // 15 minutes
+
+    db.storePendingRegistration(email, { email, password, firmName, lawyerName }, otp, expires);
+
+    const emailResult = await sendSignupOTPEmail(email, otp);
+
+    res.json({
+      success: true,
+      code: emailResult.sent ? undefined : otp,
+      emailError: emailResult.sent ? undefined : (emailResult.error || "Resend sandbox mode"),
+      message: emailResult.sent
+        ? "A verification OTP has been sent to your email address."
+        : "Verification OTP generated. For testing, it is displayed below."
+    });
+  } catch (err) {
+    console.error("Send signup OTP error:", err);
+    res.status(500).json({ error: "Failed to send registration OTP." });
+  }
+});
+
+/**
+ * Verify Signup OTP & Finalize Registration
+ */
+app.post('/api/auth/verify-signup-otp', async (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) {
+    return res.status(400).json({ error: "Email and OTP are required." });
+  }
+
+  try {
+    const pending = db.getPendingRegistration(email);
+    if (!pending) {
+      return res.status(400).json({ error: "No pending registration found. Please register again." });
+    }
+
+    if (Date.now() > pending.expires) {
+      db.deletePendingRegistration(email);
+      return res.status(400).json({ error: "OTP code has expired. Please request a new OTP." });
+    }
+
+    if (pending.otp !== otp.trim()) {
+      return res.status(400).json({ error: "Invalid OTP code. Please check and try again." });
+    }
+
+    const { password, firmName, lawyerName } = pending.signupData;
+    const tenant = await db.createTenant(email, password, firmName, lawyerName);
+
+    db.deletePendingRegistration(email);
+
+    // Create session token
+    const token = jwt.sign({ id: tenant.id, email: tenant.email }, JWT_SECRET, { expiresIn: '30d' });
+
+    res.cookie('session_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000
+    });
+
+    // Send Welcome Email asynchronously
+    sendWelcomeEmail(tenant.email, tenant.firmName, tenant.lawyerName).catch(e => console.error(e));
+
+    res.json({ success: true, user: tenant });
+  } catch (err) {
+    console.error("Verify signup OTP error:", err);
+    res.status(500).json({ error: "Failed to finalize registration." });
+  }
+});
+
+/**
+ * Legacy direct signup endpoint
  */
 app.post('/api/auth/signup', async (req, res) => {
   const { email, password, firmName, lawyerName } = req.body;
@@ -200,7 +332,7 @@ app.post('/api/auth/signup', async (req, res) => {
       return res.status(400).json({ error: "An account with this email address already exists." });
     }
 
-    const tenant = await db.createTenant(email, password, firmName, lawyerName);
+    const tenant = await db.addTenant(email, password, firmName, lawyerName);
 
     // Create session token
     const token = jwt.sign({ id: tenant.id, email: tenant.email }, JWT_SECRET, { expiresIn: '30d' });
@@ -259,6 +391,18 @@ app.post('/api/auth/login', async (req, res) => {
     console.error("Login error:", err);
     res.status(500).json({ error: "Failed to authenticate login request." });
   }
+});
+
+/**
+ * Log Out (Session Termination)
+ */
+app.post('/api/auth/logout', (req, res) => {
+  res.clearCookie('session_token', {
+    httpOnly: true,
+    secure: false,
+    sameSite: 'lax'
+  });
+  res.json({ success: true, message: "Logged out successfully." });
 });
 
 /**

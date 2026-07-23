@@ -1760,6 +1760,25 @@ async function getSupportTickets(tenantId) {
   return tickets.filter(t => t.tenantId === tenantId);
 }
 
+// Pending Registrations Memory Store for Signup OTP Verification
+const pendingRegistrations = new Map();
+
+function storePendingRegistration(email, signupData, otp, expires) {
+  pendingRegistrations.set(email.toLowerCase(), {
+    signupData,
+    otp,
+    expires
+  });
+}
+
+function getPendingRegistration(email) {
+  return pendingRegistrations.get(email.toLowerCase());
+}
+
+function deletePendingRegistration(email) {
+  pendingRegistrations.delete(email.toLowerCase());
+}
+
 module.exports = {
   getDb,
   initDatabase,
@@ -1797,12 +1816,12 @@ module.exports = {
   addTaskComment,
   getNotifications,
   addNotification,
-  markNotificationRead,
-  markAllNotificationsRead,
-  clearNotifications,
   getPlatformAdminMetrics,
   getPublicClientPortalData,
   regenerateClientToken,
   addSupportTicket,
-  getSupportTickets
+  getSupportTickets,
+  storePendingRegistration,
+  getPendingRegistration,
+  deletePendingRegistration
 };

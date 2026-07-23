@@ -5,6 +5,7 @@
 
 import db from './db.js';
 import casesModule from './cases.js';
+import historyManager from './history.js';
 
 // Calendar State
 const calendarState = {

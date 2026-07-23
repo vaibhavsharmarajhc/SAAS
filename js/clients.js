@@ -5,6 +5,7 @@
 
 import db from './db.js';
 import casesModule from './cases.js';
+import historyManager from './history.js';
 
 let currentStep = 1;
 
@@ -258,6 +259,28 @@ const clientsModule = {
       this.render();
       this.showClientDossier(id);
       this.copyClientPortalLink(id);
+    }
+  },
+
+  async deleteClient(id) {
+    const client = db.getClient(id);
+    if (!client) return;
+
+    if (confirm(`Are you sure you want to delete client profile "${client.name}"?`)) {
+      await db.deleteClient(id);
+      this.renderClientList();
+
+      historyManager.push({
+        description: `Client "${client.name}" deleted`,
+        undo: async () => {
+          await db.createClient(client);
+          this.renderClientList();
+        },
+        redo: async () => {
+          await db.deleteClient(id);
+          this.renderClientList();
+        }
+      });
     }
   },
 

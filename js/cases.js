@@ -5,6 +5,7 @@
 
 import db from './db.js';
 import accountsModule from './accounts.js';
+import historyManager from './history.js';
 
 const casesModule = {
   init() {
@@ -108,6 +109,18 @@ const casesModule = {
       // Add Case
       const newCase = await db.addCase({
         clientId, title, caseNumber, caseType, court, stage, nextHearingDate, description, referredBy
+      });
+
+      historyManager.push({
+        description: `Case "${title}" registered`,
+        undo: async () => {
+          await db.deleteCase(newCase.id);
+          this.render();
+        },
+        redo: async () => {
+          await db.addCase(newCase);
+          this.render();
+        }
       });
 
       // Log an initial blank hearing in history if next hearing is defined
