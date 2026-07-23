@@ -25,6 +25,18 @@ window.onerror = function(message, source, lineno, colno, error) {
   console.error(message, error);
 };
 
+function safeCreateIcons() {
+  try {
+    if (typeof window.safeCreateIcons === 'function') {
+      window.safeCreateIcons();
+    } else if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') {
+      lucide.createIcons();
+    }
+  } catch (e) {
+    console.warn("Lucide safe icon create error:", e);
+  }
+}
+
 import db from './db.js';
 import api from './api.js';
 import historyManager from './history.js';
@@ -208,7 +220,7 @@ export async function switchView(targetViewId) {
       newIcon.setAttribute('data-lucide', config.icon);
       iconElement.parentNode.replaceChild(newIcon, iconElement);
     }
-    lucide.createIcons();
+    safeCreateIcons();
   } else {
     headerQuickActionBtn.style.display = 'none';
   }
@@ -372,10 +384,10 @@ async function updateDbStatusBadge() {
     } else {
       badge.innerHTML = `<span style="background-color: #f59e0b; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" title="No MongoDB cloud database configured. Local filesystem storage is active."><i data-lucide="file-text" style="width: 10px; height: 10px;"></i> Local Mode (Temporary Storage)</span>`;
     }
-    lucide.createIcons();
+    safeCreateIcons();
   } catch (err) {
     badge.innerHTML = `<span style="background-color: var(--color-danger); color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"><i data-lucide="alert-triangle" style="width: 10px; height: 10px;"></i> Connection Failed</span>`;
-    lucide.createIcons();
+    safeCreateIcons();
   }
 }
 
@@ -474,32 +486,32 @@ async function router() {
   if (path === '/' || path === '/index.html') {
     if (marketingPage) {
       marketingPage.style.display = 'block';
-      lucide.createIcons();
+      safeCreateIcons();
     }
   } else if (path === '/privacy') {
     if (privacyPage) {
       privacyPage.style.display = 'block';
-      lucide.createIcons();
+      safeCreateIcons();
     }
   } else if (path === '/terms') {
     if (termsPage) {
       termsPage.style.display = 'block';
-      lucide.createIcons();
+      safeCreateIcons();
     }
   } else if (path === '/features') {
     if (featuresPage) {
       featuresPage.style.display = 'block';
-      lucide.createIcons();
+      safeCreateIcons();
     }
   } else if (path === '/about') {
     if (aboutPage) {
       aboutPage.style.display = 'block';
-      lucide.createIcons();
+      safeCreateIcons();
     }
   } else if (path === '/pricing') {
     if (pricingPage) {
       pricingPage.style.display = 'block';
-      lucide.createIcons();
+      safeCreateIcons();
     }
   } else if (path === '/login' || path === '/register') {
     if (isAuthenticated) {
@@ -601,13 +613,13 @@ function initPasswordToggleHandlers() {
         input.type = 'text';
         if (icon) {
           icon.setAttribute('data-lucide', 'eye-off');
-          lucide.createIcons();
+          safeCreateIcons();
         }
       } else {
         input.type = 'password';
         if (icon) {
           icon.setAttribute('data-lucide', 'eye');
-          lucide.createIcons();
+          safeCreateIcons();
         }
       }
     });
@@ -706,7 +718,7 @@ function initAuthenticationHandlers() {
     loginError.style.color = '#34d399';
     loginError.innerHTML = `<i data-lucide="check-circle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> You have been logged out successfully.`;
     loginError.style.display = 'flex';
-    lucide.createIcons();
+    safeCreateIcons();
   }
 
   // Toggle views using URL states
@@ -755,7 +767,7 @@ function initAuthenticationHandlers() {
     try {
       submitBtn.disabled = true;
       submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Signing In...`;
-      lucide.createIcons();
+      safeCreateIcons();
 
       await api.auth.login(loginEmail.value, loginPass.value);
       loginForm.reset();
@@ -774,7 +786,7 @@ function initAuthenticationHandlers() {
       loginError.style.color = 'var(--color-danger)';
       loginError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Invalid credentials."}`;
       loginError.style.display = 'flex';
-      lucide.createIcons();
+      safeCreateIcons();
     }
   });
 
@@ -793,7 +805,7 @@ function initAuthenticationHandlers() {
     try {
       submitBtn.disabled = true;
       submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Sending Verification OTP...`;
-      lucide.createIcons();
+      safeCreateIcons();
 
       pendingSignupState = {
         email: signupEmail.value.trim(),
@@ -831,7 +843,7 @@ function initAuthenticationHandlers() {
       inputs.forEach(i => i.classList.add('auth-input-error'));
       signupError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Registration failed."}`;
       signupError.style.display = 'flex';
-      lucide.createIcons();
+      safeCreateIcons();
     }
   });
 
@@ -847,7 +859,7 @@ function initAuthenticationHandlers() {
     try {
       submitBtn.disabled = true;
       submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Verifying OTP...`;
-      lucide.createIcons();
+      safeCreateIcons();
 
       if (!pendingSignupState || !pendingSignupState.email) {
         throw new Error("Registration session lost. Please fill out the signup form again.");
@@ -867,7 +879,7 @@ function initAuthenticationHandlers() {
       submitBtn.innerHTML = originalBtnHtml;
       otpError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Verification failed."}`;
       otpError.style.display = 'flex';
-      lucide.createIcons();
+      safeCreateIcons();
     }
   });
 
@@ -915,7 +927,7 @@ function initAuthenticationHandlers() {
     try {
       submitBtn.disabled = true;
       submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Sending Code...`;
-      lucide.createIcons();
+      safeCreateIcons();
 
       const res = await api.auth.forgotPassword(forgotEmail.value);
       submitBtn.disabled = false;
@@ -932,7 +944,7 @@ function initAuthenticationHandlers() {
         forgotSuccessBanner.style.display = 'block';
         forgotSubmitBtn.style.display = 'none';
         forgotGoResetBtn.style.display = 'block';
-        lucide.createIcons();
+        safeCreateIcons();
       }
     } catch (err) {
       submitBtn.disabled = false;
@@ -940,7 +952,7 @@ function initAuthenticationHandlers() {
       forgotEmail.classList.add('auth-input-error');
       forgotError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Request failed."}`;
       forgotError.style.display = 'flex';
-      lucide.createIcons();
+      safeCreateIcons();
     }
   });
 
@@ -958,7 +970,7 @@ function initAuthenticationHandlers() {
     try {
       submitBtn.disabled = true;
       submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Updating Password...`;
-      lucide.createIcons();
+      safeCreateIcons();
 
       await api.auth.resetPassword(resetEmail.value, resetCode.value, resetPass.value);
       alert("Password updated successfully! Please login with your new credentials.");
@@ -970,7 +982,7 @@ function initAuthenticationHandlers() {
       inputs.forEach(i => i.classList.add('auth-input-error'));
       resetError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Reset failed. Verify email and code."}`;
       resetError.style.display = 'flex';
-      lucide.createIcons();
+      safeCreateIcons();
     }
   });
 
@@ -1597,7 +1609,7 @@ function initFeaturesTabs() {
       });
     }
 
-    lucide.createIcons();
+    safeCreateIcons();
   }
 
   tabsList.forEach(btn => {
@@ -1712,7 +1724,7 @@ function initChangePasswordHandler() {
       const btn = form.querySelector('button[type="submit"]');
       btn.innerHTML = '<i data-lucide="lock"></i> Update Password';
       btn.disabled = false;
-      lucide.createIcons();
+      safeCreateIcons();
 
       errorEl.textContent = err.message;
       errorEl.style.display = 'block';
@@ -1841,7 +1853,7 @@ function initSupportTicketHandlers() {
       const btn = form.querySelector('button[type="submit"]');
       btn.innerHTML = '<i data-lucide="message-square"></i> Submit Support Ticket';
       btn.disabled = false;
-      lucide.createIcons();
+      safeCreateIcons();
 
       errorEl.textContent = err.message;
       errorEl.style.display = 'block';
