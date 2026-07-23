@@ -152,6 +152,45 @@ async function getTenantById(id) {
   return null;
 }
 
+async function getTenantByIdWithHash(id) {
+  const db = await getDb();
+  if (db) {
+    const tenant = await db.collection('tenants').findOne({
+      $or: [
+        { _id: id },
+        { id: id }
+      ]
+    });
+    return mapId(tenant);
+  }
+  const localDb = readDb();
+  return localDb.tenants.find(t => t.id === id) || null;
+}
+
+async function updateTenantPassword(id, newPasswordHash) {
+  const db = await getDb();
+  if (db) {
+    await db.collection('tenants').updateOne(
+      { 
+        $or: [
+          { _id: id },
+          { id: id }
+        ]
+      },
+      { $set: { passwordHash: newPasswordHash } }
+    );
+    return true;
+  }
+  const localDb = readDb();
+  const idx = localDb.tenants.findIndex(t => t.id === id);
+  if (idx !== -1) {
+    localDb.tenants[idx].passwordHash = newPasswordHash;
+    writeDb(localDb);
+    return true;
+  }
+  return false;
+}
+
 async function setTenantResetCode(email, code, expires) {
   const db = await getDb();
   if (db) {
@@ -1677,11 +1716,57 @@ async function regenerateClientToken(tenantId, clientId) {
   return newToken;
 }
 
+async function addSupportTicket(tenantId, ticketObj) {
+  const newTicket = {
+    id: "ticket_" + Date.now(),
+    tenantId,
+    subject: ticketObj.subject || "",
+    category: ticketObj.category || "General Question",
+    description: ticketObj.description || "",
+    status: "Open",
+    createdAt: new Date().toISOString(),
+    replies: [
+      {
+        sender: "System Agent",
+        role: "Automated Support Confirmation",
+        text: "Thank you for raising a help support ticket. Our engineering team has been notified and will address your request shortly.",
+        date: new Date().toISOString()
+      }
+    ]
+  };
+
+  const db = await getDb();
+  if (db) {
+    await db.collection('tickets').insertOne(toMongoDoc(newTicket));
+    return newTicket;
+  }
+
+  const localDb = readDb();
+  if (!localDb.tickets) localDb.tickets = [];
+  localDb.tickets.push(newTicket);
+  writeDb(localDb);
+  return newTicket;
+}
+
+async function getSupportTickets(tenantId) {
+  const db = await getDb();
+  if (db) {
+    const tickets = await db.collection('tickets').find({ tenantId }).toArray();
+    return mapIds(tickets);
+  }
+
+  const localDb = readDb();
+  const tickets = localDb.tickets || [];
+  return tickets.filter(t => t.tenantId === tenantId);
+}
+
 module.exports = {
   getDb,
   initDatabase,
   getTenantByEmail,
   getTenantById,
+  getTenantByIdWithHash,
+  updateTenantPassword,
   setTenantResetCode,
   resetTenantPassword,
   createTenant,
@@ -1717,5 +1802,7 @@ module.exports = {
   clearNotifications,
   getPlatformAdminMetrics,
   getPublicClientPortalData,
-  regenerateClientToken
+  regenerateClientToken,
+  addSupportTicket,
+  getSupportTickets
 };

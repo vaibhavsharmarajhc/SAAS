@@ -5,6 +5,7 @@
 
 import db from './db.js';
 import api from './api.js';
+import historyManager from './history.js';
 
 let tasksState = {
   tasks: [],
@@ -120,11 +121,25 @@ const tasksModule = {
     const deleteBtn = document.getElementById('task-delete-btn');
     deleteBtn.addEventListener('click', async () => {
       const taskId = document.getElementById('task-edit-id').value;
+      const task = tasksState.tasks.find(t => t.id === taskId);
+      if (!task) return;
       if (confirm("Are you sure you want to delete this task?")) {
         try {
           await api.tasks.delete(taskId);
           addTaskModal.classList.remove('active');
           await this.render();
+
+          historyManager.push({
+            description: `Task "${task.title}" deleted`,
+            undo: async () => {
+              await api.tasks.create(task);
+              await this.render();
+            },
+            redo: async () => {
+              await api.tasks.delete(taskId);
+              await this.render();
+            }
+          });
         } catch (err) {
           alert("Failed to delete task: " + err.message);
         }
@@ -326,13 +341,39 @@ const tasksModule = {
 
       try {
         if (editId) {
+          const original = { ...tasksState.tasks.find(t => t.id === editId) };
           await api.tasks.update(editId, taskData);
+          await this.render();
+
+          historyManager.push({
+            description: `Task "${title}" updated`,
+            undo: async () => {
+              await api.tasks.update(editId, original);
+              await this.render();
+            },
+            redo: async () => {
+              await api.tasks.update(editId, taskData);
+              await this.render();
+            }
+          });
         } else {
-          await api.tasks.create(taskData);
+          const created = await api.tasks.create(taskData);
+          await this.render();
+
+          historyManager.push({
+            description: `Task "${title}" created`,
+            undo: async () => {
+              await api.tasks.delete(created.id);
+              await this.render();
+            },
+            redo: async () => {
+              await api.tasks.create(taskData);
+              await this.render();
+            }
+          });
         }
         tasksState.currentParentId = null;
         modal.classList.remove('active');
-        await this.render();
       } catch (err) {
         alert("Failed to save task: " + err.message);
       }
@@ -797,10 +838,23 @@ const tasksModule = {
         const task = tasksState.tasks.find(t => t.id === taskId);
         if (!task) return;
 
-        const newStatus = task.status === 'pending' ? 'completed' : 'pending';
+        const originalStatus = task.status;
+        const newStatus = originalStatus === 'pending' ? 'completed' : 'pending';
         try {
           await api.tasks.update(taskId, { status: newStatus });
           await this.render();
+
+          historyManager.push({
+            description: `Task "${task.title}" marked as ${newStatus}`,
+            undo: async () => {
+              await api.tasks.update(taskId, { status: originalStatus });
+              await this.render();
+            },
+            redo: async () => {
+              await api.tasks.update(taskId, { status: newStatus });
+              await this.render();
+            }
+          });
         } catch (err) {
           alert("Failed to toggle status: " + err.message);
         }

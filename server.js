@@ -343,9 +343,91 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
     if (!tenant) {
       return res.status(404).json({ error: "User profile not found." });
     }
-    res.json({ user: tenant });
+    const { passwordHash: _, ...safeTenant } = tenant;
+    res.json({ user: safeTenant });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch user context." });
+  }
+});
+
+/**
+ * Change Password (Authenticated)
+ */
+app.post('/api/auth/change-password', authenticateToken, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: "All fields are required (current password, new password)." });
+  }
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: "New password must be at least 6 characters." });
+  }
+
+  try {
+    const tenant = await db.getTenantByIdWithHash(req.user.id);
+    if (!tenant) {
+      return res.status(404).json({ error: "Advocate account not found." });
+    }
+
+    const passwordValid = bcrypt.compareSync(currentPassword, tenant.passwordHash);
+    if (!passwordValid) {
+      return res.status(400).json({ error: "Current password entered is incorrect." });
+    }
+
+    const salt = bcrypt.genSaltSync(10);
+    const newPasswordHash = bcrypt.hashSync(newPassword, salt);
+
+    await db.updateTenantPassword(req.user.id, newPasswordHash);
+
+    res.json({ success: true, message: "Password updated successfully." });
+  } catch (err) {
+    console.error("Change password error:", err);
+    res.status(500).json({ error: "Failed to update password." });
+  }
+});
+
+/**
+ * Support Ticket Endpoints
+ */
+app.post('/api/tickets', authenticateToken, async (req, res) => {
+  try {
+    const ticket = await db.addSupportTicket(req.user.id, req.body);
+    
+    // Send confirmation email asynchronously
+    sendEmail({
+      to: req.user.email,
+      subject: `Support Ticket Created: #${ticket.id.split('_')[1] || ticket.id}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; background: #111827; border: 1px solid #1f2937; border-radius: 8px; color: #f1f5f9; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.35);">
+          <h2 style="color: #d97706; margin-top:0;">Support Ticket Raised</h2>
+          <p>Dear Lead Counsel,</p>
+          <p>We have successfully received support ticket <strong>#${ticket.id.split('_')[1] || ticket.id}</strong> in our queue.</p>
+          <div style="background: #0b0f19; border-left: 3px solid #d97706; padding: 0.75rem 1rem; margin: 1rem 0; font-size: 0.85rem; color: #94a3b8;">
+            <strong>Subject:</strong> ${ticket.subject}<br>
+            <strong>Category:</strong> ${ticket.category}<br>
+            <strong>Description:</strong> ${ticket.description}
+          </div>
+          <p>Our engineering support team will address your request shortly. Thank you for using Track My Chambers!</p>
+          <div style="font-size: 0.75rem; color: #4b5563; text-align: center; border-top: 1px solid #1f2937; padding-top: 1rem; margin-top: 1.5rem;">
+            VSH Legal Chambers &bull; Track My Chambers Support Center
+          </div>
+        </div>
+      `
+    }).catch(err => console.error("Failed to send support ticket email:", err));
+
+    res.status(201).json(ticket);
+  } catch (err) {
+    console.error("Create ticket error:", err);
+    res.status(500).json({ error: "Failed to submit support ticket." });
+  }
+});
+
+app.get('/api/tickets', authenticateToken, async (req, res) => {
+  try {
+    const tickets = await db.getSupportTickets(req.user.id);
+    res.json(tickets);
+  } catch (err) {
+    console.error("Get tickets error:", err);
+    res.status(500).json({ error: "Failed to fetch support tickets." });
   }
 });
 

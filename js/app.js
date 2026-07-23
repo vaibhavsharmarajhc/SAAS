@@ -27,6 +27,7 @@ window.onerror = function(message, source, lineno, colno, error) {
 
 import db from './db.js';
 import api from './api.js';
+import historyManager from './history.js';
 import dashboard from './dashboard.js';
 import clients from './clients.js';
 import cases from './cases.js';
@@ -138,6 +139,14 @@ const viewQuickActions = {
     action: () => {
       db.exportBackup();
     }
+  },
+  'support-page': {
+    text: 'Raise Ticket',
+    icon: 'message-square',
+    action: () => {
+      const subjectInput = document.getElementById('support-ticket-subject');
+      if (subjectInput) subjectInput.focus();
+    }
   }
 };
 
@@ -181,6 +190,7 @@ export async function switchView(targetViewId) {
                                 capitalizedTitle === 'Accounts' ? 'Accounts & Income Ledger' : 
                                 capitalizedTitle === 'Share' ? 'Client Intimation' : 
                                 capitalizedTitle === 'Tasks' ? 'Task Manager' : 
+                                capitalizedTitle === 'Support' ? 'Help & Support Center' :
                                 capitalizedTitle === 'Superadmin' ? 'Super Admin Console' : capitalizedTitle;
 
   if (targetViewId === 'tasks-page' && typeof window.tasksModule !== 'undefined') {
@@ -245,6 +255,9 @@ async function refreshPageView(viewId) {
       break;
     case 'settings-page':
       loadSettingsForm();
+      break;
+    case 'support-page':
+      renderSupportPage();
       break;
     case 'superadmin-page':
       adminModule.render();
@@ -519,7 +532,7 @@ async function router() {
       });
       portalModule.render();
     }
-  } else if (path === '/dashboard' || path.startsWith('/dashboard-page') || path.startsWith('/overview-page') || path.startsWith('/clients-page') || path.startsWith('/cases-page') || path.startsWith('/diary-page') || path.startsWith('/accounts-page') || path.startsWith('/share-page') || path.startsWith('/tasks-page') || path.startsWith('/settings-page') || path.startsWith('/superadmin-page')) {
+  } else if (path === '/dashboard' || path.startsWith('/dashboard-page') || path.startsWith('/overview-page') || path.startsWith('/clients-page') || path.startsWith('/cases-page') || path.startsWith('/diary-page') || path.startsWith('/accounts-page') || path.startsWith('/share-page') || path.startsWith('/tasks-page') || path.startsWith('/settings-page') || path.startsWith('/superadmin-page') || path.startsWith('/support-page')) {
     if (!isAuthenticated) {
       window.history.pushState({}, '', '/login');
       router();
@@ -571,7 +584,7 @@ async function router() {
 }
 
 function initPasswordToggleHandlers() {
-  const toggles = document.querySelectorAll('.password-toggle-btn');
+  const toggles = document.querySelectorAll('.password-toggle-btn, .btn-toggle-password-view');
   toggles.forEach(btn => {
     // Remove previous listeners if any to prevent duplicate fires
     const newBtn = btn.cloneNode(true);
@@ -579,7 +592,7 @@ function initPasswordToggleHandlers() {
 
     newBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      const targetId = newBtn.getAttribute('data-toggle-target');
+      const targetId = newBtn.getAttribute('data-toggle-target') || newBtn.getAttribute('data-target');
       const input = document.getElementById(targetId);
       if (!input) return;
 
@@ -1138,6 +1151,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   initPasswordToggleHandlers();
   initGlobalSearch();
   initFeaturesTabs();
+  initChangePasswordHandler();
+  initSupportTicketHandlers();
  
   // Test hook to clear DB for visual empty state testing
   const urlParams = new URLSearchParams(window.location.search);
@@ -1487,3 +1502,186 @@ function setupMobileOverviewPage() {
 
 // Bind resize listener for responsive layout swapping
 window.addEventListener('resize', setupMobileOverviewPage);
+
+/**
+ * Change Password Handler
+ */
+function initChangePasswordHandler() {
+  const form = document.getElementById('settings-password-form');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const currentPassword = document.getElementById('settings-current-password').value;
+    const newPassword = document.getElementById('settings-new-password').value;
+    const confirmPassword = document.getElementById('settings-confirm-password').value;
+    
+    const errorEl = document.getElementById('settings-password-error');
+    const successEl = document.getElementById('settings-password-success');
+    
+    errorEl.style.display = 'none';
+    successEl.style.display = 'none';
+    
+    if (newPassword !== confirmPassword) {
+      errorEl.textContent = "Confirm password does not match new password.";
+      errorEl.style.display = 'block';
+      return;
+    }
+    
+    try {
+      const btn = form.querySelector('button[type="submit"]');
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = '<i class="spinner" style="width: 14px; height: 14px; margin-right: 4px;"></i> Updating...';
+      btn.disabled = true;
+
+      await api.auth.changePassword(currentPassword, newPassword);
+
+      btn.innerHTML = originalHtml;
+      btn.disabled = false;
+      
+      successEl.textContent = "Password updated successfully!";
+      successEl.style.display = 'block';
+      
+      document.getElementById('settings-current-password').value = '';
+      document.getElementById('settings-new-password').value = '';
+      document.getElementById('settings-confirm-password').value = '';
+    } catch (err) {
+      const btn = form.querySelector('button[type="submit"]');
+      btn.innerHTML = '<i data-lucide="lock"></i> Update Password';
+      btn.disabled = false;
+      lucide.createIcons();
+
+      errorEl.textContent = err.message;
+      errorEl.style.display = 'block';
+    }
+  });
+
+  // Re-run password toggle initializer to capture settings password form inputs
+  initPasswordToggleHandlers();
+}
+
+/**
+ * Support Tickets Manager & Loader
+ */
+async function renderSupportPage() {
+  const listEl = document.getElementById('support-tickets-list');
+  if (!listEl) return;
+
+  try {
+    const tickets = await api.tickets.getAll();
+    if (!tickets || tickets.length === 0) {
+      listEl.innerHTML = `
+        <div style="text-align:center; padding:3rem;" class="text-muted">
+          <p>No support tickets raised yet.</p>
+        </div>
+      `;
+      return;
+    }
+
+    // Sort tickets by createdAt desc
+    tickets.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    let html = '';
+    tickets.forEach(ticket => {
+      const dateStr = new Date(ticket.createdAt).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      const statusColors = {
+        'Open': { bg: 'rgba(59, 130, 246, 0.15)', text: '#60a5fa' },
+        'In Progress': { bg: 'rgba(245, 158, 11, 0.15)', text: '#fbbf24' },
+        'Resolved': { bg: 'rgba(16, 185, 129, 0.15)', text: '#34d399' }
+      };
+      const status = statusColors[ticket.status] || { bg: 'rgba(255,255,255,0.05)', text: '#cbd5e1' };
+
+      let repliesHtml = '';
+      if (ticket.replies && ticket.replies.length > 0) {
+        repliesHtml = `
+          <div style="margin-top: 1rem; border-top: 1px dashed var(--border-color); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem;">
+            <div style="font-size: 0.7rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.5px;">Ticket Thread</div>
+            \${ticket.replies.map(r => `
+              <div style="background: rgba(0,0,0,0.15); border: 1px solid var(--border-color); padding: 0.6rem 0.8rem; border-radius: 4px; font-size: 0.75rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
+                  <strong style="color: #fff;">\${r.sender} <span style="font-weight:400; color:var(--text-muted); font-size:0.7rem;">(\${r.role})</span></strong>
+                  <span style="color: var(--text-muted); font-size: 0.65rem;">\${new Date(r.date).toLocaleDateString()}</span>
+                </div>
+                <div style="color: #94a3b8; line-height: 1.4;">\${r.text}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      html += `
+        <div class="card" style="background: rgba(30, 41, 59, 0.2); border: 1px solid var(--border-color); padding: 1.25rem; margin-bottom: 0.5rem;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap: 1rem;">
+            <div>
+              <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600;">TICKET #\${ticket.id.split('_')[1] || ticket.id} • \${ticket.category}</span>
+              <h4 style="color: #fff; margin: 4px 0 6px 0; font-size: 1rem; font-weight: 600;">\${ticket.subject}</h4>
+              <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0; line-height: 1.5;">\${ticket.description}</p>
+            </div>
+            <span style="font-size: 0.65rem; font-weight: 700; background: \${status.bg}; color: \${status.text}; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
+              \${ticket.status}
+            </span>
+          </div>
+          <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.75rem;">Raised on: \${dateStr}</div>
+          \${repliesHtml}
+        </div>
+      `;
+    });
+
+    listEl.innerHTML = html;
+  } catch (err) {
+    listEl.innerHTML = `<div style="color: var(--color-danger); padding: 1rem; text-align: center;">Error loading support tickets: \${err.message}</div>`;
+  }
+}
+
+function initSupportTicketHandlers() {
+  const form = document.getElementById('support-ticket-form');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const subject = document.getElementById('support-ticket-subject').value.trim();
+    const category = document.getElementById('support-ticket-category').value;
+    const description = document.getElementById('support-ticket-desc').value.trim();
+
+    const errorEl = document.getElementById('support-ticket-error');
+    const successEl = document.getElementById('support-ticket-success');
+
+    errorEl.style.display = 'none';
+    successEl.style.display = 'none';
+
+    try {
+      const btn = form.querySelector('button[type="submit"]');
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = '<i class="spinner" style="width: 14px; height: 14px; margin-right: 4px;"></i> Submitting...';
+      btn.disabled = true;
+
+      await api.tickets.create({ subject, category, description });
+
+      btn.innerHTML = originalHtml;
+      btn.disabled = false;
+
+      successEl.textContent = "Support ticket submitted successfully! Check your email inbox for confirmation.";
+      successEl.style.display = 'block';
+
+      document.getElementById('support-ticket-subject').value = '';
+      document.getElementById('support-ticket-desc').value = '';
+
+      await renderSupportPage();
+    } catch (err) {
+      const btn = form.querySelector('button[type="submit"]');
+      btn.innerHTML = '<i data-lucide="message-square"></i> Submit Support Ticket';
+      btn.disabled = false;
+      lucide.createIcons();
+
+      errorEl.textContent = err.message;
+      errorEl.style.display = 'block';
+    }
+  });
+}

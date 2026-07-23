@@ -65,6 +65,12 @@ const api = {
         // If unauthenticated, return null rather than throwing
         return null;
       }
+    },
+    async changePassword(currentPassword, newPassword) {
+      return await fetchAPI('/api/auth/change-password', {
+        method: 'POST',
+        body: { currentPassword, newPassword }
+      });
     }
   },
 
@@ -246,6 +252,19 @@ const api = {
     },
     async clear() {
       return await fetchAPI('/api/notifications/clear', { method: 'DELETE' });
+    }
+  },
+  tickets: {
+    async create(ticketData) {
+      return await fetchAPI('/api/tickets', {
+        method: 'POST',
+        body: ticketData
+      });
+    },
+    async getAll() {
+      return await fetchAPI('/api/tickets', {
+        method: 'GET'
+      });
     }
   }
 };
