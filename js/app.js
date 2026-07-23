@@ -394,16 +394,16 @@ async function updateDbStatusBadge() {
 function showAuthView(viewName) {
   const loginForm = document.getElementById('auth-login-form');
   const signupForm = document.getElementById('auth-signup-form');
+  const signupOtpForm = document.getElementById('auth-signup-otp-form');
   const forgotForm = document.getElementById('auth-forgot-form');
   const resetForm = document.getElementById('auth-reset-form');
   const modalTitle = document.getElementById('auth-modal-title');
 
-  if (!loginForm || !signupForm || !forgotForm || !resetForm) return;
-
-  loginForm.style.display = 'none';
-  signupForm.style.display = 'none';
-  forgotForm.style.display = 'none';
-  resetForm.style.display = 'none';
+  if (loginForm) loginForm.style.display = viewName === 'login' ? 'block' : 'none';
+  if (signupForm) signupForm.style.display = viewName === 'signup' ? 'block' : 'none';
+  if (signupOtpForm) signupOtpForm.style.display = viewName === 'otp' ? 'block' : 'none';
+  if (forgotForm) forgotForm.style.display = viewName === 'forgot' ? 'block' : 'none';
+  if (resetForm) resetForm.style.display = viewName === 'reset' ? 'block' : 'none';
 
   // Clear inputs error state
   const inputs = document.querySelectorAll('#auth-page .form-control');
@@ -414,18 +414,12 @@ function showAuthView(viewName) {
     c.innerHTML = '';
   });
 
-  if (viewName === 'login') {
-    loginForm.style.display = 'block';
-    modalTitle.textContent = "Login to Chambers";
-  } else if (viewName === 'signup') {
-    signupForm.style.display = 'block';
-    modalTitle.textContent = "Register Chamber";
-  } else if (viewName === 'forgot') {
-    forgotForm.style.display = 'block';
-    modalTitle.textContent = "Forgot Password";
-  } else if (viewName === 'reset') {
-    resetForm.style.display = 'block';
-    modalTitle.textContent = "Reset Password";
+  if (modalTitle) {
+    if (viewName === 'login') modalTitle.textContent = 'Login to Chambers';
+    else if (viewName === 'signup') modalTitle.textContent = 'Register Chamber';
+    else if (viewName === 'otp') modalTitle.textContent = 'Verify Email OTP';
+    else if (viewName === 'forgot') modalTitle.textContent = 'Forgot Password';
+    else if (viewName === 'reset') modalTitle.textContent = 'Reset Password';
   }
 }
 
@@ -624,29 +618,6 @@ function initPasswordToggleHandlers() {
       }
     });
   });
-}
-
-function showAuthView(viewName) {
-  const loginForm = document.getElementById('auth-login-form');
-  const signupForm = document.getElementById('auth-signup-form');
-  const signupOtpForm = document.getElementById('auth-signup-otp-form');
-  const forgotForm = document.getElementById('auth-forgot-form');
-  const resetForm = document.getElementById('auth-reset-form');
-  const modalTitle = document.getElementById('auth-modal-title');
-
-  if (loginForm) loginForm.style.display = viewName === 'login' ? 'block' : 'none';
-  if (signupForm) signupForm.style.display = viewName === 'signup' ? 'block' : 'none';
-  if (signupOtpForm) signupOtpForm.style.display = viewName === 'otp' ? 'block' : 'none';
-  if (forgotForm) forgotForm.style.display = viewName === 'forgot' ? 'block' : 'none';
-  if (resetForm) resetForm.style.display = viewName === 'reset' ? 'block' : 'none';
-
-  if (modalTitle) {
-    if (viewName === 'login') modalTitle.textContent = 'Login to Chambers';
-    else if (viewName === 'signup') modalTitle.textContent = 'Register Chamber';
-    else if (viewName === 'otp') modalTitle.textContent = 'Verify Email OTP';
-    else if (viewName === 'forgot') modalTitle.textContent = 'Forgot Password';
-    else if (viewName === 'reset') modalTitle.textContent = 'Reset Password';
-  }
 }
 
 let pendingSignupState = null;
