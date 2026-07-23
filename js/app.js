@@ -1603,13 +1603,13 @@ async function renderSupportPage() {
         repliesHtml = `
           <div style="margin-top: 1rem; border-top: 1px dashed var(--border-color); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem;">
             <div style="font-size: 0.7rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.5px;">Ticket Thread</div>
-            \${ticket.replies.map(r => `
+            ${ticket.replies.map(r => `
               <div style="background: rgba(0,0,0,0.15); border: 1px solid var(--border-color); padding: 0.6rem 0.8rem; border-radius: 4px; font-size: 0.75rem;">
                 <div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
-                  <strong style="color: #fff;">\${r.sender} <span style="font-weight:400; color:var(--text-muted); font-size:0.7rem;">(\${r.role})</span></strong>
-                  <span style="color: var(--text-muted); font-size: 0.65rem;">\${new Date(r.date).toLocaleDateString()}</span>
+                  <strong style="color: #fff;">${r.sender} <span style="font-weight:400; color:var(--text-muted); font-size:0.7rem;">(${r.role})</span></strong>
+                  <span style="color: var(--text-muted); font-size: 0.65rem;">${new Date(r.date).toLocaleDateString()}</span>
                 </div>
-                <div style="color: #94a3b8; line-height: 1.4;">\${r.text}</div>
+                <div style="color: #94a3b8; line-height: 1.4;">${r.text}</div>
               </div>
             `).join('')}
           </div>
@@ -1620,23 +1620,23 @@ async function renderSupportPage() {
         <div class="card" style="background: rgba(30, 41, 59, 0.2); border: 1px solid var(--border-color); padding: 1.25rem; margin-bottom: 0.5rem;">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; gap: 1rem;">
             <div>
-              <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600;">TICKET #\${ticket.id.split('_')[1] || ticket.id} • \${ticket.category}</span>
-              <h4 style="color: #fff; margin: 4px 0 6px 0; font-size: 1rem; font-weight: 600;">\${ticket.subject}</h4>
-              <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0; line-height: 1.5;">\${ticket.description}</p>
+              <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600;">TICKET #${ticket.id.split('_')[1] || ticket.id} • ${ticket.category}</span>
+              <h4 style="color: #fff; margin: 4px 0 6px 0; font-size: 1rem; font-weight: 600;">${ticket.subject}</h4>
+              <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0; line-height: 1.5;">${ticket.description}</p>
             </div>
-            <span style="font-size: 0.65rem; font-weight: 700; background: \${status.bg}; color: \${status.text}; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
-              \${ticket.status}
+            <span style="font-size: 0.65rem; font-weight: 700; background: ${status.bg}; color: ${status.text}; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
+              ${ticket.status}
             </span>
           </div>
-          <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.75rem;">Raised on: \${dateStr}</div>
-          \${repliesHtml}
+          <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.75rem;">Raised on: ${dateStr}</div>
+          ${repliesHtml}
         </div>
       `;
     });
 
     listEl.innerHTML = html;
   } catch (err) {
-    listEl.innerHTML = `<div style="color: var(--color-danger); padding: 1rem; text-align: center;">Error loading support tickets: \${err.message}</div>`;
+    listEl.innerHTML = `<div style="color: var(--color-danger); padding: 1rem; text-align: center;">Error loading support tickets: ${err.message}</div>`;
   }
 }
 
