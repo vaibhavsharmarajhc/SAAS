@@ -54,6 +54,135 @@ app.get('/api/status', async (req, res) => {
   });
 });
 
+// ================= EMAIL UTILITIES (RESEND API INTEGRATION) =================
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const RESEND_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'Track My Chambers <onboarding@resend.dev>';
+
+async function sendEmail({ to, subject, html }) {
+  if (!RESEND_API_KEY) {
+    console.warn(`[Resend Email Warning] RESEND_API_KEY is not defined. Email logging fallback:\nTo: ${to}\nSubject: ${subject}`);
+    return { sent: false };
+  }
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${RESEND_API_KEY}`
+      },
+      body: JSON.stringify({
+        from: RESEND_FROM_EMAIL,
+        to: [to],
+        subject: subject,
+        html: html
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error("[Resend API Error]:", data);
+      return { sent: false, error: data };
+    }
+    console.log(`[Resend Email Success] Sent email ID: ${data.id}`);
+    return { sent: true, id: data.id };
+  } catch (err) {
+    console.error("[Resend Network Exception]:", err);
+    return { sent: false, error: err.message };
+  }
+}
+
+async function sendWelcomeEmail(to, firmName, lawyerName) {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #0b0f19; color: #f1f5f9; padding: 2rem 1rem; margin: 0; }
+        .card { max-width: 580px; margin: 0 auto; background: #111827; border: 1px solid #1f2937; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header { background: #1e1b4b; padding: 1.5rem 2rem; border-bottom: 2px solid #d97706; text-align: center; }
+        .logo { font-size: 1.6rem; font-weight: 700; color: #d97706; text-transform: uppercase; letter-spacing: 0.05em; font-family: 'Georgia', serif; }
+        .body { padding: 2rem; line-height: 1.6; }
+        h2 { font-size: 1.25rem; color: #fff; margin-top: 0; }
+        ul { padding-left: 1.25rem; margin: 1rem 0; color: #94a3b8; }
+        li { margin-bottom: 0.5rem; }
+        .btn-container { text-align: center; margin: 2rem 0 1rem 0; }
+        .btn { display: inline-block; background-color: #d97706; color: #ffffff !important; text-decoration: none; padding: 0.75rem 1.5rem; border-radius: 4px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em; }
+        .footer { font-size: 0.75rem; color: #4b5563; text-align: center; padding: 1.5rem; background: #0b0f19; border-top: 1px solid #1f2937; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <div class="logo">Track My Chambers</div>
+          <span style="font-size: 0.75rem; color: #94a3b8;">Legal Practice & Chamber Management PWA Suite</span>
+        </div>
+        <div class="body">
+          <h2>Welcome, ${lawyerName}!</h2>
+          <p>Your digital advocate chamber <strong>${firmName}</strong> has been successfully registered on <strong>Track My Chambers</strong>.</p>
+          <p>Your practice manager suite is now live with the following core modules:</p>
+          <ul>
+            <li><strong>Interactive Case grid</strong> to track court forums, CNR status, and next hearing schedules.</li>
+            <li><strong>Advocate Billings & Retainers</strong> to manage invoice statements, receipts, and stamp paper disbursements.</li>
+            <li><strong>Client Access Portals</strong> to share direct links to case calendars (with all fee figures omitted for privacy).</li>
+          </ul>
+          <div class="btn-container">
+            <a href="https://trackmychambers.in/login" class="btn">Launch Your Dashboard</a>
+          </div>
+          <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 1.5rem;">If you have any questions or require support setting up your database, reply to this email to get in touch with our team.</p>
+        </div>
+        <div class="footer">
+          VSH Legal Chambers &bull; Adv. Vaibhav Sharma &bull; Track My Chambers Practice Manager
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({ to, subject: "Welcome to Track My Chambers!", html });
+}
+
+async function sendResetCodeEmail(to, resetCode) {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #0b0f19; color: #f1f5f9; padding: 2rem 1rem; margin: 0; }
+        .card { max-width: 500px; margin: 0 auto; background: #111827; border: 1px solid #1f2937; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header { background: #1e1b4b; padding: 1.25rem 2rem; border-bottom: 2px solid #d97706; text-align: center; }
+        .logo { font-size: 1.4rem; font-weight: 700; color: #d97706; text-transform: uppercase; letter-spacing: 0.05em; font-family: 'Georgia', serif; }
+        .body { padding: 2rem; line-height: 1.6; text-align: center; }
+        h2 { font-size: 1.25rem; color: #fff; margin-top: 0; }
+        .code-box { background-color: #0b0f19; border: 1px dashed #d97706; font-size: 2.2rem; font-weight: 700; color: #d97706; padding: 1rem; letter-spacing: 0.3em; margin: 1.5rem 0; border-radius: 6px; display: inline-block; width: 80%; }
+        .footer { font-size: 0.75rem; color: #4b5563; text-align: center; padding: 1.5rem; background: #0b0f19; border-top: 1px solid #1f2937; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <div class="logo">Track My Chambers</div>
+        </div>
+        <div class="body">
+          <h2>Password Recovery Request</h2>
+          <p style="text-align: left; color: #cbd5e1;">We received a request to reset your advocate account password. Please use the following 6-digit recovery verification code on the reset screen:</p>
+          <div class="code-box">${resetCode}</div>
+          <p style="text-align: left; font-size: 0.85rem; color: #94a3b8; margin-top: 1rem;">This code is valid for <strong>15 minutes</strong>. If you did not make this request, you can safely ignore this email.</p>
+        </div>
+        <div class="footer">
+          VSH Legal Chambers &bull; Adv. Vaibhav Sharma &bull; Track My Chambers Practice Manager
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({ to, subject: "Track My Chambers - Password Recovery Code", html });
+}
+
 // ================= AUTH ROUTES =================
 
 /**
@@ -82,6 +211,9 @@ app.post('/api/auth/signup', async (req, res) => {
       secure: false, // Set to true if running over HTTPS in production
       maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
     });
+
+    // Send Welcome Email asynchronously
+    sendWelcomeEmail(email, firmName || "Track My Chambers", lawyerName || "Advocate");
 
     res.status(201).json({ user: tenant });
   } catch (err) {
@@ -150,10 +282,15 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 
     await db.setTenantResetCode(email, resetCode, expires);
 
+    // Send reset code email via Resend
+    const emailResult = await sendResetCodeEmail(email, resetCode);
+
     res.json({ 
       success: true, 
-      code: resetCode, 
-      message: "A verification code has been generated. For testing, it is displayed below." 
+      code: emailResult.sent ? undefined : resetCode,
+      message: emailResult.sent
+        ? "A verification code has been sent to your email address."
+        : "A verification code has been generated. For testing, it is displayed below." 
     });
   } catch (err) {
     console.error("Forgot password error:", err);

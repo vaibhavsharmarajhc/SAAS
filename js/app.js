@@ -752,15 +752,18 @@ function initAuthenticationHandlers() {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnHtml;
 
-      if (res && res.code) {
+      if (res && res.success) {
         forgotSuccessBanner.innerHTML = `
-          <strong>Verification Code Generated:</strong><br>
-          Your recovery code is: <strong style="font-size: 1.1rem; color: var(--color-primary);">${res.code}</strong><br>
-          <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">* In production, this code is delivered to your email inbox.</span>
+          <strong style="color: var(--color-success); display: flex; align-items: center; gap: 4px; margin-bottom: 0.25rem;">
+            <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> Recovery Code Sent
+          </strong>
+          A 6-digit recovery code has been sent to your email address. Please check your inbox (and spam folder).<br>
+          ${res.code ? `<div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed rgba(255,255,255,0.08);">Local Testing Code: <strong style="font-size: 1.1rem; color: var(--color-primary);">${res.code}</strong></div>` : ''}
         `;
         forgotSuccessBanner.style.display = 'block';
         forgotSubmitBtn.style.display = 'none';
         forgotGoResetBtn.style.display = 'block';
+        lucide.createIcons();
       }
     } catch (err) {
       submitBtn.disabled = false;
