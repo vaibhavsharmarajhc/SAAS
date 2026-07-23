@@ -609,6 +609,11 @@ function initPasswordToggleHandlers() {
           icon.setAttribute('data-lucide', 'eye');
           lucide.createIcons();
         }
+      }
+    });
+  });
+}
+
 function showAuthView(viewName) {
   const loginForm = document.getElementById('auth-login-form');
   const signupForm = document.getElementById('auth-signup-form');
