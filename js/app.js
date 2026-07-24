@@ -440,7 +440,6 @@ async function router() {
   const featuresPage = document.getElementById('features-page');
   const aboutPage = document.getElementById('about-page');
   const pricingPage = document.getElementById('pricing-page-standalone');
-  const helpPage = document.getElementById('help-page');
 
   // Hide everything first
   if (marketingNav) marketingNav.style.display = 'none';
@@ -452,7 +451,6 @@ async function router() {
   if (featuresPage) featuresPage.style.display = 'none';
   if (aboutPage) aboutPage.style.display = 'none';
   if (pricingPage) pricingPage.style.display = 'none';
-  if (helpPage) helpPage.style.display = 'none';
   document.body.classList.remove('app-active');
 
   // Check auth
@@ -471,7 +469,7 @@ async function router() {
     console.error("Auth check failed:", err);
   }
 
-  const publicRoutes = ['/', '/index.html', '/privacy', '/terms', '/login', '/register', '/features', '/about', '/pricing', '/help', '/guide', '/support'];
+  const publicRoutes = ['/', '/index.html', '/privacy', '/terms', '/login', '/register', '/features', '/about', '/pricing'];
   const isPublicRoute = publicRoutes.includes(path);
 
   if (isPublicRoute) {
@@ -511,11 +509,6 @@ async function router() {
       pricingPage.style.display = 'block';
       safeCreateIcons();
     }
-  } else if (path === '/help' || path === '/guide' || path === '/support') {
-    if (helpPage) {
-      helpPage.style.display = 'block';
-      safeCreateIcons();
-    }
   } else if (path === '/login' || path === '/register') {
     if (isAuthenticated) {
       window.history.pushState({}, '', '/dashboard');
@@ -547,7 +540,7 @@ async function router() {
       });
       portalModule.render();
     }
-  } else if (path === '/dashboard' || path.startsWith('/dashboard-page') || path.startsWith('/overview-page') || path.startsWith('/clients-page') || path.startsWith('/cases-page') || path.startsWith('/diary-page') || path.startsWith('/accounts-page') || path.startsWith('/share-page') || path.startsWith('/tasks-page') || path.startsWith('/settings-page') || path.startsWith('/superadmin-page') || path.startsWith('/support-page')) {
+  } else if (path === '/dashboard' || path.startsWith('/dashboard-page') || path.startsWith('/overview-page') || path.startsWith('/clients-page') || path.startsWith('/cases-page') || path.startsWith('/diary-page') || path.startsWith('/accounts-page') || path.startsWith('/share-page') || path.startsWith('/tasks-page') || path.startsWith('/settings-page') || path.startsWith('/superadmin-page') || path.startsWith('/support-page') || path.startsWith('/help') || path.startsWith('/support')) {
     if (!isAuthenticated) {
       window.history.pushState({}, '', '/login');
       router();
@@ -581,9 +574,17 @@ async function router() {
 
         // Determine view from path
         let targetView = 'dashboard-page';
-        if (path !== '/dashboard') {
-          targetView = path.substring(1);
-        }
+        if (path.startsWith('/overview-page')) targetView = 'overview-page';
+        else if (path.startsWith('/clients-page')) targetView = 'clients-page';
+        else if (path.startsWith('/cases-page')) targetView = 'cases-page';
+        else if (path.startsWith('/diary-page')) targetView = 'diary-page';
+        else if (path.startsWith('/accounts-page')) targetView = 'accounts-page';
+        else if (path.startsWith('/share-page')) targetView = 'share-page';
+        else if (path.startsWith('/tasks-page')) targetView = 'tasks-page';
+        else if (path.startsWith('/settings-page')) targetView = 'settings-page';
+        else if (path.startsWith('/superadmin-page')) targetView = 'superadmin-page';
+        else if (path.startsWith('/support-page') || path.startsWith('/help') || path.startsWith('/support')) targetView = 'support-page';
+        
         await switchView(targetView);
       }
     }
