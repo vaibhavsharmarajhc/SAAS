@@ -576,14 +576,6 @@ async function router() {
         await switchView(targetView);
       }
     }
-  } else {
-    // Fallback
-    if (isAuthenticated) {
-      window.history.pushState({}, '', '/dashboard');
-    } else {
-      window.history.pushState({}, '', '/');
-    }
-    router();
   }
 }
 
