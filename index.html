@@ -7,7 +7,7 @@
   <!-- SEO & Styling Meta -->
   <meta name="description" content="Premium Case Diary, Billing, Client Onboarding, and Practice Management Suite for Track My Chambers.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.60">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.63">
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest" defer></script>
   <!-- Chart.js CDN -->
@@ -31,13 +31,13 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=60')
+        navigator.serviceWorker.register('/sw.js?v=63')
           .then(reg => {
             reg.update();
             if (window.caches) {
               caches.keys().then(keys => {
                 keys.forEach(key => {
-                  if (key !== 'trackmychambers-cache-v60') {
+                  if (key !== 'trackmychambers-cache-v63') {
                     caches.delete(key);
                   }
                 });
@@ -961,6 +961,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.62"></script>
+  <script type="module" src="js/app.js?v=1.0.63"></script>
 </body>
 </html>
