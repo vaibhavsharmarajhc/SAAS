@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -15,6 +16,7 @@ const PORT = process.env.PORT || 8080;
 const JWT_SECRET = process.env.JWT_SECRET || 'vsh_secret_chambers_key_998877';
 
 // Middleware
+app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 

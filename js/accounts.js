@@ -205,11 +205,18 @@ const accountsModule = {
   /**
    * Render ledger list
    */
+  currentPage: 1,
+  pageSize: 50,
+
+  /**
+   * Render ledger list with 50-row pagination and DocumentFragment batching
+   */
   renderLedgerTable() {
     const txs = db.getTransactions();
     const filterClient = document.getElementById('ledger-filter-client').value;
     const filterType = document.getElementById('ledger-filter-type').value;
     const tableBody = document.getElementById('ledger-table-body');
+    if (!tableBody) return;
 
     tableBody.innerHTML = '';
 
@@ -222,10 +229,19 @@ const accountsModule = {
 
     if (filteredTxs.length === 0) {
       tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;" class="text-muted">No transactions matching filter criteria.</td></tr>`;
+      this.renderPaginationControls(0, 1);
       return;
     }
 
-    filteredTxs.forEach(t => {
+    const totalPages = Math.ceil(filteredTxs.length / this.pageSize);
+    if (this.currentPage > totalPages) this.currentPage = 1;
+
+    const startIdx = (this.currentPage - 1) * this.pageSize;
+    const pageTxs = filteredTxs.slice(startIdx, startIdx + this.pageSize);
+
+    const fragment = document.createDocumentFragment();
+
+    pageTxs.forEach(t => {
       const client = db.getClient(t.clientId);
       const linkedCase = t.caseId ? db.getCase(t.caseId) : null;
       const row = document.createElement('tr');
@@ -261,10 +277,62 @@ const accountsModule = {
       row.querySelector('.btn-invoice').addEventListener('click', () => this.showInvoice(t.id));
       row.querySelector('.btn-delete-tx').addEventListener('click', () => this.deleteTransaction(t.id));
 
-      tableBody.appendChild(row);
+      fragment.appendChild(row);
     });
 
-    lucide.createIcons();
+    tableBody.appendChild(fragment);
+    this.renderPaginationControls(filteredTxs.length, totalPages);
+
+    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+      lucide.createIcons({ root: tableBody });
+    }
+  },
+
+  renderPaginationControls(totalItems, totalPages) {
+    let container = document.getElementById('accounts-pagination-container');
+    const ledgerCard = document.getElementById('ledger-table-body')?.closest('.card');
+    if (!ledgerCard) return;
+
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'accounts-pagination-container';
+      container.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 1rem 0 0 0; border-top: 1px solid var(--border-color); margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);';
+      ledgerCard.appendChild(container);
+    }
+
+    if (totalItems <= this.pageSize) {
+      container.innerHTML = `<span>Showing all ${totalItems} transactions</span>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <span>Showing ${((this.currentPage - 1) * this.pageSize) + 1}–${Math.min(this.currentPage * this.pageSize, totalItems)} of ${totalItems} entries</span>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <button id="accounts-prev-page" class="btn btn-secondary" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;" ${this.currentPage === 1 ? 'disabled' : ''}>← Prev</button>
+        <span style="font-weight: 600; color: #fff;">Page ${this.currentPage} of ${totalPages}</span>
+        <button id="accounts-next-page" class="btn btn-secondary" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;" ${this.currentPage === totalPages ? 'disabled' : ''}>Next →</button>
+      </div>
+    `;
+
+    const prevBtn = document.getElementById('accounts-prev-page');
+    const nextBtn = document.getElementById('accounts-next-page');
+
+    if (prevBtn) {
+      prevBtn.onclick = () => {
+        if (this.currentPage > 1) {
+          this.currentPage--;
+          this.renderLedgerTable();
+        }
+      };
+    }
+    if (nextBtn) {
+      nextBtn.onclick = () => {
+        if (this.currentPage < totalPages) {
+          this.currentPage++;
+          this.renderLedgerTable();
+        }
+      };
+    }
   },
 
   async deleteTransaction(id) {

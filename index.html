@@ -7,16 +7,20 @@
   <!-- SEO & Styling Meta -->
   <meta name="description" content="Premium Case Diary, Billing, Client Onboarding, and Practice Management Suite for Track My Chambers.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.51">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.52">
   <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <script>
-    window.safeCreateIcons = function() {
+    window.safeCreateIcons = function(container) {
       try {
         if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') {
-          lucide.createIcons();
+          if (container && container instanceof HTMLElement) {
+            lucide.createIcons({ root: container });
+          } else {
+            lucide.createIcons();
+          }
         }
       } catch (e) {
         console.warn('Lucide icons safe call deferred:', e);
@@ -27,7 +31,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=51')
+        navigator.serviceWorker.register('/sw.js?v=52')
           .then(reg => {
             reg.update();
             console.log('Service Worker Auto-Updated!', reg);
@@ -3034,6 +3038,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.51"></script>
+  <script type="module" src="js/app.js?v=1.0.52"></script>
 </body>
 </html>

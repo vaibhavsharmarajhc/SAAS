@@ -48,6 +48,17 @@
   --sidebar-width: 260px;
 }
 
+/* Hardware GPU Acceleration & Smooth Performance Optimizations */
+.app-sidebar,
+.header-bar,
+.help-jump-menu,
+.modal-overlay,
+.card {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
 [data-theme="light"] {
   /* Light Theme */
   --bg-main: #f8fafc;
