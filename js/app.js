@@ -1957,17 +1957,35 @@ function initSupportTicketTelemetry() {
   }
 }
 
+// Global click interceptor for all client-side navigation links (a[data-link])
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('a[data-link]');
+  if (link) {
+    e.preventDefault();
+    const targetPath = link.getAttribute('data-link');
+    window.history.pushState({}, '', targetPath);
+    router();
+  }
+});
+
+// Global popstate listener for browser back/forward buttons
+window.addEventListener('popstate', () => {
+  router();
+});
+
 // Global initialization call on DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
+  initAuthenticationHandlers();
   initHelpSearch();
   initHelpAccordions();
   initHelpActionLaunchers();
   initSupportTicketTelemetry();
 });
 setTimeout(() => {
+  initAuthenticationHandlers();
   initHelpSearch();
   initHelpAccordions();
   initHelpActionLaunchers();
   initSupportTicketTelemetry();
-}, 1000);
+}, 500);
 
