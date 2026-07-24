@@ -507,7 +507,9 @@ async function router() {
     }
   } catch (err) {
     console.error("Auth check failed:", err);
-  } else if (path.startsWith('/portal') || path.startsWith('/portal-page')) {
+  }
+
+  if (path.startsWith('/portal') || path.startsWith('/portal-page')) {
     if (dashboardApp) {
       dashboardApp.style.display = 'flex';
       document.body.classList.add('app-active');
@@ -526,7 +528,7 @@ async function router() {
       });
       portalModule.render();
     }
-  } else if (path === '/dashboard' || path.startsWith('/dashboard-page') || path.startsWith('/overview-page') || path.startsWith('/clients-page') || path.startsWith('/cases-page') || path.startsWith('/diary-page') || path.startsWith('/accounts-page') || path.startsWith('/share-page') || path.startsWith('/tasks-page') || path.startsWith('/settings-page') || path.startsWith('/superadmin-page') || path.startsWith('/support-page') || path.startsWith('/help') || path.startsWith('/support')) {
+  } else {
     if (!isAuthenticated) {
       window.history.pushState({}, '', '/login');
       router();
