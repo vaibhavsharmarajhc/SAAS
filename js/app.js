@@ -166,6 +166,16 @@ const viewQuickActions = {
  * Switch Active View Router (Async)
  */
 export async function switchView(targetViewId) {
+  const currentUser = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || '{}');
+  if (typeof adminModule !== 'undefined' && adminModule.updateAdminVisibility) {
+    adminModule.updateAdminVisibility(currentUser);
+  }
+
+  if (targetViewId === 'superadmin-page' && typeof adminModule !== 'undefined' && !adminModule.isSuperAdmin(currentUser)) {
+    console.warn("Unauthorized attempt to access Super Admin page blocked.");
+    targetViewId = 'overview-page';
+  }
+
   state.activeView = targetViewId;
 
   // Auto-close mobile drawer sidebar

@@ -1000,7 +1000,17 @@ app.delete('/api/notifications/clear', authenticateToken, async (req, res) => {
 });
 
 // ================= SUPER ADMIN ROUTES =================
-app.get('/api/admin/metrics', authenticateToken, async (req, res) => {
+const SUPER_ADMIN_EMAIL = 'vaibhavsharmarajhc@gmail.com';
+
+function requireSuperAdmin(req, res, next) {
+  if (!req.user || !req.user.email || req.user.email.toLowerCase().trim() !== SUPER_ADMIN_EMAIL.toLowerCase()) {
+    console.warn(`[Security Alert] Unauthorized Super Admin access attempt by: ${req.user ? req.user.email : 'Unknown'}`);
+    return res.status(403).json({ error: 'Access denied. Super Admin privileges are restricted exclusively to vaibhavsharmarajhc@gmail.com.' });
+  }
+  next();
+}
+
+app.get('/api/admin/metrics', authenticateToken, requireSuperAdmin, async (req, res) => {
   try {
     const metrics = await db.getPlatformAdminMetrics();
     res.json(metrics);
