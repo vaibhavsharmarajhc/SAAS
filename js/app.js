@@ -180,8 +180,10 @@ export async function switchView(targetViewId) {
   getPageContainers().forEach(container => {
     if (container.id === targetViewId) {
       container.classList.add('active');
+      container.style.display = 'block';
     } else {
       container.classList.remove('active');
+      container.style.display = 'none';
     }
   });
 
