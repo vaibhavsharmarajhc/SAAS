@@ -1861,3 +1861,127 @@ function initSupportTicketHandlers() {
     }
   });
 }
+
+/**
+ * Help Center Real-Time Live Search Engine
+ */
+function initHelpSearch() {
+  const searchInput = document.getElementById('help-search-input');
+  const clearBtn = document.getElementById('help-search-clear');
+  if (!searchInput) return;
+
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    if (clearBtn) clearBtn.style.display = query.length > 0 ? 'block' : 'none';
+
+    const cards = document.querySelectorAll('.help-searchable-card');
+    cards.forEach(card => {
+      const text = card.textContent.toLowerCase();
+      if (!query || text.includes(query)) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  });
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      clearBtn.style.display = 'none';
+      searchInput.dispatchEvent(new Event('input'));
+    });
+  }
+}
+
+/**
+ * Help Center Accordion Expand/Collapse Controls
+ */
+function initHelpAccordions() {
+  const expandBtn = document.getElementById('btn-help-expand-all');
+  const collapseBtn = document.getElementById('btn-help-collapse-all');
+
+  if (expandBtn) {
+    expandBtn.addEventListener('click', () => {
+      document.querySelectorAll('.help-accordion').forEach(el => el.setAttribute('open', 'true'));
+    });
+  }
+
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', () => {
+      document.querySelectorAll('.help-accordion').forEach(el => el.removeAttribute('open'));
+    });
+  }
+}
+
+/**
+ * Help Center "Try It Now" Action Launchers
+ */
+function initHelpActionLaunchers() {
+  document.querySelectorAll('.help-action-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const actionTarget = btn.getAttribute('data-target-action');
+      if (!actionTarget) return;
+
+      if (actionTarget === 'overview') {
+        switchView('overview-page');
+      } else if (actionTarget === 'register-case') {
+        switchView('cases-page');
+        setTimeout(() => {
+          const addCaseBtn = document.getElementById('add-case-btn') || document.querySelector('[data-action="add-case"]');
+          if (addCaseBtn) addCaseBtn.click();
+        }, 150);
+      } else if (actionTarget === 'diary') {
+        switchView('diary-page');
+      } else if (actionTarget === 'log-tx') {
+        switchView('accounts-page');
+        setTimeout(() => {
+          const logTxBtn = document.getElementById('add-tx-btn') || document.querySelector('[data-action="add-tx"]');
+          if (logTxBtn) logTxBtn.click();
+        }, 150);
+      } else if (actionTarget === 'onboard-client') {
+        switchView('clients-page');
+        setTimeout(() => {
+          const addClientBtn = document.getElementById('add-client-btn') || document.querySelector('[data-action="add-client"]');
+          if (addClientBtn) addClientBtn.click();
+        }, 150);
+      } else if (actionTarget === 'create-task') {
+        switchView('tasks-page');
+        setTimeout(() => {
+          const addTaskBtn = document.getElementById('add-task-btn') || document.querySelector('[data-action="add-task"]');
+          if (addTaskBtn) addTaskBtn.click();
+        }, 150);
+      } else if (actionTarget === 'settings') {
+        switchView('settings-page');
+      }
+    });
+  });
+}
+
+/**
+ * Support Ticket Auto-Captured Telemetry
+ */
+function initSupportTicketTelemetry() {
+  const telemetryText = document.getElementById('telemetry-info-text');
+  if (telemetryText) {
+    const userAgent = navigator.userAgent.includes('Chrome') ? 'Chrome' : navigator.userAgent.includes('Firefox') ? 'Firefox' : 'Browser';
+    const os = navigator.platform.includes('Win') ? 'Windows' : navigator.platform.includes('Mac') ? 'macOS' : 'OS';
+    const screenRes = `${window.screen.width}x${window.screen.height}`;
+    telemetryText.textContent = `Chamber v1.0.48 | ${userAgent} on ${os} (${screenRes})`;
+  }
+}
+
+// Global initialization call on DOM Ready
+document.addEventListener('DOMContentLoaded', () => {
+  initHelpSearch();
+  initHelpAccordions();
+  initHelpActionLaunchers();
+  initSupportTicketTelemetry();
+});
+setTimeout(() => {
+  initHelpSearch();
+  initHelpAccordions();
+  initHelpActionLaunchers();
+  initSupportTicketTelemetry();
+}, 1000);
+
