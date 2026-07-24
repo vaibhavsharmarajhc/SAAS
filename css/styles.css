@@ -59,6 +59,16 @@
   backface-visibility: hidden;
 }
 
+/* Instant 0ms Tactile Touch Active Feedback */
+button, .btn, .menu-item, a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active, .btn:active, .menu-item:active {
+  transform: scale(0.97) translateZ(0) !important;
+  transition: transform 0.05s cubic-bezier(0, 0, 0.2, 1) !important;
+}
+
 [data-theme="light"] {
   /* Light Theme */
   --bg-main: #f8fafc;
