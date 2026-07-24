@@ -1787,6 +1787,26 @@ async function renderSupportPage() {
 }
 
 function initSupportTicketHandlers() {
+  const tabBtns = document.querySelectorAll('.support-tab-btn');
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetTab = btn.getAttribute('data-tab');
+      tabBtns.forEach(b => {
+        b.classList.remove('active');
+        b.classList.replace('btn-primary', 'btn-secondary');
+      });
+      btn.classList.add('active');
+      btn.classList.replace('btn-secondary', 'btn-primary');
+
+      document.querySelectorAll('.support-tab-content').forEach(content => {
+        content.style.display = 'none';
+      });
+      const targetEl = document.getElementById(`support-tab-${targetTab}`);
+      if (targetEl) targetEl.style.display = 'block';
+      safeCreateIcons();
+    });
+  });
+
   const form = document.getElementById('support-ticket-form');
   if (!form) return;
 

@@ -7,7 +7,7 @@
   <!-- SEO & Styling Meta -->
   <meta name="description" content="Premium Case Diary, Billing, Client Onboarding, and Practice Management Suite for Track My Chambers.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.42">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.43">
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Chart.js CDN -->
@@ -27,7 +27,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=42')
+        navigator.serviceWorker.register('/sw.js?v=43')
           .then(reg => {
             reg.update();
             console.log('Service Worker Auto-Updated!', reg);
@@ -1792,54 +1792,302 @@
 
       <!-- Help & Support Center View Container -->
       <div id="support-page" class="page-container" style="display: none;">
-        <div class="grid-cols-2">
-          
-          <!-- Raise Help Ticket Card -->
-          <div class="card">
-            <div class="section-header">
-              <h3>Raise Support Ticket</h3>
-            </div>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
-              Need help with case diaries, billing configuration, or custom domain setups? Raise a support ticket and our team will get back to you shortly.
-            </p>
-            <form id="support-ticket-form">
-              <div class="form-group">
-                <label class="form-label">Subject / Title *</label>
-                <input type="text" class="form-control" id="support-ticket-subject" placeholder="e.g. Domain propagation issue or billing invoice question" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Category *</label>
-                <select class="form-control" id="support-ticket-category" required>
-                  <option value="Billing & Retainers">Billing & Retainers</option>
-                  <option value="Case Registry / Diary">Case Registry / Diary</option>
-                  <option value="Custom Domain / VPS">Custom Domain / VPS</option>
-                  <option value="General Question">General Question</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Description *</label>
-                <textarea class="form-control" id="support-ticket-desc" rows="4" placeholder="Describe the issue or assistance needed in detail..." required></textarea>
-              </div>
-              <div id="support-ticket-error" style="color: var(--color-danger); font-size: 0.85rem; margin-top: 0.5rem; display: none;"></div>
-              <div id="support-ticket-success" style="color: var(--color-success); font-size: 0.85rem; margin-top: 0.5rem; display: none;"></div>
-              <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;"><i data-lucide="message-square"></i> Submit Support Ticket</button>
-            </form>
-          </div>
-
-          <!-- Active & Historical Support Tickets List -->
-          <div class="card" style="display: flex; flex-direction: column;">
-            <div class="section-header">
-              <h3>Your Support Tickets</h3>
-            </div>
-            <div id="support-tickets-list" style="display: flex; flex-direction: column; gap: 1rem; flex-grow: 1;">
-              <!-- Javascript rendered tickets list -->
-              <div style="text-align:center; padding:3rem;" class="text-muted">
-                <p>No support tickets raised yet.</p>
-              </div>
-            </div>
-          </div>
-
+        
+        <!-- Navigation Sub-Tabs -->
+        <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+          <button type="button" class="btn btn-primary support-tab-btn active" data-tab="guide" style="display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="book-open"></i> Comprehensive Practice User Guide
+          </button>
+          <button type="button" class="btn btn-secondary support-tab-btn" data-tab="tickets" style="display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="message-square"></i> Helpdesk & Support Tickets
+          </button>
         </div>
+
+        <!-- TAB 1: Comprehensive Practice User Guide -->
+        <div id="support-tab-guide" class="support-tab-content">
+          
+          <div class="card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(217, 119, 6, 0.1) 0%, rgba(30, 41, 59, 0.3) 100%); border: 1px solid rgba(217, 119, 6, 0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+              <div>
+                <h2 style="color: #fff; font-size: 1.35rem; font-weight: 700; margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 8px;">
+                  <i data-lucide="award" style="color: var(--color-primary);"></i> Track My Chambers - Advocate Practice Playbook & User Guide
+                </h2>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0; line-height: 1.5; max-width: 850px;">
+                  Welcome to your ultimate guide for maximizing efficiency, revenue tracking, client satisfaction, and case management using Track My Chambers. Follow these detailed chapters to master every capability of your digital chamber suite.
+                </p>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <span class="badge badge-active" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">PWA Version 1.0.42 Active</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature Chapters Grid -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            
+            <!-- Chapter 1: Practice Overview & Dashboard Intelligence -->
+            <div class="card">
+              <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <div style="background: rgba(217, 119, 6, 0.15); color: var(--color-primary); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">1</div>
+                <div>
+                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">Practice Overview & Real-Time Dashboard</h3>
+                  <span style="color: var(--text-muted); font-size: 0.75rem;">Command center for daily operations, revenue graphs, and quick actions</span>
+                </div>
+              </div>
+              
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: flex; align-items: center; gap: 6px; margin-bottom: 0.4rem;">
+                    <i data-lucide="bar-chart-2" style="width: 14px; height: 14px; color: var(--color-primary);"></i> Real-Time KPI Cards
+                  </strong>
+                  Monitor active clients, pending cases, monthly income, outstanding client dues, today's listed hearings, and pending delegated tasks in one centralized screen.
+                </div>
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: flex; align-items: center; gap: 6px; margin-bottom: 0.4rem;">
+                    <i data-lucide="zap" style="width: 14px; height: 14px; color: var(--color-primary);"></i> Adaptive Quick Action Button
+                  </strong>
+                  The top-right header button dynamically transforms based on your active module (e.g. <em>Log Payment</em> on Dashboard, <em>Register Case</em> on Cases, <em>New Task</em> on Task Manager).
+                </div>
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: flex; align-items: center; gap: 6px; margin-bottom: 0.4rem;">
+                    <i data-lucide="search" style="width: 14px; height: 14px; color: var(--color-primary);"></i> Global Search Bar (`Ctrl + K`)
+                  </strong>
+                  Type any keyword into the top navigation search bar to instantly query clients by name, phone, or email, and cases by title, CNR number, or court forum.
+                </div>
+              </div>
+            </div>
+
+            <!-- Chapter 2: Client Directory & Client Access Portals -->
+            <div class="card">
+              <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <div style="background: rgba(16, 185, 129, 0.15); color: var(--color-success); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">2</div>
+                <div>
+                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">Client Onboarding, Dossiers & Public Access Portals</h3>
+                  <span style="color: var(--text-muted); font-size: 0.75rem;">Manage client relationships, dossiers, and client portal access links</span>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">4-Step Onboarding Wizard:</strong>
+                  Go to <strong>Clients</strong> $\rightarrow$ Complete the wizard steps to capture client contact details, select client type (<em>Individual</em> vs <em>Corporate</em>), link initial cases, and set retainer fee agreements.
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                  <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                    <strong style="color: #fff; display: flex; align-items: center; gap: 6px; margin-bottom: 0.4rem;">
+                      <i data-lucide="folder" style="width: 14px; height: 14px; color: var(--color-success);"></i> Client Dossier View
+                    </strong>
+                    Click <strong>Dossier</strong> on any client row to open their profile details, view all linked legal matters, inspect historical billing entries, or trigger a <strong>Write-Off Bad Debt</strong> action if a client defaults.
+                  </div>
+                  <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                    <strong style="color: #fff; display: flex; align-items: center; gap: 6px; margin-bottom: 0.4rem;">
+                      <i data-lucide="link" style="width: 14px; height: 14px; color: var(--color-success);"></i> Secure Client Access Links
+                    </strong>
+                    Click <strong>Copy Link</strong> to share a secure, read-only portal link (`/portal?token=...`) with your client. Clients can view hearing dates and case stages without needing a password.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chapter 3: Case Registry & Cause List Tracking -->
+            <div class="card">
+              <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <div style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">3</div>
+                <div>
+                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">Case Registry & Chronological Hearing History</h3>
+                  <span style="color: var(--text-muted); font-size: 0.75rem;">Register legal matters, log court hearings, and manage stages</span>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Registering New Cases:</strong>
+                  Click <strong>Register Case</strong> $\rightarrow$ Select the client, specify case title, CNR number, legal category (<em>Civil, Criminal, Matrimonial, Consumer, Service, Legal Notice, Contracts, Consultation</em>), court forum, current stage, and referral source.
+                </div>
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Recording Hearing Outcomes:</strong>
+                  Click <strong>Record Hearing</strong> on any case card $\rightarrow$ Input today's hearing date, stage/purpose (e.g. <em>Arguments, Evidence</em>), summary of court directions, and listed next hearing date.
+                </div>
+              </div>
+            </div>
+
+            <!-- Chapter 4: Daily Cause List & Calendar Diary -->
+            <div class="card">
+              <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <div style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">4</div>
+                <div>
+                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">Daily Cause List & Interactive Calendar Diary</h3>
+                  <span style="color: var(--text-muted); font-size: 0.75rem;">4 calendar view modes, color-coded court badges, and printable cause lists</span>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                  <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                    <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">4 View Modes:</strong>
+                    Switch seamlessly between <strong>Month</strong>, <strong>Week</strong>, <strong>Day</strong>, and <strong>Year</strong> views to plan hearing schedules and court appearances ahead of time.
+                  </div>
+                  <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                    <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Day Pop-Up & Cause List Printing:</strong>
+                    Click on any date cell to view all listed hearings for that day. Click <strong>Print Cause List</strong> to generate a clean paper cause list to carry to court.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chapter 5: Accounts & Financial Ledger Management -->
+            <div class="card">
+              <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <div style="background: rgba(168, 85, 247, 0.15); color: #c084fc; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">5</div>
+                <div>
+                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">Accounts & Professional Fee Ledger</h3>
+                  <span style="color: var(--text-muted); font-size: 0.75rem;">Record retainer billing, disbursed expenses, fee payments, and printable invoices</span>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">4 Entry Categories:</strong>
+                  <ul style="margin: 0.4rem 0 0 1.2rem; padding: 0;">
+                    <li><strong>Professional Fee Billed (Debit)</strong>: Log legal fee invoices.</li>
+                    <li><strong>Payment Received (Credit)</strong>: Record retainer or installment payments.</li>
+                    <li><strong>Disbursed Expenses (Debit)</strong>: Record court fees, typing, or travel costs.</li>
+                    <li><strong>Written Off / Bad Debt</strong>: Clear unrecoverable balances.</li>
+                  </ul>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Printable Invoices & Receipts:</strong>
+                  Click <strong>Invoice / Memo Statement</strong> on any ledger row to open a printable invoice equipped with your chamber logo, firm name, advocate signature, and itemized billing table.
+                </div>
+              </div>
+            </div>
+
+            <!-- Chapter 6: Task Manager & Team Delegation Tree -->
+            <div class="card">
+              <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <div style="background: rgba(236, 72, 153, 0.15); color: #f472b6; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">6</div>
+                <div>
+                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">Task Manager, Sub-Delegation & Resolution Analytics</h3>
+                  <span style="color: var(--text-muted); font-size: 0.75rem;">Delegate tasks to junior colleagues, build subtask trees, and track resolution lead times</span>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Task Delegation & Sub-Trees:</strong>
+                  Create tasks, assign priority levels (*High, Medium, Low*), and delegate them to chamber colleagues. Click <strong>Sub-delegate</strong> to build multi-level nested delegation trees.
+                </div>
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Lifecycle & Chat Thread:</strong>
+                  Click on any task to view its assignment timestamp, completion timestamp, total resolution time, and post internal updates inside the <strong>Collaboration Chat Thread</strong>.
+                </div>
+              </div>
+            </div>
+
+            <!-- Chapter 7: Universal Undo/Redo & Hotkeys -->
+            <div class="card">
+              <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <div style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">7</div>
+                <div>
+                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">Universal Undo/Redo & Keyboard Shortcuts</h3>
+                  <span style="color: var(--text-muted); font-size: 0.75rem;">Revert any major or minor edit across all modules instantly</span>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Interactive Toast Banner:</strong>
+                  Every client edit, case addition, hearing update, ledger transaction, or task completion displays a 4-second notification toast with an <strong>Undo</strong> button at the bottom-right corner.
+                </div>
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Global Keyboard Shortcuts:</strong>
+                  <ul style="margin: 0.4rem 0 0 1.2rem; padding: 0;">
+                    <li><strong style="color: var(--color-primary);">Ctrl + Z</strong>: Revert last action (Undo)</li>
+                    <li><strong style="color: var(--color-primary);">Ctrl + Y</strong>: Re-apply reverted action (Redo)</li>
+                    <li><strong style="color: var(--color-primary);">Ctrl + K</strong>: Focus Global Search bar</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chapter 8: Security & Backups -->
+            <div class="card">
+              <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <div style="background: rgba(220, 38, 38, 0.15); color: #f87171; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">8</div>
+                <div>
+                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">Account Security, OTP Registration & JSON Data Backups</h3>
+                  <span style="color: var(--text-muted); font-size: 0.75rem;">Session cookies, 15-min registration OTP, and data backup snapshots</span>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Strict Session Invalidation:</strong>
+                  Clicking <strong>Logout</strong> completely destroys session cookies, clears local storage, resets memory tokens, and displays a green logout confirmation banner on the login screen.
+                </div>
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">JSON Backup Snapshots:</strong>
+                  Go to <strong>Settings</strong> $\rightarrow$ Click <strong>Download Backup File</strong> to save a complete `.json` snapshot of your chamber records on your computer.
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TAB 2: Support Ticket & Helpdesk Form -->
+        <div id="support-tab-tickets" class="support-tab-content" style="display: none;">
+          <div class="grid-cols-2">
+            
+            <!-- Raise Help Ticket Card -->
+            <div class="card">
+              <div class="section-header">
+                <h3>Raise Support Ticket</h3>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                Need help with case diaries, billing configuration, or custom domain setups? Raise a support ticket and our team will get back to you shortly.
+              </p>
+              <form id="support-ticket-form">
+                <div class="form-group">
+                  <label class="form-label">Subject / Title *</label>
+                  <input type="text" class="form-control" id="support-ticket-subject" placeholder="e.g. Domain propagation issue or billing invoice question" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Category *</label>
+                  <select class="form-control" id="support-ticket-category" required>
+                    <option value="Billing & Retainers">Billing & Retainers</option>
+                    <option value="Case Registry / Diary">Case Registry / Diary</option>
+                    <option value="Custom Domain / VPS">Custom Domain / VPS</option>
+                    <option value="General Question">General Question</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Description *</label>
+                  <textarea class="form-control" id="support-ticket-desc" rows="4" placeholder="Describe the issue or assistance needed in detail..." required></textarea>
+                </div>
+                <div id="support-ticket-error" style="color: var(--color-danger); font-size: 0.85rem; margin-top: 0.5rem; display: none;"></div>
+                <div id="support-ticket-success" style="color: var(--color-success); font-size: 0.85rem; margin-top: 0.5rem; display: none;"></div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;"><i data-lucide="message-square"></i> Submit Support Ticket</button>
+              </form>
+            </div>
+
+            <!-- Active & Historical Support Tickets List -->
+            <div class="card" style="display: flex; flex-direction: column;">
+              <div class="section-header">
+                <h3>Your Support Tickets</h3>
+              </div>
+              <div id="support-tickets-list" style="display: flex; flex-direction: column; gap: 1rem; flex-grow: 1;">
+                <!-- Javascript rendered tickets list -->
+                <div style="text-align:center; padding:3rem;" class="text-muted">
+                  <p>No support tickets raised yet.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
 
         <!-- Super Admin Platform Intelligence Console Container -->
@@ -2617,6 +2865,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.42"></script>
+  <script type="module" src="js/app.js?v=1.0.43"></script>
 </body>
 </html>
