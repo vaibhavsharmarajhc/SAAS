@@ -29,20 +29,22 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=63')
-          .then(reg => {
-            reg.update();
-            if (window.caches) {
-              caches.keys().then(keys => {
-                keys.forEach(key => {
-                  if (key !== 'trackmychambers-cache-v63') {
-                    caches.delete(key);
-                  }
-                });
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          return Promise.all(registrations.map(r => r.unregister()));
+        }).then(() => {
+          return navigator.serviceWorker.register('/sw.js?v=64');
+        }).then(reg => {
+          reg.update();
+          if (window.caches) {
+            caches.keys().then(keys => {
+              keys.forEach(key => {
+                if (key !== 'trackmychambers-cache-v64') {
+                  caches.delete(key);
+                }
               });
-            }
-          })
-          .catch(err => console.error('Service Worker registration failed: ', err));
+            });
+          }
+        }).catch(err => console.error('Service Worker registration:', err));
       });
     }
   </script>
@@ -2297,6 +2299,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.63"></script>
+  <script type="module" src="js/app.js?v=1.0.64"></script>
 </body>
 </html>
