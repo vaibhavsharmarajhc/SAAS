@@ -80,6 +80,13 @@ const api = {
         return null;
       }
     },
+    async bootstrap() {
+      try {
+        return await fetchAPI('/api/bootstrap', { method: 'GET' });
+      } catch (err) {
+        return null;
+      }
+    },
     async changePassword(currentPassword, newPassword) {
       return await fetchAPI('/api/auth/change-password', {
         method: 'POST',

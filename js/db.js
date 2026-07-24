@@ -27,21 +27,38 @@ class LegalDB {
   }
 
   async loadAll(forceReload = false) {
+    if (this.cache.user && this.cache.clients.length > 0 && !forceReload) {
+      return true; // Instant 0ms memory cache return!
+    }
+
     try {
-      const me = await api.auth.me();
-      if (!me || !me.user) {
-        this.clearCache();
-        return false; // Not authenticated
+      let data = await api.auth.bootstrap();
+      if (!data || !data.user) {
+        // Fallback to parallel requests
+        const [me, clients, cases, transactions] = await Promise.all([
+          api.auth.me(),
+          api.clients.getAll(),
+          api.cases.getAll(),
+          api.transactions.getAll()
+        ]);
+        if (!me || !me.user) {
+          this.clearCache();
+          return false;
+        }
+        data = {
+          user: me.user,
+          clients: clients || [],
+          cases: cases || [],
+          transactions: transactions || []
+        };
       }
 
-      this.cache.user = me.user;
-      this.cache.settings = me.user.settings || {};
-      
-      // Fetch resource collections from backend
-      this.cache.clients = await api.clients.getAll() || [];
-      this.cache.cases = await api.cases.getAll() || [];
-      this.cache.transactions = await api.transactions.getAll() || [];
-      return true; // Authenticated and loaded
+      this.cache.user = data.user;
+      this.cache.settings = data.user.settings || {};
+      this.cache.clients = data.clients || [];
+      this.cache.cases = data.cases || [];
+      this.cache.transactions = data.transactions || [];
+      return true;
     } catch (e) {
       this.clearCache();
       return false;

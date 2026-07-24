@@ -498,6 +498,38 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
 });
 
 /**
+ * Fast Unified Bootstrap Endpoint (Single HTTP payload)
+ */
+app.get('/api/bootstrap', authenticateToken, async (req, res) => {
+  try {
+    const tenant = await db.getTenantById(req.user.id);
+    if (!tenant) {
+      return res.status(404).json({ error: "User profile not found." });
+    }
+    const { passwordHash: _, ...safeTenant } = tenant;
+    const tenantId = req.user.id || safeTenant.email;
+
+    const [clients, cases, transactions, tasks] = await Promise.all([
+      db.getClientsForTenant(tenantId),
+      db.getCasesForTenant(tenantId),
+      db.getTransactionsForTenant(tenantId),
+      db.getTasksForTenant ? db.getTasksForTenant(tenantId) : []
+    ]);
+
+    res.json({
+      user: safeTenant,
+      clients: clients || [],
+      cases: cases || [],
+      transactions: transactions || [],
+      tasks: tasks || []
+    });
+  } catch (err) {
+    console.error("Bootstrap data fetch failed:", err);
+    res.status(500).json({ error: "Failed to compile bootstrap payload." });
+  }
+});
+
+/**
  * Change Password (Authenticated)
  */
 app.post('/api/auth/change-password', authenticateToken, async (req, res) => {
