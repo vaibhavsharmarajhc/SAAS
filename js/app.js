@@ -463,7 +463,37 @@ async function router() {
   if (pricingPage) pricingPage.style.display = 'none';
   document.body.classList.remove('app-active');
 
-  // Check auth
+  const publicRoutes = ['/', '/index.html', '/privacy', '/terms', '/login', '/register', '/features', '/about', '/pricing'];
+  const isPublicRoute = publicRoutes.includes(path);
+
+  if (isPublicRoute) {
+    if (marketingNav) marketingNav.style.display = 'flex';
+
+    if (path === '/' || path === '/index.html') {
+      if (marketingPage) marketingPage.style.display = 'block';
+    } else if (path === '/privacy') {
+      if (privacyPage) privacyPage.style.display = 'block';
+    } else if (path === '/terms') {
+      if (termsPage) termsPage.style.display = 'block';
+    } else if (path === '/features') {
+      if (featuresPage) featuresPage.style.display = 'block';
+    } else if (path === '/about') {
+      if (aboutPage) aboutPage.style.display = 'block';
+    } else if (path === '/pricing') {
+      if (pricingPage) pricingPage.style.display = 'block';
+    } else if (path === '/login' || path === '/register') {
+      if (authPage) {
+        authPage.style.display = 'flex';
+        const targetView = (path === '/login') ? 'login' : 'signup';
+        showAuthView(targetView);
+        updateDbStatusBadge();
+      }
+    }
+    safeCreateIcons();
+    return; // 0ms instant display for all public routes!
+  }
+
+  // Check auth for protected app routes
   let isAuthenticated = false;
   try {
     const urlParams = new URLSearchParams(window.location.search);
@@ -477,60 +507,6 @@ async function router() {
     }
   } catch (err) {
     console.error("Auth check failed:", err);
-  }
-
-  const publicRoutes = ['/', '/index.html', '/privacy', '/terms', '/login', '/register', '/features', '/about', '/pricing'];
-  const isPublicRoute = publicRoutes.includes(path);
-
-  if (isPublicRoute) {
-    if (marketingNav) {
-      marketingNav.style.display = 'flex';
-    }
-  }
-
-  // Handle routing matching
-  if (path === '/' || path === '/index.html') {
-    if (marketingPage) {
-      marketingPage.style.display = 'block';
-      safeCreateIcons();
-    }
-  } else if (path === '/privacy') {
-    if (privacyPage) {
-      privacyPage.style.display = 'block';
-      safeCreateIcons();
-    }
-  } else if (path === '/terms') {
-    if (termsPage) {
-      termsPage.style.display = 'block';
-      safeCreateIcons();
-    }
-  } else if (path === '/features') {
-    if (featuresPage) {
-      featuresPage.style.display = 'block';
-      safeCreateIcons();
-    }
-  } else if (path === '/about') {
-    if (aboutPage) {
-      aboutPage.style.display = 'block';
-      safeCreateIcons();
-    }
-  } else if (path === '/pricing') {
-    if (pricingPage) {
-      pricingPage.style.display = 'block';
-      safeCreateIcons();
-    }
-  } else if (path === '/login' || path === '/register') {
-    if (isAuthenticated) {
-      window.history.pushState({}, '', '/dashboard');
-      router();
-    } else {
-      if (authPage) {
-        authPage.style.display = 'flex';
-        const targetView = (path === '/login') ? 'login' : 'signup';
-        showAuthView(targetView);
-        updateDbStatusBadge();
-      }
-    }
   } else if (path.startsWith('/portal') || path.startsWith('/portal-page')) {
     if (dashboardApp) {
       dashboardApp.style.display = 'flex';
