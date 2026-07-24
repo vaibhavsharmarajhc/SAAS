@@ -7,7 +7,7 @@
   <!-- SEO & Styling Meta -->
   <meta name="description" content="Premium Case Diary, Billing, Client Onboarding, and Practice Management Suite for Track My Chambers.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.46">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.47">
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Chart.js CDN -->
@@ -27,7 +27,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=46')
+        navigator.serviceWorker.register('/sw.js?v=47')
           .then(reg => {
             reg.update();
             console.log('Service Worker Auto-Updated!', reg);
@@ -1801,13 +1801,10 @@
             <i data-lucide="book-open"></i> Comprehensive Practice User Guide
           </button>
           <button type="button" class="btn btn-secondary support-tab-btn" data-tab="tickets" style="display: flex; align-items: center; gap: 6px;">
-            <i data-lucide="message-square"></i> Helpdesk & Support Tickets
-          </button>
-        </div>
-
-        <!-- TAB 1: Comprehensive Practice User Guide -->
+            <i d        <!-- TAB 1: Comprehensive Practice User Guide -->
         <div id="support-tab-guide" class="support-tab-content">
           
+          <!-- Header Banner -->
           <div class="card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(217, 119, 6, 0.1) 0%, rgba(30, 41, 59, 0.3) 100%); border: 1px solid rgba(217, 119, 6, 0.3);">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
               <div>
@@ -1815,119 +1812,103 @@
                   <i data-lucide="award" style="color: var(--color-primary);"></i> Track My Chambers - Advocate Practice Playbook & User Guide
                 </h2>
                 <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0; line-height: 1.5; max-width: 850px;">
-                  Welcome to your ultimate guide for maximizing efficiency, revenue tracking, client satisfaction, and case management using Track My Chambers. Follow these detailed chapters to master every capability of your digital chamber suite.
+                  Welcome to your comprehensive operational playbook for maximizing chamber efficiency, revenue tracking, client satisfaction, and case diary management. Use the quick jump menu below to navigate directly to any workflow section.
                 </p>
               </div>
               <div style="display: flex; gap: 0.5rem;">
-                <span class="badge badge-active" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">PWA Version 1.0.42 Active</span>
+                <span class="badge badge-active" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">Chamber Suite v1.0 Active</span>
               </div>
             </div>
           </div>
 
-          <!-- Feature Chapters Grid -->
+          <!-- Sticky In-Page Jump Menu -->
+          <div style="position: sticky; top: 0; z-index: 100; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.5rem; backdrop-filter: blur(8px); display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+            <span style="font-size: 0.75rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.05em; margin-right: 0.5rem; display: flex; align-items: center; gap: 4px;">
+              <i data-lucide="compass" style="width: 14px; height: 14px;"></i> Jump To:
+            </span>
+            <a href="#guide-getting-started" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">🚀 Getting Started</a>
+            <a href="#guide-daily-workflow" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">📅 Daily Workflow</a>
+            <a href="#guide-managing-money" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">💰 Financial Ledger</a>
+            <a href="#guide-working-with-clients" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">👥 Client Management</a>
+            <a href="#guide-team-delegation" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">📋 Team Tasks</a>
+            <a href="#guide-data-safety" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">🔒 Security & Backups</a>
+            <a href="#guide-critical-warnings" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; color: #f87171; border-color: rgba(239, 68, 68, 0.3);">⚠️ Critical Warnings</a>
+            <a href="#guide-faq" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">❓ FAQ & Troubleshooting</a>
+          </div>
+
+          <!-- Feature Chapters & Workflow Sections -->
           <div style="display: flex; flex-direction: column; gap: 1.5rem;">
             
-            <!-- Chapter 1: Practice Overview & Dashboard Intelligence -->
-            <div class="card">
+            <!-- SECTION 1: Getting Started -->
+            <div id="guide-getting-started" class="card">
               <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
                 <div style="background: rgba(217, 119, 6, 0.15); color: var(--color-primary); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">1</div>
                 <div>
-                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">Practice Overview & Real-Time Dashboard</h3>
-                  <span style="color: var(--text-muted); font-size: 0.75rem;">Command center for daily operations, revenue graphs, and quick actions</span>
+                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">🚀 Getting Started & Chamber Setup</h3>
+                  <span style="color: var(--text-muted); font-size: 0.75rem;">5-step quick start walkthrough to initialize your digital chamber suite</span>
                 </div>
               </div>
               
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
-                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
-                  <strong style="color: #fff; display: flex; align-items: center; gap: 6px; margin-bottom: 0.4rem;">
-                    <i data-lucide="bar-chart-2" style="width: 14px; height: 14px; color: var(--color-primary);"></i> Real-Time KPI Cards
-                  </strong>
-                  Monitor active clients, pending cases, monthly income, outstanding client dues, today's listed hearings, and pending delegated tasks in one centralized screen.
-                </div>
-                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
-                  <strong style="color: #fff; display: flex; align-items: center; gap: 6px; margin-bottom: 0.4rem;">
-                    <i data-lucide="zap" style="width: 14px; height: 14px; color: var(--color-primary);"></i> Adaptive Quick Action Button
-                  </strong>
-                  The top-right header button dynamically transforms based on your active module (e.g. <em>Log Payment</em> on Dashboard, <em>Register Case</em> on Cases, <em>New Task</em> on Task Manager).
-                </div>
-                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
-                  <strong style="color: #fff; display: flex; align-items: center; gap: 6px; margin-bottom: 0.4rem;">
-                    <i data-lucide="search" style="width: 14px; height: 14px; color: var(--color-primary);"></i> Global Search Bar (`Ctrl + K`)
-                  </strong>
-                  Type any keyword into the top navigation search bar to instantly query clients by name, phone, or email, and cases by title, CNR number, or court forum.
-                </div>
-              </div>
-            </div>
-
-            <!-- Chapter 2: Client Directory & Client Access Portals -->
-            <div class="card">
-              <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
-                <div style="background: rgba(16, 185, 129, 0.15); color: var(--color-success); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">2</div>
-                <div>
-                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">Client Onboarding, Dossiers & Public Access Portals</h3>
-                  <span style="color: var(--text-muted); font-size: 0.75rem;">Manage client relationships, dossiers, and client portal access links</span>
-                </div>
-              </div>
-
               <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
-                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">4-Step Onboarding Wizard:</strong>
-                  Go to <strong>Clients</strong> $\rightarrow$ Complete the wizard steps to capture client contact details, select client type (<em>Individual</em> vs <em>Corporate</em>), link initial cases, and set retainer fee agreements.
+                  <strong style="color: #fff; display: block; margin-bottom: 0.4rem;">Quick Start Walkthrough:</strong>
+                  <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; font-size: 0.8rem;">
+                    <span class="badge" style="background: rgba(217,119,6,0.2); color: #fbbf24;">Step 1: Register Chamber</span> →
+                    <span class="badge" style="background: rgba(59,130,246,0.2); color: #60a5fa;">Step 2: Verify Email OTP</span> →
+                    <span class="badge" style="background: rgba(16,185,129,0.2); color: #34d399;">Step 3: Onboard First Client</span> →
+                    <span class="badge" style="background: rgba(168,85,247,0.2); color: #c084fc;">Step 4: Register First Case</span> →
+                    <span class="badge" style="background: rgba(236,72,153,0.2); color: #f472b6;">Step 5: View Dashboard Intelligence</span>
+                  </div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
                   <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
                     <strong style="color: #fff; display: flex; align-items: center; gap: 6px; margin-bottom: 0.4rem;">
-                      <i data-lucide="folder" style="width: 14px; height: 14px; color: var(--color-success);"></i> Client Dossier View
+                      <i data-lucide="bar-chart-2" style="width: 14px; height: 14px; color: var(--color-primary);"></i> Real-Time KPI Cards
                     </strong>
-                    Click <strong>Dossier</strong> on any client row to open their profile details, view all linked legal matters, inspect historical billing entries, or trigger a <strong>Write-Off Bad Debt</strong> action if a client defaults.
+                    Monitor active clients, pending cases, monthly income, outstanding client dues, today's listed hearings, and pending delegated tasks in one centralized screen.
                   </div>
                   <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
                     <strong style="color: #fff; display: flex; align-items: center; gap: 6px; margin-bottom: 0.4rem;">
-                      <i data-lucide="link" style="width: 14px; height: 14px; color: var(--color-success);"></i> Secure Client Access Links
+                      <i data-lucide="zap" style="width: 14px; height: 14px; color: var(--color-primary);"></i> Adaptive Quick Action Button
                     </strong>
-                    Click <strong>Copy Link</strong> to share a secure, read-only portal link (`/portal?token=...`) with your client. Clients can view hearing dates and case stages without needing a password.
+                    The top-right header button dynamically transforms based on your active module (e.g. <em>Log Payment</em> on Dashboard, <em>Register Case</em> on Cases, <em>New Task</em> on Task Manager).
+                  </div>
+                  <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                    <strong style="color: #fff; display: flex; align-items: center; gap: 6px; margin-bottom: 0.4rem;">
+                      <i data-lucide="search" style="width: 14px; height: 14px; color: var(--color-primary);"></i> Global Search Bar (`Ctrl + K`)
+                    </strong>
+                    Type any keyword into the top navigation search bar to instantly query clients by name, phone, or email, and cases by title, CNR number, or court forum.
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Chapter 3: Case Registry & Cause List Tracking -->
-            <div class="card">
+            <!-- SECTION 2: Daily Workflow - Diary & Hearings -->
+            <div id="guide-daily-workflow" class="card">
               <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
-                <div style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">3</div>
+                <div style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">2</div>
                 <div>
-                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">Case Registry & Chronological Hearing History</h3>
-                  <span style="color: var(--text-muted); font-size: 0.75rem;">Register legal matters, log court hearings, and manage stages</span>
-                </div>
-              </div>
-
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
-                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
-                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Registering New Cases:</strong>
-                  Click <strong>Register Case</strong> $\rightarrow$ Select the client, specify case title, CNR number, legal category (<em>Civil, Criminal, Matrimonial, Consumer, Service, Legal Notice, Contracts, Consultation</em>), court forum, current stage, and referral source.
-                </div>
-                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
-                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Recording Hearing Outcomes:</strong>
-                  Click <strong>Record Hearing</strong> on any case card $\rightarrow$ Input today's hearing date, stage/purpose (e.g. <em>Arguments, Evidence</em>), summary of court directions, and listed next hearing date.
-                </div>
-              </div>
-            </div>
-
-            <!-- Chapter 4: Daily Cause List & Calendar Diary -->
-            <div class="card">
-              <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
-                <div style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">4</div>
-                <div>
-                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">Daily Cause List & Interactive Calendar Diary</h3>
-                  <span style="color: var(--text-muted); font-size: 0.75rem;">4 calendar view modes, color-coded court badges, and printable cause lists</span>
+                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">📅 Daily Workflow: Diary & Hearings</h3>
+                  <span style="color: var(--text-muted); font-size: 0.75rem;">Court hearing diary, 4 calendar view modes, and printable daily cause lists</span>
                 </div>
               </div>
 
               <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
                   <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
-                    <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">4 View Modes:</strong>
+                    <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Registering & Tracking Cases:</strong>
+                    Go to <strong>Case Registry</strong> → Click <strong>Register Case</strong> → Select client, specify title, CNR number, legal category (<em>Civil, Criminal, Matrimonial, Consumer, Service, Legal Notice, Contracts, Consultation</em>), court forum, and current stage.
+                  </div>
+                  <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                    <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Recording Hearing Outcomes:</strong>
+                    Click <strong>Record Hearing</strong> on any case card → Input today's hearing date, stage/purpose (e.g. <em>Arguments, Evidence</em>), summary of court directions, and listed next hearing date.
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                  <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                    <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">4 Calendar View Modes:</strong>
                     Switch seamlessly between <strong>Month</strong>, <strong>Week</strong>, <strong>Day</strong>, and <strong>Year</strong> views to plan hearing schedules and court appearances ahead of time.
                   </div>
                   <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
@@ -1938,13 +1919,13 @@
               </div>
             </div>
 
-            <!-- Chapter 5: Accounts & Financial Ledger Management -->
-            <div class="card">
+            <!-- SECTION 3: Managing Money - Ledger & Payments -->
+            <div id="guide-managing-money" class="card">
               <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
-                <div style="background: rgba(168, 85, 247, 0.15); color: #c084fc; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">5</div>
+                <div style="background: rgba(168, 85, 247, 0.15); color: #c084fc; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">3</div>
                 <div>
-                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">Accounts & Professional Fee Ledger</h3>
-                  <span style="color: var(--text-muted); font-size: 0.75rem;">Record retainer billing, disbursed expenses, fee payments, and printable invoices</span>
+                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">💰 Managing Money: Ledger, Invoicing & Payments</h3>
+                  <span style="color: var(--text-muted); font-size: 0.75rem;">Retainer fee billing, disbursed expenses, payment receipts, and printable fee memos</span>
                 </div>
               </div>
 
@@ -1955,7 +1936,7 @@
                     <li><strong>Professional Fee Billed (Debit)</strong>: Log legal fee invoices.</li>
                     <li><strong>Payment Received (Credit)</strong>: Record retainer or installment payments.</li>
                     <li><strong>Disbursed Expenses (Debit)</strong>: Record court fees, typing, or travel costs.</li>
-                    <li><strong>Written Off / Bad Debt</strong>: Clear unrecoverable balances.</li>
+                    <li><strong>Written Off / Bad Debt</strong>: Clear unrecoverable balances into loss ledgers.</li>
                   </ul>
                 </div>
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
@@ -1965,60 +1946,67 @@
               </div>
             </div>
 
-            <!-- Chapter 6: Task Manager & Team Delegation Tree -->
-            <div class="card">
+            <!-- SECTION 4: Working with Clients -->
+            <div id="guide-working-with-clients" class="card">
               <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
-                <div style="background: rgba(236, 72, 153, 0.15); color: #f472b6; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">6</div>
+                <div style="background: rgba(16, 185, 129, 0.15); color: var(--color-success); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">4</div>
                 <div>
-                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">Task Manager, Sub-Delegation & Resolution Analytics</h3>
-                  <span style="color: var(--text-muted); font-size: 0.75rem;">Delegate tasks to junior colleagues, build subtask trees, and track resolution lead times</span>
+                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">👥 Working with Clients: Onboarding, Dossiers & Portal Links</h3>
+                  <span style="color: var(--text-muted); font-size: 0.75rem;">Client dossiers, fee retainers, and sharing read-only client access links</span>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">4-Step Onboarding Wizard:</strong>
+                  Go to <strong>Clients Onboarding</strong> → Complete wizard steps to capture contact details, select client type (<em>Individual</em> vs <em>Corporate</em>), link initial legal matters, and record fee agreements.
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                  <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                    <strong style="color: #fff; display: flex; align-items: center; gap: 6px; margin-bottom: 0.4rem;">
+                      <i data-lucide="folder" style="width: 14px; height: 14px; color: var(--color-success);"></i> Client Dossier View
+                    </strong>
+                    Click <strong>Dossier</strong> on any client row to inspect profile details, view linked legal matters, inspect historical billing entries, or execute bad debt write-offs.
+                  </div>
+                  <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                    <strong style="color: #fff; display: flex; align-items: center; gap: 6px; margin-bottom: 0.4rem;">
+                      <i data-lucide="link" style="width: 14px; height: 14px; color: var(--color-success);"></i> Secure Client Access Links
+                    </strong>
+                    Click <strong>Copy Link</strong> to share a secure read-only portal link (`/portal?token=...`). Clients can view hearing dates and case stages without needing a password.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SECTION 5: Team Delegation & Tasks -->
+            <div id="guide-team-delegation" class="card">
+              <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <div style="background: rgba(236, 72, 153, 0.15); color: #f472b6; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">5</div>
+                <div>
+                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">📋 Delegation & Team Tasks</h3>
+                  <span style="color: var(--text-muted); font-size: 0.75rem;">Delegate tasks to junior colleagues, build subtask trees, and track lead times</span>
                 </div>
               </div>
 
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
                   <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Task Delegation & Sub-Trees:</strong>
-                  Create tasks, assign priority levels (*High, Medium, Low*), and delegate them to chamber colleagues. Click <strong>Sub-delegate</strong> to build multi-level nested delegation trees.
+                  Create tasks, assign priority levels (<em>High, Medium, Low</em>), and delegate them to chamber colleagues. Click <strong>Sub-delegate</strong> to build multi-level nested delegation trees.
                 </div>
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
                   <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Lifecycle & Chat Thread:</strong>
-                  Click on any task to view its assignment timestamp, completion timestamp, total resolution time, and post internal updates inside the <strong>Collaboration Chat Thread</strong>.
+                  Click on any task to view assignment timestamps, completion timestamps, total resolution time, and post internal updates inside the <strong>Collaboration Chat Thread</strong>.
                 </div>
               </div>
             </div>
 
-            <!-- Chapter 7: Universal Undo/Redo & Hotkeys -->
-            <div class="card">
+            <!-- SECTION 6: Data, Backup & Account Safety -->
+            <div id="guide-data-safety" class="card">
               <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
-                <div style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">7</div>
+                <div style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">6</div>
                 <div>
-                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">Universal Undo/Redo & Keyboard Shortcuts</h3>
-                  <span style="color: var(--text-muted); font-size: 0.75rem;">Revert any major or minor edit across all modules instantly</span>
-                </div>
-              </div>
-
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
-                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
-                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Interactive Toast Banner:</strong>
-                  Every client edit, case addition, hearing update, ledger transaction, or task completion displays a 4-second notification toast with an <strong>Undo</strong> button at the bottom-right corner.
-                </div>
-                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
-                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Global Keyboard Shortcuts:</strong>
-                  <ul style="margin: 0.4rem 0 0 1.2rem; padding: 0;">
-                    <li><strong style="color: var(--color-primary);">Ctrl + Z</strong>: Revert last action (Undo)</li>
-                    <li><strong style="color: var(--color-primary);">Ctrl + Y</strong>: Re-apply reverted action (Redo)</li>
-                    <li><strong style="color: var(--color-primary);">Ctrl + K</strong>: Focus Global Search bar</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <!-- Chapter 8: Security & Backups -->
-            <div class="card">
-              <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
-                <div style="background: rgba(220, 38, 38, 0.15); color: #f87171; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">8</div>
-                <div>
-                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">Account Security, OTP Registration & JSON Data Backups</h3>
+                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">🔒 Data, Backup & Account Safety</h3>
                   <span style="color: var(--text-muted); font-size: 0.75rem;">Session cookies, 15-min registration OTP, and data backup snapshots</span>
                 </div>
               </div>
@@ -2030,7 +2018,95 @@
                 </div>
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
                   <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">JSON Backup Snapshots:</strong>
-                  Go to <strong>Settings</strong> $\rightarrow$ Click <strong>Download Backup File</strong> to save a complete `.json` snapshot of your chamber records on your computer.
+                  Go to <strong>System Settings</strong> → Click <strong>Download Backup File</strong> to save a complete `.json` snapshot of your chamber records on your computer.
+                </div>
+              </div>
+            </div>
+
+            <!-- SECTION 7: Critical Warnings & Irreversible Actions -->
+            <div id="guide-critical-warnings" class="card" style="border: 1px solid rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.03);">
+              <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(239, 68, 68, 0.2); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <div style="background: rgba(239, 68, 68, 0.15); color: #f87171; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">⚠️</div>
+                <div>
+                  <h3 style="color: #f87171; font-size: 1.1rem; font-weight: 700; margin: 0;">Critical Warnings & Irreversible Actions</h3>
+                  <span style="color: var(--text-muted); font-size: 0.75rem;">High-risk administrative operations and their immediate data consequences</span>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; font-size: 0.85rem; color: var(--text-secondary);">
+                
+                <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1rem; border-radius: var(--radius-md);">
+                  <div style="display: flex; align-items: center; gap: 6px; color: #f87171; font-weight: 700; margin-bottom: 0.4rem;">
+                    <i data-lucide="alert-triangle" style="width: 16px; height: 16px;"></i> Factory Data Reset
+                  </div>
+                  <strong style="color: #fff; display: block; font-size: 0.8rem; margin-bottom: 0.2rem;">Consequence: Irreversible Data Destruction</strong>
+                  Typing `DELETE` in Settings erases all live clients, cases, diaries, and transactions, resetting the chamber to seed state.
+                </div>
+
+                <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(245, 158, 11, 0.3); padding: 1rem; border-radius: var(--radius-md);">
+                  <div style="display: flex; align-items: center; gap: 6px; color: #fbbf24; font-weight: 700; margin-bottom: 0.4rem;">
+                    <i data-lucide="upload-cloud" style="width: 16px; height: 16px;"></i> Restore Database (JSON Import)
+                  </div>
+                  <strong style="color: #fff; display: block; font-size: 0.8rem; margin-bottom: 0.2rem;">Consequence: Database Overwrite</strong>
+                  Importing a JSON backup snapshot completely replaces current live chamber data with the records contained inside the JSON file.
+                </div>
+
+                <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1rem; border-radius: var(--radius-md);">
+                  <div style="display: flex; align-items: center; gap: 6px; color: #f87171; font-weight: 700; margin-bottom: 0.4rem;">
+                    <i data-lucide="minus-circle" style="width: 16px; height: 16px;"></i> Write-Off Bad Debt
+                  </div>
+                  <strong style="color: #fff; display: block; font-size: 0.8rem; margin-bottom: 0.2rem;">Consequence: Permanent Balance Clearance</strong>
+                  Executing a bad debt write-off zeros out a client's outstanding balance and posts a non-reversible debit loss transaction.
+                </div>
+
+                <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1rem; border-radius: var(--radius-md);">
+                  <div style="display: flex; align-items: center; gap: 6px; color: #f87171; font-weight: 700; margin-bottom: 0.4rem;">
+                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i> Delete Case or Client
+                  </div>
+                  <strong style="color: #fff; display: block; font-size: 0.8rem; margin-bottom: 0.2rem;">Consequence: Record & Log Purge</strong>
+                  Deleting a case card or client profile permanently removes the docket along with all linked court hearing history logs.
+                </div>
+
+              </div>
+            </div>
+
+            <!-- SECTION 8: FAQ & Troubleshooting -->
+            <div id="guide-faq" class="card">
+              <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <div style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">❓</div>
+                <div>
+                  <h3 style="color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0;">FAQ & Troubleshooting</h3>
+                  <span style="color: var(--text-muted); font-size: 0.75rem;">Verified answers for common operational scenarios based on app logic</span>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Q: What happens if my email registration OTP code expires?</strong>
+                  Registration OTP codes are valid for 15 minutes. If your code expires, click <strong>Resend Code</strong> on the verification screen to trigger a fresh 6-digit verification code to your email.
+                </div>
+
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Q: What happens if a JSON restore file is invalid or corrupted?</strong>
+                  The system validates the `.json` schema structure before importing. If the file structure is invalid or corrupt, the import is immediately aborted with an error message, and your current database remains 100% untouched.
+                </div>
+
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Q: How do I remove a colleague's access to my chamber?</strong>
+                  Go to <strong>System Settings</strong> → Scroll to <strong>Teammate Management</strong> → Locate the colleague's account link → Click <strong>Unlink Teammate</strong> to instantly revoke their chamber access.
+                </div>
+
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md);">
+                  <strong style="color: #fff; display: block; margin-bottom: 0.25rem;">Q: What can a client see vs. NOT see via a Client Portal link?</strong>
+                  Clients visiting their tokenized link (`/portal?token=...`) can view: case stage, court forum, next hearing date, and public hearing notes. They <strong>CANNOT</strong> view advocate fee ledgers, private billing memos, internal dossier comments, or other clients' cases.
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
                 </div>
               </div>
             </div>
@@ -2867,6 +2943,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.46"></script>
+  <script type="module" src="js/app.js?v=1.0.47"></script>
 </body>
 </html>
