@@ -7,7 +7,7 @@
   <!-- SEO & Styling Meta -->
   <meta name="description" content="Premium Case Diary, Billing, Client Onboarding, and Practice Management Suite for Track My Chambers.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.54">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.57">
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest" defer></script>
   <!-- Chart.js CDN -->
@@ -31,13 +31,13 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=54')
+        navigator.serviceWorker.register('/sw.js?v=57')
           .then(reg => {
             reg.update();
             if (window.caches) {
               caches.keys().then(keys => {
                 keys.forEach(key => {
-                  if (key !== 'trackmychambers-cache-v54') {
+                  if (key !== 'trackmychambers-cache-v57') {
                     caches.delete(key);
                   }
                 });
@@ -52,7 +52,7 @@
 <body>
 
   <!-- Shared Marketing Navbar -->
-  <nav class="marketing-nav" id="marketing-nav" style="display: none;">
+  <nav class="marketing-nav" id="marketing-nav" style="display: flex;">
     <a href="/" class="marketing-logo" data-link="/">
       <i data-lucide="scale"></i> Chambers<span>.</span>
     </a>
@@ -69,7 +69,7 @@
   </nav>
 
   <!-- Public Marketing Landing Page -->
-  <div id="marketing-page" class="public-container" style="display: none;">
+  <div id="marketing-page" class="page-container active" style="display: block;">
 
     <!-- Hero Section -->
     <header class="hero-section">
