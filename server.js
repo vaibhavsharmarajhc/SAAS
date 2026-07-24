@@ -1074,28 +1074,37 @@ app.get('/sw.js', (req, res) => {
   res.sendFile(path.join(__dirname, 'sw.js'));
 });
 
-// Serve app.html for application workspace routes
-const appWorkspaceRoutes = [
-  '/dashboard', '/overview', '/clients', '/cases', '/diary', 
-  '/accounts', '/share', '/tasks', '/settings', '/superadmin', 
-  '/support', '/help', '/app'
-];
-
-appWorkspaceRoutes.forEach(route => {
-  app.get(route, (req, res) => {
-    res.sendFile(path.join(__dirname, 'app.html'));
-  });
+// Serve app.html for all application workspace routes and SPA sub-routes
+app.use((req, res, next) => {
+  if (req.method !== 'GET') return next();
+  const p = req.path.toLowerCase();
+  if (
+    p.startsWith('/dashboard') ||
+    p.startsWith('/overview') ||
+    p.startsWith('/clients') ||
+    p.startsWith('/cases') ||
+    p.startsWith('/diary') ||
+    p.startsWith('/accounts') ||
+    p.startsWith('/share') ||
+    p.startsWith('/tasks') ||
+    p.startsWith('/settings') ||
+    p.startsWith('/superadmin') ||
+    p.startsWith('/support') ||
+    p.startsWith('/help') ||
+    p.startsWith('/app') ||
+    p.endsWith('-page')
+  ) {
+    return res.sendFile(path.join(__dirname, 'app.html'));
+  }
+  next();
 });
 
 // Serve index.html as main entry route for marketing and fallback
 app.get('*', (req, res) => {
   const indexPath = path.join(__dirname, 'index.html');
   res.sendFile(indexPath, (err) => {
-    if (err) {
-      console.error(`Error serving index.html from path: ${indexPath}. Error:`, err);
-      if (!res.headersSent) {
-        res.status(err.status || 500).send("Chambers Server Error: index.html not found.");
-      }
+    if (err && !res.headersSent) {
+      res.status(err.status || 500).send("Chambers Server Error.");
     }
   });
 });
