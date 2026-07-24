@@ -142,7 +142,7 @@ async function sendWelcomeEmail(to, firmName, lawyerName) {
           <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 1.5rem;">If you have any questions or require support setting up your database, reply to this email to get in touch with our team.</p>
         </div>
         <div class="footer">
-          VSH Legal Chambers &bull; Adv. Vaibhav Sharma &bull; Track My Chambers Practice Manager
+          ${firmName} &bull; ${lawyerName} &bull; Track My Chambers Practice Manager
         </div>
       </div>
     </body>
@@ -181,7 +181,7 @@ async function sendResetCodeEmail(to, resetCode) {
           <p style="text-align: left; font-size: 0.85rem; color: #94a3b8; margin-top: 1rem;">This code is valid for <strong>15 minutes</strong>. If you did not make this request, you can safely ignore this email.</p>
         </div>
         <div class="footer">
-          VSH Legal Chambers &bull; Adv. Vaibhav Sharma &bull; Track My Chambers Practice Manager
+          Track My Chambers &bull; Advocate Practice Management Suite
         </div>
       </div>
     </body>
@@ -220,7 +220,7 @@ async function sendSignupOTPEmail(to, otpCode) {
           <p style="text-align: left; font-size: 0.85rem; color: #94a3b8; margin-top: 1rem;">This OTP code is valid for <strong>15 minutes</strong>. If you did not initiate this registration, you can safely ignore this email.</p>
         </div>
         <div class="footer">
-          VSH Legal Chambers &bull; Adv. Vaibhav Sharma &bull; Track My Chambers Practice Manager
+          Track My Chambers &bull; Advocate Practice Management Suite
         </div>
       </div>
     </body>
@@ -553,7 +553,7 @@ app.post('/api/tickets', authenticateToken, async (req, res) => {
           </div>
           <p>Our engineering support team will address your request shortly. Thank you for using Track My Chambers!</p>
           <div style="font-size: 0.75rem; color: #4b5563; text-align: center; border-top: 1px solid #1f2937; padding-top: 1rem; margin-top: 1.5rem;">
-            VSH Legal Chambers &bull; Track My Chambers Support Center
+            Track My Chambers &bull; Support & Helpdesk Operations
           </div>
         </div>
       `

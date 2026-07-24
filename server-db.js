@@ -1676,8 +1676,8 @@ async function getPublicClientPortalData(token) {
     }))
   }));
 
-  const lawyerName = tenantInfo?.settings?.lawyerName || tenantInfo?.lawyerName || 'Adv. Vaibhav Sharma';
-  const firmName = tenantInfo?.settings?.firmName || tenantInfo?.firmName || 'VSH Legal Chambers';
+  const lawyerName = tenantInfo?.settings?.lawyerName || tenantInfo?.lawyerName || 'Advocate';
+  const firmName = tenantInfo?.settings?.firmName || tenantInfo?.firmName || 'Chambers Practice';
 
   return {
     client: {
