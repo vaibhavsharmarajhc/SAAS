@@ -1074,7 +1074,20 @@ app.get('/sw.js', (req, res) => {
   res.sendFile(path.join(__dirname, 'sw.js'));
 });
 
-// Serve index.html as main entry route with diagnostic error logging
+// Serve app.html for application workspace routes
+const appWorkspaceRoutes = [
+  '/dashboard', '/overview', '/clients', '/cases', '/diary', 
+  '/accounts', '/share', '/tasks', '/settings', '/superadmin', 
+  '/support', '/help', '/app'
+];
+
+appWorkspaceRoutes.forEach(route => {
+  app.get(route, (req, res) => {
+    res.sendFile(path.join(__dirname, 'app.html'));
+  });
+});
+
+// Serve index.html as main entry route for marketing and fallback
 app.get('*', (req, res) => {
   const indexPath = path.join(__dirname, 'index.html');
   res.sendFile(indexPath, (err) => {

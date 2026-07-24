@@ -9,52 +9,65 @@ import historyManager from './history.js';
 let incomeChartInstance = null;
 
 const accountsModule = {
+  worker: null,
+  currentPage: 1,
+  pageSize: 50,
+
   init() {
+    this.initWorker();
     this.setupFilters();
     this.setupLogTransactionForm();
     this.setupInvoiceModalEvents();
     this.setupChartEvents();
   },
 
+  initWorker() {
+    if (typeof Worker !== 'undefined' && !this.worker) {
+      try {
+        this.worker = new Worker('/js/workers/ledger.worker.js');
+        this.worker.onmessage = (e) => {
+          if (e.data.action === 'ledgerProcessed') {
+            this.handleWorkerResult(e.data);
+          }
+        };
+      } catch (err) {
+        console.warn("Web Worker init fallback to main thread:", err);
+      }
+    }
+  },
+
   render() {
     this.populateClientDropdowns();
-    this.updateFinancialKPIs();
-    this.renderLedgerTable();
+    this.processAndRenderLedger();
     this.renderIncomeChart();
   },
 
-  /**
-   * Update Financial KPI cards
-   */
-  updateFinancialKPIs() {
+  processAndRenderLedger() {
     const txs = db.getTransactions();
+    const filterClient = document.getElementById('ledger-filter-client')?.value || 'All';
+    const filterType = document.getElementById('ledger-filter-type')?.value || 'All';
+
+    if (this.worker) {
+      this.worker.postMessage({
+        action: 'processLedger',
+        txs,
+        filterClient,
+        filterType,
+        page: this.currentPage,
+        pageSize: this.pageSize
+      });
+    } else {
+      this.renderLedgerTableFallback(txs, filterClient, filterType);
+    }
+  },
+
+  handleWorkerResult(data) {
+    const { totals, totalItems, totalPages, currentPage, pageItems } = data;
+    this.currentPage = currentPage;
+
+    // Update KPIs from worker pre-computed totals
     const clients = db.getClients();
-
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-
-    let monthlyIncome = 0;
-    let annualIncome = 0;
-    let cumulativeIncome = 0;
-    let feesBilled = 0;
-    let disbursementsBilled = 0;
     let unpaidDues = 0;
-
-    txs.forEach(t => {
-      const tDate = new Date(t.date);
-      if (t.type === 'Received') {
-        cumulativeIncome += t.amount;
-        if (tDate.getFullYear() === currentYear) {
-          annualIncome += t.amount;
-          if (tDate.getMonth() === currentMonth) {
-            monthlyIncome += t.amount;
-          }
-        }
-      } else if (t.type === 'Billed') feesBilled += t.amount;
-      else if (t.type === 'Disbursed') disbursementsBilled += t.amount;
-    });
-
     clients.forEach(c => {
       const balance = db.getClientBalance(c.id);
       unpaidDues += balance.outstanding;
@@ -62,13 +75,71 @@ const accountsModule = {
 
     const elMonthly = document.getElementById('ledger-monthly-income');
     const elAnnual = document.getElementById('ledger-annual-income');
-    if (elMonthly) elMonthly.textContent = '₹' + monthlyIncome.toLocaleString('en-IN');
-    if (elAnnual) elAnnual.textContent = '₹' + annualIncome.toLocaleString('en-IN');
+    if (elMonthly) elMonthly.textContent = '₹' + totals.monthlyIncome.toLocaleString('en-IN');
+    if (elAnnual) elAnnual.textContent = '₹' + totals.annualIncome.toLocaleString('en-IN');
 
-    document.getElementById('ledger-cumulative-income').textContent = '₹' + cumulativeIncome.toLocaleString('en-IN');
-    document.getElementById('ledger-fees-billed').textContent = '₹' + feesBilled.toLocaleString('en-IN');
-    document.getElementById('ledger-disbursements-billed').textContent = '₹' + disbursementsBilled.toLocaleString('en-IN');
-    document.getElementById('ledger-unpaid-dues').textContent = '₹' + unpaidDues.toLocaleString('en-IN');
+    const elCum = document.getElementById('ledger-cumulative-income');
+    const elFees = document.getElementById('ledger-fees-billed');
+    const elDisb = document.getElementById('ledger-disbursements-billed');
+    const elDues = document.getElementById('ledger-unpaid-dues');
+
+    if (elCum) elCum.textContent = '₹' + totals.cumulativeIncome.toLocaleString('en-IN');
+    if (elFees) elFees.textContent = '₹' + totals.feesBilled.toLocaleString('en-IN');
+    if (elDisb) elDisb.textContent = '₹' + totals.disbursementsBilled.toLocaleString('en-IN');
+    if (elDues) elDues.textContent = '₹' + unpaidDues.toLocaleString('en-IN');
+
+    // Render table rows using DocumentFragment
+    const tableBody = document.getElementById('ledger-table-body');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = '';
+
+    if (pageItems.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;" class="text-muted">No transactions matching filter criteria.</td></tr>`;
+      this.renderPaginationControls(0, 1);
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    pageItems.forEach(t => {
+      const client = db.getClient(t.clientId);
+      const linkedCase = t.caseId ? db.getCase(t.caseId) : null;
+      const row = document.createElement('tr');
+      row.className = `transaction-row-${t.type}`;
+
+      const creditColorStyle = t.type === 'WrittenOff' ? 'color: var(--text-secondary); text-decoration: line-through;' : 'color: var(--color-success);';
+
+      row.innerHTML = `
+        <td>${t.date}</td>
+        <td>
+          <div style="font-weight:600; color:var(--text-primary);">${client ? client.name : 'Unknown'}</div>
+          ${linkedCase ? `<div style="font-size:0.75rem; color:var(--color-primary); cursor:pointer; text-decoration:underline;" onclick="viewCaseDetails('${t.caseId}')">${linkedCase.title}</div>` : `<div style="font-size:0.75rem; color:var(--text-muted);">Standalone account</div>`}
+        </td>
+        <td>${t.description}</td>
+        <td><span class="badge ${t.typeBadgeClass}">${t.type}</span></td>
+        <td style="font-weight:500;">${t.debitVal}</td>
+        <td style="${creditColorStyle} font-weight:500;">${t.creditVal}</td>
+        <td>
+          <div style="display:flex; gap:0.4rem;">
+            <button class="btn btn-secondary btn-invoice" style="padding:0.25rem 0.4rem;" data-id="${t.id}" title="Print Invoice/Receipt"><i data-lucide="printer" style="width:12px; height:12px;"></i></button>
+            <button class="btn btn-danger btn-delete-tx" style="padding:0.25rem 0.4rem;" data-id="${t.id}" title="Delete Transaction"><i data-lucide="trash-2" style="width:12px; height:12px;"></i></button>
+          </div>
+        </td>
+      `;
+
+      row.querySelector('.btn-invoice').addEventListener('click', () => this.showInvoice(t.id));
+      row.querySelector('.btn-delete-tx').addEventListener('click', () => this.deleteTransaction(t.id));
+
+      fragment.appendChild(row);
+    });
+
+    tableBody.appendChild(fragment);
+    this.renderPaginationControls(totalItems, totalPages);
+
+    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+      lucide.createIcons({ root: tableBody });
+    }
   },
 
   /**
@@ -102,8 +173,8 @@ const accountsModule = {
     const filterClient = document.getElementById('ledger-filter-client');
     const filterType = document.getElementById('ledger-filter-type');
 
-    filterClient.addEventListener('change', () => this.renderLedgerTable());
-    filterType.addEventListener('change', () => this.renderLedgerTable());
+    if (filterClient) filterClient.addEventListener('change', () => { this.currentPage = 1; this.processAndRenderLedger(); });
+    if (filterType) filterType.addEventListener('change', () => { this.currentPage = 1; this.processAndRenderLedger(); });
 
     // Trigger modal btn
     const logBtn = document.getElementById('btn-log-transaction');
