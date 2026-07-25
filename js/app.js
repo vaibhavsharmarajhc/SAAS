@@ -730,11 +730,16 @@ function initAuthenticationHandlers() {
       submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Signing In...`;
       safeCreateIcons();
 
-      await api.auth.login(loginEmail.value, loginPass.value);
+      const resData = await api.auth.login(loginEmail.value, loginPass.value);
       loginForm.reset();
       
-      window.history.pushState({}, '', '/dashboard');
-      await router();
+      if (resData) {
+        try {
+          sessionStorage.setItem('bootstrap_preload', JSON.stringify(resData));
+        } catch (e) {}
+      }
+      
+      window.location.replace('/dashboard');
     } catch (err) {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnHtml;

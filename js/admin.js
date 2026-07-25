@@ -21,6 +21,7 @@ const adminModule = {
   init(user) {
     console.log("AdminModule: Initializing Super Admin Console...");
     this.updateAdminVisibility(user);
+    this.setupCategorySettingsManager();
   },
 
   updateAdminVisibility(user) {
@@ -256,6 +257,97 @@ const adminModule = {
         </tr>
       `;
     }).join('');
+  },
+
+  setupCategorySettingsManager() {
+    const list = document.getElementById('settings-categories-list');
+    const addBtn = document.getElementById('btn-add-settings-category');
+    if (!list) return;
+
+    const renderList = () => {
+      const categories = db.getCategories();
+      list.innerHTML = categories.map(c => `
+        <div class="card" style="padding:0.6rem 0.8rem; display:flex; justify-content:space-between; align-items:center; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:var(--radius-sm);">
+          <div style="display:flex; align-items:center; gap:8px; flex-grow:1; min-width:0; margin-right:8px;">
+            <span style="width:12px; height:12px; border-radius:50%; background:${c.color}; flex-shrink:0; display:inline-block;"></span>
+            <span style="font-size:0.85rem; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.name}</span>
+          </div>
+          <div style="display:flex; gap:4px;">
+            <button type="button" class="btn btn-secondary btn-edit-cat" data-id="${c.id}" data-name="${c.name}" style="padding:0.2rem 0.4rem; font-size:0.7rem;"><i data-lucide="edit-2"></i></button>
+            <button type="button" class="btn btn-secondary btn-del-cat" data-id="${c.id}" data-name="${c.name}" style="padding:0.2rem 0.4rem; font-size:0.7rem; color:var(--color-danger);"><i data-lucide="trash-2"></i></button>
+          </div>
+        </div>
+      `).join('');
+      if (typeof safeCreateIcons === 'function') safeCreateIcons(list);
+
+      // Edit listeners
+      list.querySelectorAll('.btn-edit-cat').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          const currentName = btn.getAttribute('data-name');
+          const newName = prompt("Rename Category:", currentName);
+          if (newName && newName.trim() && newName.trim() !== currentName) {
+            await db.updateCategory(id, newName.trim());
+            renderList();
+          }
+        });
+      });
+
+      // Delete listeners
+      list.querySelectorAll('.btn-del-cat').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          const name = btn.getAttribute('data-name');
+          const modal = document.getElementById('reassign-category-modal');
+          const targetIdInput = document.getElementById('reassign-category-target-id');
+          const targetNameSpan = document.getElementById('reassign-category-target-name');
+          const select = document.getElementById('reassign-category-select');
+
+          if (!modal || !select) return;
+
+          targetIdInput.value = id;
+          targetNameSpan.textContent = name;
+
+          const remaining = db.getCategories().filter(c => c.id !== id);
+          select.innerHTML = remaining.map(c => `<option value="${c.name}">${c.name}</option>`).join('') + '<option value="Uncategorized" selected>Uncategorized (Default)</option>';
+
+          modal.classList.add('active');
+        });
+      });
+    };
+
+    renderList();
+
+    if (addBtn) {
+      addBtn.addEventListener('click', async () => {
+        const catName = prompt("Enter new Case Category name:");
+        if (catName && catName.trim()) {
+          await db.addCategory(catName.trim());
+          renderList();
+        }
+      });
+    }
+
+    // Modal submit listener
+    const reassignForm = document.getElementById('reassign-category-form');
+    const reassignModal = document.getElementById('reassign-category-modal');
+    const reassignCancel = document.getElementById('reassign-category-cancel');
+    const reassignClose = document.getElementById('reassign-category-close');
+
+    if (reassignForm) {
+      reassignForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const targetId = document.getElementById('reassign-category-target-id').value;
+        const replacementName = document.getElementById('reassign-category-select').value;
+        await db.deleteCategory(targetId, replacementName);
+        reassignModal.classList.remove('active');
+        renderList();
+      });
+    }
+    if (reassignCancel) reassignCancel.addEventListener('click', () => reassignModal.classList.remove('active'));
+    if (reassignClose) reassignClose.addEventListener('click', () => reassignModal.classList.remove('active'));
+
+    document.addEventListener('categoriesUpdated', () => renderList());
   }
 };
 

@@ -15,6 +15,8 @@ const casesModule = {
     this.setupEditHearingForm();
     this.setupCaseDossierEvents();
     this.populateReferralDatalist();
+    this.populateCategoryDropdowns();
+    this.setupCategoryAddListeners();
 
     // Listen for custom logged transaction events to refresh views in real-time
     document.addEventListener('transactionLogged', (e) => {
@@ -30,6 +32,57 @@ const casesModule = {
     this.renderCaseGrid();
     this.populateClientDropdowns();
     this.populateReferralDatalist();
+    this.populateCategoryDropdowns();
+  },
+
+  /**
+   * Populate dropdown select lists with dynamic categories
+   */
+  populateCategoryDropdowns() {
+    const categories = db.getCategories();
+    const selects = ['add-case-type', 'edit-case-type', 'case-type'];
+
+    selects.forEach(id => {
+      const select = document.getElementById(id);
+      if (!select) return;
+      const currentVal = select.value;
+      select.innerHTML = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('') + '<option value="__ADD_NEW__" style="font-weight:600; color:var(--color-primary);">+ Add New Category...</option>';
+      if (currentVal && categories.some(c => c.name === currentVal)) {
+        select.value = currentVal;
+      }
+    });
+
+    const filterSelect = document.getElementById('case-filter-category');
+    if (filterSelect) {
+      const currentFilter = filterSelect.value;
+      filterSelect.innerHTML = '<option value="All">All Categories</option>' + categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+      if (currentFilter) filterSelect.value = currentFilter;
+    }
+  },
+
+  setupCategoryAddListeners() {
+    const selects = ['add-case-type', 'edit-case-type', 'case-type'];
+    selects.forEach(id => {
+      const select = document.getElementById(id);
+      if (!select) return;
+      select.addEventListener('change', async (e) => {
+        if (e.target.value === '__ADD_NEW__') {
+          const catName = prompt("Enter new Case Category name (e.g. Arbitration, Taxation, IPR):");
+          if (catName && catName.trim()) {
+            const newCat = await db.addCategory(catName.trim());
+            this.populateCategoryDropdowns();
+            if (newCat) select.value = newCat.name;
+          } else {
+            select.selectedIndex = 0;
+          }
+        }
+      });
+    });
+
+    document.addEventListener('categoriesUpdated', () => {
+      this.populateCategoryDropdowns();
+      this.renderCaseGrid();
+    });
   },
 
   /**
@@ -77,6 +130,7 @@ const casesModule = {
     const modal = document.getElementById('add-case-modal');
     registerBtn.addEventListener('click', () => {
       this.populateClientDropdowns();
+      this.populateCategoryDropdowns();
       modal.classList.add('active');
     });
   },
@@ -183,12 +237,12 @@ const casesModule = {
       const card = document.createElement('div');
       card.className = 'card';
       
-      const badgeStyle = c.status === 'Active' ? 'badge-active' : 'badge-closed';
-      const balanceStyle = balance.outstanding > 0 ? 'color: var(--color-danger); font-weight:600;' : 'color: var(--color-success);';
+      const catObj = db.getCategoryByName(c.caseType);
+      const catColor = catObj ? catObj.color : '#3b82f6';
 
       card.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 0.75rem;">
-          <span style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:600;">${c.caseType}</span>
+          <span style="font-size:0.7rem; text-transform:uppercase; color:${catColor}; font-weight:700; background:${catColor}18; padding:2px 8px; border-radius:4px; border:1px solid ${catColor}40;">${c.caseType}</span>
           <span class="badge ${badgeStyle}">${c.status}</span>
         </div>
         <h3 style="font-size:1.15rem; color:var(--text-primary); line-height:1.3; margin-bottom:0.5rem;" class="case-title-link">${c.title}</h3>

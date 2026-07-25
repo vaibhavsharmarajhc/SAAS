@@ -32,6 +32,24 @@ class LegalDB {
     }
 
     try {
+      const preloadStr = sessionStorage.getItem('bootstrap_preload');
+      if (preloadStr) {
+        sessionStorage.removeItem('bootstrap_preload');
+        const preloadData = JSON.parse(preloadStr);
+        if (preloadData && preloadData.user) {
+          this.cache.user = preloadData.user;
+          this.cache.settings = preloadData.user.settings || {};
+          this.cache.clients = preloadData.clients || [];
+          this.cache.cases = preloadData.cases || [];
+          this.cache.transactions = preloadData.transactions || [];
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn("Preload check failed:", e);
+    }
+
+    try {
       let data = await api.auth.bootstrap();
       if (!data || !data.user) {
         // Fallback to parallel requests
@@ -69,9 +87,94 @@ class LegalDB {
     return this.cache.user;
   }
 
-  // --- SETTINGS ---
+  // --- SETTINGS & CATEGORIES ---
   getSettings() {
     return this.cache.settings;
+  }
+
+  getCategories() {
+    const DEFAULT_CATEGORIES = [
+      { id: 'cat_civil', name: 'Civil', color: '#3b82f6' },
+      { id: 'cat_criminal', name: 'Criminal', color: '#ef4444' },
+      { id: 'cat_matrimonial', name: 'Matrimonial', color: '#8b5cf6' },
+      { id: 'cat_consumer', name: 'Consumer', color: '#f59e0b' },
+      { id: 'cat_service', name: 'Service', color: '#14b8a6' },
+      { id: 'cat_notice', name: 'Legal Notice', color: '#f43f5e' },
+      { id: 'cat_contracts', name: 'Contracts', color: '#10b981' },
+      { id: 'cat_consultation', name: 'Consultation', color: '#06b6d4' },
+      { id: 'cat_uncategorized', name: 'Uncategorized', color: '#6b7280' }
+    ];
+
+    if (!this.cache.settings.caseCategories || !Array.isArray(this.cache.settings.caseCategories) || this.cache.settings.caseCategories.length === 0) {
+      this.cache.settings.caseCategories = [...DEFAULT_CATEGORIES];
+    }
+    return this.cache.settings.caseCategories;
+  }
+
+  getCategoryByName(name) {
+    const categories = this.getCategories();
+    return categories.find(c => c.name.toLowerCase() === (name || '').toLowerCase()) || { id: 'cat_uncategorized', name: name || 'Uncategorized', color: '#6b7280' };
+  }
+
+  async addCategory(name) {
+    const PALETTE = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#f43f5e', '#14b8a6', '#6366f1'];
+    const trimmed = (name || '').trim();
+    if (!trimmed) return null;
+    const categories = this.getCategories();
+    const existing = categories.find(c => c.name.toLowerCase() === trimmed.toLowerCase());
+    if (existing) return existing;
+
+    const colorIdx = categories.length % PALETTE.length;
+    const newCat = {
+      id: 'cat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+      name: trimmed,
+      color: PALETTE[colorIdx]
+    };
+    categories.push(newCat);
+    this.cache.settings.caseCategories = categories;
+    await this.updateSettings({ caseCategories: categories });
+    document.dispatchEvent(new CustomEvent('categoriesUpdated', { detail: { category: newCat } }));
+    return newCat;
+  }
+
+  async updateCategory(id, newName) {
+    const categories = this.getCategories();
+    const cat = categories.find(c => c.id === id);
+    if (!cat) return null;
+    const oldName = cat.name;
+    cat.name = newName.trim();
+    
+    // Update linked cases
+    this.cache.cases.forEach(c => {
+      if (c.caseType === oldName) {
+        c.caseType = cat.name;
+      }
+    });
+
+    await this.updateSettings({ caseCategories: categories });
+    document.dispatchEvent(new CustomEvent('categoriesUpdated'));
+    return cat;
+  }
+
+  async deleteCategory(id, replacementCategoryName = 'Uncategorized') {
+    let categories = this.getCategories();
+    const target = categories.find(c => c.id === id);
+    if (!target) return false;
+
+    const oldName = target.name;
+    categories = categories.filter(c => c.id !== id);
+    this.cache.settings.caseCategories = categories;
+
+    // Migrate linked cases
+    this.cache.cases.forEach(c => {
+      if (c.caseType === oldName) {
+        c.caseType = replacementCategoryName;
+      }
+    });
+
+    await this.updateSettings({ caseCategories: categories });
+    document.dispatchEvent(new CustomEvent('categoriesUpdated'));
+    return true;
   }
 
   async updateSettings(settingsData) {

@@ -388,7 +388,18 @@ app.post('/api/auth/login', async (req, res) => {
     });
 
     const { passwordHash: _, ...safeTenant } = tenant;
-    res.json({ user: safeTenant });
+    const [clients, cases, transactions] = await Promise.all([
+      db.getClients(tenant.id),
+      db.getCases(tenant.id),
+      db.getTransactions(tenant.id)
+    ]);
+
+    res.json({
+      user: safeTenant,
+      clients: clients || [],
+      cases: cases || [],
+      transactions: transactions || []
+    });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ error: "Failed to authenticate login request." });
