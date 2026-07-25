@@ -3047,20 +3047,20 @@ mark.search-highlight {
 }
 
 .workflow-step {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   padding: 0.4rem 0.8rem;
   font-size: 0.85rem;
-  font-weight: 600;
-  color: #f1f5f9;
+  font-weight: 650;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
 .workflow-arrow {
-  color: #fbbf24;
+  color: var(--color-primary);
   font-weight: 700;
   font-size: 0.95rem;
 }
@@ -3288,6 +3288,19 @@ mark.search-highlight {
 [data-theme="light"] .help-guide-subtext,
 [data-theme="light"] .help-guide-body-text {
   color: #334155 !important;
+}
+
+[data-theme="light"] .workflow-step {
+  background: #ffffff !important;
+  border: 1px solid rgba(15, 23, 42, 0.18) !important;
+  color: #0f172a !important; /* Slate-900: 15.8:1 contrast */
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
+  font-weight: 650 !important;
+}
+
+[data-theme="light"] .workflow-arrow {
+  color: #b45309 !important; /* Amber-700: 5.8:1 contrast */
+  font-weight: 800 !important;
 }
 
 [data-theme="light"] .help-searchable-card div[style*="background"] {
