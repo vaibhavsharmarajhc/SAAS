@@ -17,7 +17,7 @@
   <title>Track My Chambers - Practice Workspace</title>
   <meta name="description" content="Advocate Chambers Practice Management Workspace.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.67">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.68">
   <!-- Local Vendor Bundles (Zero External CDNs) -->
   <script src="/js/vendor/lucide.min.js" defer></script>
   <script src="/js/vendor/chart.min.js" defer></script>
@@ -43,13 +43,13 @@
         navigator.serviceWorker.getRegistrations().then(registrations => {
           return Promise.all(registrations.map(r => r.unregister()));
         }).then(() => {
-          return navigator.serviceWorker.register('/sw.js?v=67');
+          return navigator.serviceWorker.register('/sw.js?v=68');
         }).then(reg => {
           reg.update();
           if (window.caches) {
             caches.keys().then(keys => {
               keys.forEach(key => {
-                if (key !== 'trackmychambers-cache-v67') {
+                if (key !== 'trackmychambers-cache-v68') {
                   caches.delete(key);
                 }
               });
@@ -1099,21 +1099,21 @@
         </div>
 
         <!-- TAB 1: Comprehensive Practice User Guide -->
-        <div id="support-tab-guide" class="support-tab-content">
+        <div id="support-tab-guide" class="support-tab-content help-guide-container">
           
           <!-- Header Banner -->
-          <div class="card" style="margin-bottom: 1.25rem; background: linear-gradient(135deg, rgba(217, 119, 6, 0.12) 0%, rgba(30, 41, 59, 0.4) 100%); border: 1px solid rgba(217, 119, 6, 0.4);">
+          <div class="card help-guide-header-card">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
               <div>
-                <h2 style="color: #fff; font-size: 1.55rem; font-weight: 700; margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 10px; font-family: 'Playfair Display', Georgia, serif;">
-                  <i data-lucide="award" style="color: var(--color-primary); width: 28px; height: 28px;"></i> Track My Chambers - Advocate Practice Playbook & User Guide
+                <h2 class="help-guide-main-title">
+                  <i data-lucide="award" style="color: var(--color-primary); width: 26px; height: 26px;"></i> Track My Chambers - Advocate Practice Playbook & User Guide
                 </h2>
-                <p style="color: #cbd5e1; font-size: 0.95rem; margin: 0; line-height: 1.7; max-width: 900px;">
-                  Welcome to your interactive operational playbook for maximizing chamber efficiency, revenue tracking, client satisfaction, and case diary management. Use the real-time search engine or jump menu below to navigate features.
+                <p class="help-guide-main-subtitle">
+                  Welcome to your operational playbook for maximizing chamber efficiency, revenue tracking, client satisfaction, and case diary management. Use the real-time search engine or jump menu below to navigate features.
                 </p>
               </div>
               <div style="display: flex; gap: 0.5rem;">
-                <span class="badge badge-active" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; font-weight: 600;">Chamber Suite v1.0.48 Active</span>
+                <span class="badge badge-active" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; font-weight: 600;">Chamber Suite Active</span>
               </div>
             </div>
           </div>
@@ -1121,7 +1121,7 @@
           <!-- Real-Time Search Bar Filter -->
           <div class="help-search-container">
             <i data-lucide="search" class="help-search-icon"></i>
-            <input type="text" id="help-search-input" class="help-search-input" placeholder="🔍 Search guide (e.g. 'receipt', 'CNR', 'bad debt', 'OTP', 'undo', 'portal')...">
+            <input type="text" id="help-search-input" class="help-search-input" placeholder="Search guide (e.g. 'receipt', 'CNR', 'bad debt', 'OTP', 'undo', 'portal')...">
             <button id="help-search-clear" class="help-search-clear">Clear</button>
           </div>
 
@@ -1131,14 +1131,14 @@
               <span style="font-size: 0.82rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.05em; margin-right: 0.4rem; display: flex; align-items: center; gap: 4px;">
                 <i data-lucide="compass" style="width: 15px; height: 15px;"></i> Jump To:
               </span>
-              <a href="#guide-getting-started" class="btn btn-secondary" style="padding: 0.3rem 0.7rem; font-size: 0.82rem;">🚀 Getting Started</a>
-              <a href="#guide-daily-workflow" class="btn btn-secondary" style="padding: 0.3rem 0.7rem; font-size: 0.82rem;">📅 Daily Workflow</a>
-              <a href="#guide-managing-money" class="btn btn-secondary" style="padding: 0.3rem 0.7rem; font-size: 0.82rem;">💰 Financial Ledger</a>
-              <a href="#guide-working-with-clients" class="btn btn-secondary" style="padding: 0.3rem 0.7rem; font-size: 0.82rem;">👥 Client Management</a>
-              <a href="#guide-team-delegation" class="btn btn-secondary" style="padding: 0.3rem 0.7rem; font-size: 0.82rem;">📋 Team Tasks</a>
-              <a href="#guide-data-safety" class="btn btn-secondary" style="padding: 0.3rem 0.7rem; font-size: 0.82rem;">🔒 Security & Backups</a>
-              <a href="#guide-critical-warnings" class="btn btn-secondary" style="padding: 0.3rem 0.7rem; font-size: 0.82rem; color: #fca5a5; border-color: rgba(239, 68, 68, 0.4);">⚠️ Critical Warnings</a>
-              <a href="#guide-faq" class="btn btn-secondary" style="padding: 0.3rem 0.7rem; font-size: 0.82rem;">❓ FAQ & Troubleshooting</a>
+              <a href="#guide-getting-started" class="btn btn-secondary help-jump-nav-btn"><i data-lucide="rocket" style="width:13px; height:13px;"></i> Getting Started</a>
+              <a href="#guide-daily-workflow" class="btn btn-secondary help-jump-nav-btn"><i data-lucide="calendar" style="width:13px; height:13px;"></i> Daily Workflow</a>
+              <a href="#guide-managing-money" class="btn btn-secondary help-jump-nav-btn"><i data-lucide="dollar-sign" style="width:13px; height:13px;"></i> Financial Ledger</a>
+              <a href="#guide-working-with-clients" class="btn btn-secondary help-jump-nav-btn"><i data-lucide="users" style="width:13px; height:13px;"></i> Client Management</a>
+              <a href="#guide-team-delegation" class="btn btn-secondary help-jump-nav-btn"><i data-lucide="check-square" style="width:13px; height:13px;"></i> Team Tasks</a>
+              <a href="#guide-data-safety" class="btn btn-secondary help-jump-nav-btn"><i data-lucide="shield-check" style="width:13px; height:13px;"></i> Security & Backups</a>
+              <a href="#guide-critical-warnings" class="btn btn-secondary help-jump-nav-btn" style="color: #fca5a5; border-color: rgba(239, 68, 68, 0.4);"><i data-lucide="alert-triangle" style="width:13px; height:13px; color:#fca5a5;"></i> Critical Warnings</a>
+              <a href="#guide-faq" class="btn btn-secondary help-jump-nav-btn"><i data-lucide="help-circle" style="width:13px; height:13px;"></i> FAQ & Troubleshooting</a>
             </div>
 
             <!-- Global Accordion Expand/Collapse Controls -->
@@ -1161,8 +1161,8 @@
                 <div style="display: flex; align-items: center; gap: 12px;">
                   <div style="background: rgba(217, 119, 6, 0.2); color: #fbbf24; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.25rem;">1</div>
                   <div>
-                    <h3 style="color: #fff; font-size: 1.25rem; font-weight: 700; margin: 0; font-family: 'Playfair Display', Georgia, serif;">🚀 Getting Started & Chamber Setup</h3>
-                    <span style="color: #cbd5e1; font-size: 0.85rem;">5-step quick start walkthrough to initialize your digital chamber suite</span>
+                    <h3 class="help-guide-chapter-title"><i data-lucide="rocket" style="width:18px; height:18px; color:var(--color-primary); display:inline-block; vertical-align:middle; margin-right:4px;"></i> Getting Started & Chamber Setup</h3>
+                    <span class="help-guide-chapter-sub">5-step quick start walkthrough to initialize your digital chamber suite</span>
                   </div>
                 </div>
                 <button class="btn btn-primary help-action-btn" data-target-action="overview" style="padding: 0.4rem 0.85rem; font-size: 0.82rem; display: flex; align-items: center; gap: 6px;">
@@ -1215,8 +1215,8 @@
                 <div style="display: flex; align-items: center; gap: 12px;">
                   <div style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.25rem;">2</div>
                   <div>
-                    <h3 style="color: #fff; font-size: 1.25rem; font-weight: 700; margin: 0; font-family: 'Playfair Display', Georgia, serif;">📅 Daily Workflow: Diary & Hearings</h3>
-                    <span style="color: #cbd5e1; font-size: 0.85rem;">Court hearing diary, 4 calendar view modes, and printable daily cause lists</span>
+                    <h3 class="help-guide-chapter-title"><i data-lucide="calendar" style="width:18px; height:18px; color:#fbbf24; display:inline-block; vertical-align:middle; margin-right:4px;"></i> Daily Workflow: Diary & Hearings</h3>
+                    <span class="help-guide-chapter-sub">Court hearing diary, 4 calendar view modes, and printable daily cause lists</span>
                   </div>
                 </div>
                 <div style="display: flex; gap: 0.5rem;">
@@ -2353,6 +2353,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.67"></script>
+  <script type="module" src="js/app.js?v=1.0.68"></script>
 </body>
 </html>
