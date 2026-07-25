@@ -225,6 +225,19 @@ const portalModule = {
           </div>
         </div>
 
+        <!-- Attorney-Client Privilege Confidentiality Banner -->
+        <div class="card" style="background: rgba(217, 119, 6, 0.06); border: 1px solid rgba(217, 119, 6, 0.25); border-left: 4px solid var(--color-primary); margin-bottom: 1.5rem; padding: 1rem 1.25rem;">
+          <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+            <i data-lucide="shield-alert" style="width: 20px; height: 20px; color: var(--color-primary); flex-shrink: 0; margin-top: 2px;"></i>
+            <div>
+              <strong style="color: var(--text-primary); font-size: 0.92rem; display: block; margin-bottom: 0.2rem;">Privileged & Confidential Legal Communication</strong>
+              <p style="margin: 0; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+                This access portal is strictly generated for the client of <strong>${chambers.firmName}</strong>. Advocate billing ledgers, retainer fee memo statements, and internal chamber notes are strictly excluded from this portal view for confidentiality.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- Client Dossier Greeting Card -->
         <div class="card" style="margin-bottom: 1.5rem; padding: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">

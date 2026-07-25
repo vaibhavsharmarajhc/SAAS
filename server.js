@@ -15,16 +15,69 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const JWT_SECRET = process.env.JWT_SECRET || 'vsh_secret_chambers_key_998877';
 
+if (process.env.NODE_ENV === 'production' && (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'vsh_secret_chambers_key_998877')) {
+  console.warn("⚠️ [SECURITY WARNING]: Production environment detected using default JWT_SECRET fallback. Please configure a unique JWT_SECRET env variable!");
+}
+
 // Middleware
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
+
+// Rate Limiting (Sliding Window In-Memory Store)
+const rateLimitStores = {
+  auth: new Map(),
+  mutation: new Map(),
+  global: new Map()
+};
+
+function createRateLimiter(storeName, maxHits, windowMs) {
+  const store = rateLimitStores[storeName];
+  return (req, res, next) => {
+    const key = req.ip || req.headers['x-forwarded-for'] || 'unknown_ip';
+    const now = Date.now();
+    const record = store.get(key) || { count: 0, resetTime: now + windowMs };
+
+    if (now > record.resetTime) {
+      record.count = 1;
+      record.resetTime = now + windowMs;
+    } else {
+      record.count++;
+    }
+
+    store.set(key, record);
+
+    if (record.count > maxHits) {
+      return res.status(429).json({ error: "Too many requests. Please try again later." });
+    }
+    next();
+  };
+}
+
+const authRateLimiter = createRateLimiter('auth', 10, 15 * 60 * 1000); // 10 attempts per 15 mins for dev/test
+const mutationRateLimiter = createRateLimiter('mutation', 60, 60 * 1000); // 60 mutations per min
+const globalRateLimiter = createRateLimiter('global', 300, 15 * 60 * 1000);
+
+app.use('/api/', globalRateLimiter);
+app.use('/api/auth/login', authRateLimiter);
+app.use('/api/auth/send-otp', authRateLimiter);
+app.use('/api/auth/verify-otp', authRateLimiter);
 
 // Security Headers & Cache-Control Middleware
 app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  res.setHeader('Content-Security-Policy', [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "img-src 'self' data: blob: https:",
+    "connect-src 'self' https://api.resend.com wss: ws:",
+    "frame-ancestors 'none'"
+  ].join('; '));
   next();
 });
 
@@ -38,6 +91,11 @@ async function authenticateToken(req, res, next) {
   const token = req.cookies.session_token;
   if (!token) {
     return res.status(401).json({ error: "Access denied. No session token provided." });
+  }
+
+  if (db.isTokenBlacklisted && db.isTokenBlacklisted(token)) {
+    res.clearCookie('session_token');
+    return res.status(401).json({ error: "Session token has been revoked. Please log in again." });
   }
 
   try {
@@ -383,7 +441,8 @@ app.post('/api/auth/login', async (req, res) => {
     // Set HttpOnly cookie
     res.cookie('session_token', token, {
       httpOnly: true,
-      secure: false,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
       maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
     });
 
@@ -396,25 +455,25 @@ app.post('/api/auth/login', async (req, res) => {
 
     res.json({
       user: safeTenant,
-      clients: clients || [],
-      cases: cases || [],
-      transactions: transactions || []
+      clients,
+      cases,
+      transactions
     });
   } catch (err) {
     console.error("Login error:", err);
-    res.status(500).json({ error: "Failed to authenticate login request." });
+    res.status(500).json({ error: err.message || "Failed to log in." });
   }
 });
 
 /**
- * Log Out (Session Termination)
+ * Log Out (Revoke Session Token)
  */
 app.post('/api/auth/logout', (req, res) => {
-  res.clearCookie('session_token', {
-    httpOnly: true,
-    secure: false,
-    sameSite: 'lax'
-  });
+  const token = req.cookies.session_token;
+  if (token && db.blacklistToken) {
+    db.blacklistToken(token);
+  }
+  res.clearCookie('session_token');
   res.json({ success: true, message: "Logged out successfully." });
 });
 

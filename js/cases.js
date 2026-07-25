@@ -244,19 +244,19 @@ const casesModule = {
 
       card.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 0.75rem;">
-          <span style="font-size:0.7rem; text-transform:uppercase; color:${catColor}; font-weight:700; background:${catColor}18; padding:2px 8px; border-radius:4px; border:1px solid ${catColor}40;">${c.caseType}</span>
+          <span style="font-size:0.7rem; text-transform:uppercase; color:${catColor}; font-weight:700; background:${catColor}18; padding:2px 8px; border-radius:4px; border:1px solid ${catColor}40;">${window.sanitizeText(c.caseType)}</span>
           <span class="badge ${badgeStyle}">${c.status}</span>
         </div>
-        <h3 style="font-size:1.15rem; color:var(--text-primary); line-height:1.3; margin-bottom:0.5rem;" class="case-title-link">${c.title}</h3>
+        <h3 style="font-size:1.15rem; color:var(--text-primary); line-height:1.3; margin-bottom:0.5rem;" class="case-title-link">${window.sanitizeText(c.title)}</h3>
         
         <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:1rem; display:flex; flex-direction:column; gap:0.25rem;">
-          <div><i data-lucide="user" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> Client: <strong>${client ? client.name : 'Unknown'}</strong></div>
-          <div><i data-lucide="hash" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> CNR/Ref: ${c.caseNumber}</div>
-          <div><i data-lucide="map-pin" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> Court: ${c.court}</div>
+          <div><i data-lucide="user" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> Client: <strong>${client ? window.sanitizeText(client.name) : 'Unknown'}</strong></div>
+          <div><i data-lucide="hash" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> CNR/Ref: ${window.sanitizeText(c.caseNumber)}</div>
+          <div><i data-lucide="map-pin" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> Court: ${window.sanitizeText(c.court)}</div>
         </div>
 
         <div style="border-top: 1px solid var(--border-color); padding: 0.75rem 0; margin-bottom:0.5rem; display:flex; justify-content:space-between; font-size:0.8rem;">
-          <div>Stage: <strong style="color:var(--text-primary);">${c.stage}</strong></div>
+          <div>Stage: <strong style="color:var(--text-primary);">${window.sanitizeText(c.stage)}</strong></div>
           <div style="${balanceStyle}">O/S: ₹${balance.outstanding.toLocaleString('en-IN')}</div>
         </div>
 

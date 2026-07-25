@@ -232,14 +232,39 @@ const clientsModule = {
     const client = db.getClient(id);
     if (!client) return;
 
-    let token = client.accessToken || client.id;
-    const portalUrl = `${window.location.origin}/portal?token=${token}`;
+    const modal = document.getElementById('portal-share-modal');
+    const nameEl = document.getElementById('portal-share-client-name');
+    const copyBtn = document.getElementById('portal-share-copy-btn');
+    const cancelBtn = document.getElementById('portal-share-cancel');
+    const closeBtn = document.getElementById('portal-share-close');
 
-    try {
-      navigator.clipboard.writeText(portalUrl);
-      alert(`Client Access Portal Link copied to clipboard:\n\n${portalUrl}`);
-    } catch (err) {
-      prompt("Copy Client Access Portal Link below:", portalUrl);
+    if (nameEl) nameEl.textContent = window.sanitizeText ? window.sanitizeText(client.name) : (client.name || 'Client');
+
+    const baseUrl = window.location.origin;
+    const token = client.accessToken || client.id || 'demo';
+    const portalUrl = `${baseUrl}/portal?token=${token}`;
+
+    const handleCopy = async () => {
+      try {
+        await navigator.clipboard.writeText(portalUrl);
+        alert(`Verified Client Access Portal Link copied to clipboard:\n\n${portalUrl}`);
+      } catch (err) {
+        prompt("Copy Verified Client Access Portal Link below:", portalUrl);
+      }
+      if (modal) modal.classList.remove('active');
+    };
+
+    const handleClose = () => {
+      if (modal) modal.classList.remove('active');
+    };
+
+    if (copyBtn) copyBtn.onclick = handleCopy;
+    if (cancelBtn) cancelBtn.onclick = handleClose;
+    if (closeBtn) closeBtn.onclick = handleClose;
+
+    if (modal) {
+      modal.classList.add('active');
+      if (window.lucide) window.lucide.createIcons();
     }
   },
 

@@ -17,7 +17,7 @@
   <title>Track My Chambers - Practice Workspace</title>
   <meta name="description" content="Advocate Chambers Practice Management Workspace.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.73">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.74">
   <!-- Local Vendor Bundles (Zero External CDNs) -->
   <script src="/js/vendor/lucide.min.js" defer></script>
   <script src="/js/vendor/chart.min.js" defer></script>
@@ -43,13 +43,13 @@
         navigator.serviceWorker.getRegistrations().then(registrations => {
           return Promise.all(registrations.map(r => r.unregister()));
         }).then(() => {
-          return navigator.serviceWorker.register('/sw.js?v=73');
+          return navigator.serviceWorker.register('/sw.js?v=74');
         }).then(reg => {
           reg.update();
           if (window.caches) {
             caches.keys().then(keys => {
               keys.forEach(key => {
-                if (key !== 'trackmychambers-cache-v73') {
+                if (key !== 'trackmychambers-cache-v74') {
                   caches.delete(key);
                 }
               });
@@ -148,8 +148,12 @@
         <button class="menu-toggle-btn" id="btn-sidebar-toggle" style="display:none; padding:0.4rem; flex-shrink:0; background:transparent; border:none; color:var(--text-primary); cursor:pointer;">
           <i data-lucide="menu" style="width: 18px; height: 18px;"></i>
         </button>
-        <div class="page-title-section" style="flex-shrink:0;">
+        <div class="page-title-section" style="flex-shrink:0; display:flex; align-items:center; gap:0.75rem;">
           <h2 id="header-page-title">Dashboard</h2>
+          <div class="security-badge-pill" style="display:inline-flex; align-items:center; gap:5px; background:rgba(16, 185, 129, 0.12); color:#059669; border:1px solid rgba(16, 185, 129, 0.3); padding:0.25rem 0.65rem; border-radius:20px; font-size:0.72rem; font-weight:600;">
+            <i data-lucide="shield-check" style="width:13px; height:13px; color:#059669;"></i>
+            <span>256-Bit Encrypted Sandbox</span>
+          </div>
         </div>
         
 
@@ -1052,6 +1056,22 @@
                 You can save this file securely on your computer as a database snapshot.
               </p>
               <button class="btn btn-primary" id="settings-backup-export-btn"><i data-lucide="download"></i> Download Backup File</button>
+            <!-- Data Sovereignty & Confidentiality Guarantee Card -->
+            <div class="card" style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.25); border-left: 4px solid var(--color-success); margin-bottom: 1.5rem; padding: 1.25rem;">
+              <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                <i data-lucide="shield-check" style="width: 22px; height: 22px; color: var(--color-success); flex-shrink: 0; margin-top: 2px;"></i>
+                <div>
+                  <strong style="color: var(--text-primary); font-size: 0.95rem; display: block; margin-bottom: 0.3rem;">Chamber Data Sovereignty & Anti-Profiling Guarantee</strong>
+                  <p style="margin: 0 0 0.5rem 0; font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">
+                    Your litigation records, client lists, and fee ledgers are <strong>100% tenant-isolated</strong>. Track My Chambers guarantees:
+                  </p>
+                  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;">
+                    <li><strong>0 Commercial Profiling</strong>: Your dockets are never scanned, indexed, or sold to third parties or AI models.</li>
+                    <li><strong>0 Cloud Lock-In</strong>: Download 100% of your chamber records in standard JSON format at any time for free.</li>
+                    <li><strong>Instant Hard Purge</strong>: Executing a reset permanently wipes live records with 0 cloud shadow copies retained.</li>
+                  </ul>
+                </div>
+              </div>
             </div>
 
             <div class="settings-section" style="margin-top:2rem;">
@@ -1652,6 +1672,10 @@
             <label class="form-label">Case Details & Description</label>
             <textarea class="form-control" id="add-case-desc" rows="3"></textarea>
           </div>
+          <div class="form-trust-microbadge" style="display:flex; align-items:center; gap:6px; background:rgba(16, 185, 129, 0.08); border:1px solid rgba(16, 185, 129, 0.2); padding:0.4rem 0.75rem; border-radius:var(--radius-sm); font-size:0.75rem; color:#059669; margin-top:0.75rem;">
+            <i data-lucide="lock" style="width:13px; height:13px; color:#059669;"></i>
+            <span>Encrypted Chamber Isolated Record &bull; Visible strictly to your chamber</span>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" id="add-case-cancel">Cancel</button>
@@ -1838,6 +1862,48 @@
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="window.print();"><i data-lucide="printer"></i> Print Invoice</button>
         <button class="btn btn-primary" id="invoice-close-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Express Client Portal Privacy Sharing Modal -->
+  <div id="portal-share-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 520px;">
+      <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="shield-check" style="width: 20px; height: 20px; color: var(--color-success);"></i>
+          <h3 class="modal-title">Express Client Portal Sharing</h3>
+        </div>
+        <button class="modal-close" id="portal-share-close">&times;</button>
+      </div>
+      <div class="modal-body" style="padding-top: 1rem;">
+        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5;">
+          Customise which matter details will be visible to <strong><span id="portal-share-client-name">Client</span></strong> on their public portal link:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; background: var(--bg-hover); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem;">
+          <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; cursor: pointer;">
+            <span><i data-lucide="calendar" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px; color: var(--color-primary);"></i> Next Hearing Date & Forum</span>
+            <input type="checkbox" id="portal-opt-date" checked disabled>
+          </label>
+          <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; cursor: pointer;">
+            <span><i data-lucide="hash" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px; color: var(--color-primary);"></i> Court Forum & CNR Reference</span>
+            <input type="checkbox" id="portal-opt-cnr" checked disabled>
+          </label>
+          <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; cursor: pointer;">
+            <span><i data-lucide="file-text" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px; color: var(--color-primary);"></i> Include Public Hearing Summaries</span>
+            <input type="checkbox" id="portal-opt-notes">
+          </label>
+        </div>
+
+        <div style="background: rgba(239, 68, 68, 0.08); border: 1px dashed rgba(239, 68, 68, 0.3); border-radius: var(--radius-sm); padding: 0.65rem 0.85rem; font-size: 0.78rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="lock" style="width: 14px; height: 14px; color: var(--color-danger); flex-shrink: 0;"></i>
+          <span><strong>Guaranteed Omitted</strong>: Fee Ledgers, Retainer Debits/Credits, and Advocate Internal Notes.</span>
+        </div>
+      </div>
+      <div class="modal-footer" style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+        <button class="btn btn-secondary" id="portal-share-cancel">Cancel</button>
+        <button class="btn btn-primary" id="portal-share-copy-btn"><i data-lucide="copy"></i> Copy Verified Portal Link</button>
       </div>
     </div>
   </div>
@@ -2353,6 +2419,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.73"></script>
+  <script type="module" src="js/app.js?v=1.0.74"></script>
 </body>
 </html>

@@ -3329,6 +3329,43 @@ mark.search-highlight {
   color: #0f172a !important;
 }
 
+/* Security Trust Badges & Confidentiality Styling */
+.security-badge-pill {
+  transition: all 0.2s ease;
+}
+
+[data-theme="light"] .security-badge-pill {
+  background: rgba(16, 185, 129, 0.08) !important;
+  color: #047857 !important;
+  border-color: rgba(16, 185, 129, 0.25) !important;
+}
+
+.form-trust-microbadge {
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+[data-theme="light"] .form-trust-microbadge {
+  background: rgba(16, 185, 129, 0.06) !important;
+  border-color: rgba(16, 185, 129, 0.2) !important;
+  color: #047857 !important;
+}
+
+@media (max-width: 640px) {
+  .security-badge-pill {
+    font-size: 0.65rem !important;
+    padding: 0.15rem 0.45rem !important;
+  }
+  .form-trust-microbadge {
+    font-size: 0.7rem !important;
+    padding: 0.3rem 0.5rem !important;
+  }
+  .modal-container {
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+  }
+}
+
 [data-theme="light"] .help-search-container {
   background: #ffffff !important;
   border: 1px solid rgba(15, 23, 42, 0.12) !important;

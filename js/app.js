@@ -25,6 +25,15 @@ window.onerror = function(message, source, lineno, colno, error) {
   console.error(message, error);
 };
 
+window.sanitizeText = function(str) {
+  if (!str || typeof str !== 'string') return '';
+  return str.replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+};
+
 function safeCreateIcons() {
   try {
     if (typeof window.safeCreateIcons === 'function') {
