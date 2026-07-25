@@ -3160,6 +3160,23 @@ mark.search-highlight {
   color: var(--text-primary) !important;
 }
 
+.help-grid-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  padding: 1.1rem;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+}
+
+.help-grid-box strong {
+  color: var(--text-primary);
+}
+
+.help-guide-subtext {
+  color: var(--text-secondary) !important;
+  font-weight: 450 !important;
+}
+
 .help-guide-header-card {
   background: linear-gradient(135deg, rgba(217, 119, 6, 0.12) 0%, var(--bg-sidebar) 100%) !important;
   border: 1px solid rgba(245, 158, 11, 0.35) !important;
@@ -3255,7 +3272,22 @@ mark.search-highlight {
   background: #ffffff !important;
   border: 1px solid rgba(15, 23, 42, 0.1) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
-  color: var(--text-secondary) !important;
+  color: #334155 !important;
+}
+
+[data-theme="light"] .help-grid-box {
+  background: #f8fafc !important;
+  border: 1px solid rgba(15, 23, 42, 0.12) !important;
+  color: #334155 !important;
+}
+
+[data-theme="light"] .help-grid-box strong {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .help-guide-subtext,
+[data-theme="light"] .help-guide-body-text {
+  color: #334155 !important;
 }
 
 [data-theme="light"] .help-searchable-card div[style*="background"] {
