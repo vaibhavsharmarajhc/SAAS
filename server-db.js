@@ -404,26 +404,46 @@ async function deleteClient(tenantId, id) {
 /**
  * Case Management
  */
+function healCaseNextHearing(c) {
+  if (!c) return c;
+  if (!c.nextHearingDate || c.nextHearingDate === 'Not Scheduled' || String(c.nextHearingDate).trim() === '') {
+    if (c.hearings && c.hearings.length > 0) {
+      const sorted = [...c.hearings].sort((a, b) => new Date(b.date) - new Date(a.date));
+      for (let h of sorted) {
+        if (h.nextHearingDate && String(h.nextHearingDate).trim() !== '') {
+          c.nextHearingDate = h.nextHearingDate;
+          break;
+        }
+      }
+      if (!c.nextHearingDate && sorted[0] && sorted[0].date) {
+        c.nextHearingDate = sorted[0].date;
+      }
+    }
+  }
+  return c;
+}
+
 async function getCases(tenantId) {
   const db = await getDb();
   if (db) {
     const cases = await db.collection('cases').find({ tenantId }).toArray();
-    return mapIds(cases);
+    return mapIds(cases).map(healCaseNextHearing);
   }
 
   const localDb = readDb();
-  return localDb.cases.filter(c => c.tenantId === tenantId);
+  return (localDb.cases.filter(c => c.tenantId === tenantId) || []).map(healCaseNextHearing);
 }
 
 async function getCase(tenantId, id) {
   const db = await getDb();
   if (db) {
     const cs = await db.collection('cases').findOne({ tenantId, _id: id });
-    return mapId(cs);
+    return healCaseNextHearing(mapId(cs));
   }
 
   const localDb = readDb();
-  return localDb.cases.find(c => c.tenantId === tenantId && c.id === id) || null;
+  const found = localDb.cases.find(c => c.tenantId === tenantId && c.id === id) || null;
+  return healCaseNextHearing(found);
 }
 
 async function addCase(tenantId, caseObj) {
@@ -505,11 +525,13 @@ async function deleteCase(tenantId, id) {
 }
 
 async function addHearing(tenantId, caseId, hearingData) {
+  const nextHearingDate = hearingData.nextHearingDate || hearingData.nextDate || null;
   const newHearing = {
     id: "h_" + Date.now(),
     date: hearingData.date || new Date().toISOString().split('T')[0],
     stage: hearingData.stage || "Hearing",
     nextStage: hearingData.nextStage || null,
+    nextHearingDate: nextHearingDate,
     notes: hearingData.notes || ""
   };
 
@@ -524,8 +546,10 @@ async function addHearing(tenantId, caseId, hearingData) {
     if (hearingData.nextStage || hearingData.stage) {
       setFields.stage = hearingData.nextStage || hearingData.stage;
     }
-    if (hearingData.nextHearingDate) {
-      setFields.nextHearingDate = hearingData.nextHearingDate;
+    if (nextHearingDate) {
+      setFields.nextHearingDate = nextHearingDate;
+    } else if (newHearing.date) {
+      setFields.nextHearingDate = newHearing.date;
     }
 
     await db.collection('cases').updateOne(
@@ -544,8 +568,10 @@ async function addHearing(tenantId, caseId, hearingData) {
     if (hearingData.nextStage || hearingData.stage) {
       localDb.cases[idx].stage = hearingData.nextStage || hearingData.stage;
     }
-    if (hearingData.nextHearingDate) {
-      localDb.cases[idx].nextHearingDate = hearingData.nextHearingDate;
+    if (nextHearingDate) {
+      localDb.cases[idx].nextHearingDate = nextHearingDate;
+    } else if (newHearing.date) {
+      localDb.cases[idx].nextHearingDate = newHearing.date;
     }
     writeDb(localDb);
     return localDb.cases[idx];
