@@ -209,10 +209,10 @@ const clientsModule = {
         <td>${c.onboardingDate}</td>
         <td style="${balanceStyle}">₹${balance.outstanding.toLocaleString('en-IN')}</td>
         <td>
-          <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
-            <button class="btn btn-secondary btn-dossier" style="padding:0.25rem 0.5rem; font-size:0.75rem;" data-id="${c.id}"><i data-lucide="folder" style="width:12px; height:12px;"></i> Dossier</button>
-            <button class="btn btn-secondary btn-copy-portal" style="padding:0.25rem 0.5rem; font-size:0.75rem;" data-id="${c.id}"><i data-lucide="link" style="width:12px; height:12px;"></i> Copy Link</button>
-            <button class="btn btn-danger btn-delete-client" style="padding:0.25rem 0.5rem; font-size:0.75rem;" data-id="${c.id}"><i data-lucide="trash-2" style="width:12px; height:12px;"></i></button>
+          <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:nowrap;">
+            <button class="btn btn-secondary btn-dossier" style="padding:0 0.6rem; height:28px; font-size:0.75rem; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; gap:0.35rem;" data-id="${c.id}"><i data-lucide="folder" style="width:12px; height:12px; flex-shrink:0;"></i> Dossier</button>
+            <button class="btn btn-secondary btn-copy-portal" style="padding:0 0.6rem; height:28px; font-size:0.75rem; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; gap:0.35rem;" data-id="${c.id}"><i data-lucide="link" style="width:12px; height:12px; flex-shrink:0;"></i> Copy Link</button>
+            <button class="btn btn-danger btn-delete-client" style="padding:0; width:28px; height:28px; font-size:0.75rem; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" data-id="${c.id}" title="Delete Client Profile"><i data-lucide="trash-2" style="width:12px; height:12px;"></i></button>
           </div>
         </td>
       `;
