@@ -642,6 +642,32 @@ async function deleteTransaction(tenantId, id) {
   writeDb(localDb);
 }
 
+async function updateTransaction(tenantId, id, txData) {
+  const updates = {
+    clientId: txData.clientId,
+    caseId: txData.caseId || null,
+    date: txData.date,
+    amount: parseFloat(txData.amount) || 0,
+    type: txData.type,
+    description: txData.description
+  };
+
+  const db = await getDb();
+  if (db) {
+    await db.collection('transactions').updateOne({ tenantId, _id: id }, { $set: updates });
+    return { id, tenantId, ...updates };
+  }
+
+  const localDb = readDb();
+  const idx = localDb.transactions.findIndex(t => t.tenantId === tenantId && t.id === id);
+  if (idx !== -1) {
+    localDb.transactions[idx] = { ...localDb.transactions[idx], ...updates };
+    writeDb(localDb);
+    return localDb.transactions[idx];
+  }
+  return null;
+}
+
 /**
  * Database Seeder
  */
@@ -1818,6 +1844,7 @@ module.exports = {
   updateHearing,
   getTransactions,
   addTransaction,
+  updateTransaction,
   deleteTransaction,
   seedTenantData,
   importTenantBackup,

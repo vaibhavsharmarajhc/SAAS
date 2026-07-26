@@ -290,6 +290,20 @@ class LegalDB {
     return newTx;
   }
 
+  async updateTransaction(id, txData) {
+    let updated;
+    try {
+      updated = await api.transactions.update(id, txData);
+    } catch (e) {
+      updated = { id, ...txData };
+    }
+    const idx = this.cache.transactions.findIndex(t => t.id === id);
+    if (idx !== -1) {
+      this.cache.transactions[idx] = { ...this.cache.transactions[idx], ...updated };
+    }
+    return updated;
+  }
+
   async deleteTransaction(id) {
     await api.transactions.delete(id);
     this.cache.transactions = this.cache.transactions.filter(t => t.id !== id);

@@ -214,6 +214,13 @@ const api = {
       });
     },
 
+    async update(id, txData) {
+      return await fetchAPI(`/api/transactions/${id}`, {
+        method: 'PUT',
+        body: txData
+      });
+    },
+
     async delete(id) {
       return await fetchAPI(`/api/transactions/${id}`, {
         method: 'DELETE'

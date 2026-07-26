@@ -182,10 +182,55 @@ const accountsModule = {
     
     logBtn.addEventListener('click', () => {
       this.populateClientDropdowns();
-      // Set default transaction date to today
+      const editInput = document.getElementById('log-tx-edit-id');
+      const titleEl = document.getElementById('log-tx-title');
+      const submitBtn = document.getElementById('log-tx-submit-btn');
+
+      if (editInput) editInput.value = '';
+      if (titleEl) titleEl.textContent = 'Log Financial Transaction';
+      if (submitBtn) submitBtn.textContent = 'Save Entry';
+
       document.getElementById('log-tx-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('log-tx-amount').value = '';
+      document.getElementById('log-tx-desc').value = '';
       modal.classList.add('active');
     });
+  },
+
+  showEditTransaction(txId) {
+    const tx = db.getTransactions().find(t => t.id === txId);
+    if (!tx) return;
+
+    this.populateClientDropdowns();
+
+    const editInput = document.getElementById('log-tx-edit-id');
+    const titleEl = document.getElementById('log-tx-title');
+    const submitBtn = document.getElementById('log-tx-submit-btn');
+
+    if (editInput) editInput.value = tx.id;
+    if (titleEl) titleEl.textContent = 'Edit Financial Entry';
+    if (submitBtn) submitBtn.textContent = 'Save Changes';
+
+    const clientSelect = document.getElementById('log-tx-client-id');
+    const caseSelect = document.getElementById('log-tx-case-id');
+
+    clientSelect.value = tx.clientId || '';
+
+    const cases = db.getCasesForClient(tx.clientId);
+    caseSelect.innerHTML = '<option value="">Standalone Client billing (No Case link)</option>';
+    cases.forEach(cs => {
+      caseSelect.innerHTML += `<option value="${cs.id}">${cs.title} (${cs.caseNumber})</option>`;
+    });
+    caseSelect.value = tx.caseId || '';
+
+    document.getElementById('log-tx-date').value = tx.date || new Date().toISOString().split('T')[0];
+    document.getElementById('log-tx-type').value = tx.type || 'Billed';
+    document.getElementById('log-tx-amount').value = tx.amount || 0;
+    document.getElementById('log-tx-desc').value = tx.description || '';
+
+    const modal = document.getElementById('log-tx-modal');
+    modal.classList.add('active');
+    if (window.lucide) window.lucide.createIcons();
   },
 
   /**
@@ -211,6 +256,7 @@ const accountsModule = {
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const editId = document.getElementById('log-tx-edit-id')?.value;
       const clientId = clientSelect.value;
       const caseId = caseSelect.value || null;
       const date = document.getElementById('log-tx-date').value;
@@ -223,25 +269,44 @@ const accountsModule = {
         return;
       }
 
-      const tx = await db.addTransaction({ clientId, caseId, date, type, amount, description });
-      
-      historyManager.push({
-        description: `Financial entry (${type} ₹${amount}) logged`,
-        undo: async () => {
-          await db.deleteTransaction(tx.id);
-          this.render();
-        },
-        redo: async () => {
-          await db.addTransaction(tx);
-          this.render();
-        }
-      });
+      if (editId) {
+        const prevTx = db.getTransactions().find(t => t.id === editId);
+        const updated = await db.updateTransaction(editId, { clientId, caseId, date, type, amount, description });
+        
+        historyManager.push({
+          description: `Financial entry (${type} ₹${amount}) updated`,
+          undo: async () => {
+            if (prevTx) await db.updateTransaction(editId, prevTx);
+            this.render();
+          },
+          redo: async () => {
+            await db.updateTransaction(editId, updated);
+            this.render();
+          }
+        });
+        alert("Financial transaction entry updated.");
+      } else {
+        const tx = await db.addTransaction({ clientId, caseId, date, type, amount, description });
+        
+        historyManager.push({
+          description: `Financial entry (${type} ₹${amount}) logged`,
+          undo: async () => {
+            await db.deleteTransaction(tx.id);
+            this.render();
+          },
+          redo: async () => {
+            await db.addTransaction(tx);
+            this.render();
+          }
+        });
+        alert("Financial transaction logged.");
+      }
 
       // Dispatch a custom event to notify other modules to refresh
       document.dispatchEvent(new CustomEvent('transactionLogged', { detail: { clientId, caseId } }));
       
-      alert("Financial transaction logged.");
       form.reset();
+      if (document.getElementById('log-tx-edit-id')) document.getElementById('log-tx-edit-id').value = '';
       caseSelect.innerHTML = '<option value="">Standalone Client billing (No Case link)</option>';
       modal.classList.remove('active');
       this.render();
@@ -338,13 +403,15 @@ const accountsModule = {
         <td style="font-weight:500;">${debitVal}</td>
         <td style="${creditColorStyle} font-weight:500;">${creditVal}</td>
         <td>
-          <div style="display:flex; gap:0.4rem;">
-            <button class="btn btn-secondary btn-invoice" style="padding:0.25rem 0.4rem;" data-id="${t.id}" title="Print Invoice/Receipt"><i data-lucide="printer" style="width:12px; height:12px;"></i></button>
-            <button class="btn btn-danger btn-delete-tx" style="padding:0.25rem 0.4rem;" data-id="${t.id}" title="Delete Transaction"><i data-lucide="trash-2" style="width:12px; height:12px;"></i></button>
+          <div style="display:flex; gap:0.35rem; align-items:center;">
+            <button class="btn btn-secondary btn-edit-tx" style="padding:0; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" data-id="${t.id}" title="Edit Transaction Entry"><i data-lucide="edit-3" style="width:12px; height:12px;"></i></button>
+            <button class="btn btn-secondary btn-invoice" style="padding:0; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" data-id="${t.id}" title="Print Invoice/Receipt"><i data-lucide="printer" style="width:12px; height:12px;"></i></button>
+            <button class="btn btn-danger btn-delete-tx" style="padding:0; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" data-id="${t.id}" title="Delete Transaction"><i data-lucide="trash-2" style="width:12px; height:12px;"></i></button>
           </div>
         </td>
       `;
 
+      row.querySelector('.btn-edit-tx').addEventListener('click', () => this.showEditTransaction(t.id));
       row.querySelector('.btn-invoice').addEventListener('click', () => this.showInvoice(t.id));
       row.querySelector('.btn-delete-tx').addEventListener('click', () => this.deleteTransaction(t.id));
 

@@ -847,6 +847,18 @@ app.post('/api/transactions', authenticateToken, async (req, res) => {
   }
 });
 
+app.put('/api/transactions/:id', authenticateToken, async (req, res) => {
+  try {
+    const updated = await db.updateTransaction(req.user.id, req.params.id, req.body);
+    if (!updated) {
+      return res.status(404).json({ error: "Transaction not found or access denied." });
+    }
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update transaction entry." });
+  }
+});
+
 app.delete('/api/transactions/:id', authenticateToken, async (req, res) => {
   try {
     await db.deleteTransaction(req.user.id, req.params.id);
