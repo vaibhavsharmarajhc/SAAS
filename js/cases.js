@@ -177,12 +177,12 @@ const casesModule = {
         }
       });
 
-      // Log an initial blank hearing in history if next hearing is defined
+      // Log an initial hearing record in history if hearing date is defined
       if (nextHearingDate) {
         await db.addHearing(newCase.id, {
-          date: new Date().toISOString().split('T')[0],
-          stage: "Register",
-          notes: "Case registered. First hearing listed on: " + nextHearingDate,
+          date: nextHearingDate,
+          stage: stage || "Filing",
+          notes: `Case registered. Listed for ${stage || "Hearing"} on: ${nextHearingDate}`,
           nextHearingDate
         });
       }

@@ -160,9 +160,21 @@ const clientsModule = {
   setupSearchAndFilters() {
     const searchInput = document.getElementById('client-search-input');
     const filterType = document.getElementById('client-filter-type');
+    const gotoOnboardBtn = document.getElementById('btn-goto-onboarding');
 
-    searchInput.addEventListener('input', () => this.renderClientList());
-    filterType.addEventListener('change', () => this.renderClientList());
+    if (searchInput) searchInput.addEventListener('input', () => this.renderClientList());
+    if (filterType) filterType.addEventListener('change', () => this.renderClientList());
+
+    if (gotoOnboardBtn) {
+      gotoOnboardBtn.addEventListener('click', () => {
+        this.resetWizard();
+        if (typeof window.switchView === 'function') {
+          window.switchView('onboarding-page');
+        } else {
+          document.querySelector('[data-view="onboarding-page"]')?.click();
+        }
+      });
+    }
   },
 
   /**
