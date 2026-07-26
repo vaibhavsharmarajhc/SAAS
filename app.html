@@ -17,7 +17,7 @@
   <title>Track My Chambers - Practice Workspace</title>
   <meta name="description" content="Advocate Chambers Practice Management Workspace.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.81">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.83">
   <!-- Local Vendor Bundles (Zero External CDNs) -->
   <script src="/js/vendor/lucide.min.js" defer></script>
   <script src="/js/vendor/chart.min.js" defer></script>
@@ -43,13 +43,13 @@
         navigator.serviceWorker.getRegistrations().then(registrations => {
           return Promise.all(registrations.map(r => r.unregister()));
         }).then(() => {
-          return navigator.serviceWorker.register('/sw.js?v=81');
+          return navigator.serviceWorker.register('/sw.js?v=83');
         }).then(reg => {
           reg.update();
           if (window.caches) {
             caches.keys().then(keys => {
               keys.forEach(key => {
-                if (key !== 'trackmychambers-cache-v81') {
+                if (key !== 'trackmychambers-cache-v83') {
                   caches.delete(key);
                 }
               });
@@ -1710,40 +1710,88 @@
   <div id="add-hearing-modal" class="modal-overlay">
     <div class="modal-container">
       <div class="modal-header">
-        <h3 class="modal-title">Record Hearing Outcomes</h3>
+        <h3 class="modal-title">Record Hearing Proceedings & Listing</h3>
         <button class="modal-close" id="add-hearing-close">&times;</button>
       </div>
       <form id="add-hearing-form">
         <input type="hidden" id="add-hearing-case-id">
+        <input type="hidden" id="add-hearing-listing-mode" value="fixed">
         <div class="modal-body">
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Date of Hearing *</label>
+              <label class="form-label">Hearing Date *</label>
               <input type="date" class="form-control" id="add-hearing-date" required>
             </div>
             <div class="form-group">
-              <label class="form-label">Purpose/Stage for Today's Date *</label>
-              <input type="text" class="form-control" id="add-hearing-stage" required placeholder="Evidence, Arguments...">
+              <label class="form-label">Case Stage & Next Purpose *</label>
+              <input type="text" class="form-control" id="add-hearing-stage" required placeholder="e.g. Arguments Completed; Adjourned for Orders">
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Next Listed Hearing Date</label>
+
+          <!-- Next Listing Mode Selector -->
+          <div class="form-group" style="background:var(--bg-hover); padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border-color); margin-bottom:1rem;">
+            <label class="form-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+              <span>Next Listing Type *</span>
+              <span id="add-hearing-mode-lbl" style="font-size:0.75rem; font-weight:600; color:var(--color-primary);">Fixed Calendar Date</span>
+            </label>
+            <div style="display:flex; gap:0.5rem; margin-bottom:0.75rem;">
+              <button type="button" class="btn btn-secondary btn-sm flex-1 hearing-mode-toggle active" id="btn-mode-fixed" style="font-size:0.75rem; padding:0.35rem;"><i data-lucide="calendar"></i> Fixed Date</button>
+              <button type="button" class="btn btn-secondary btn-sm flex-1 hearing-mode-toggle" id="btn-mode-relative" style="font-size:0.75rem; padding:0.35rem;"><i data-lucide="clock"></i> High Court Relative (Not Before)</button>
+            </div>
+
+            <!-- Fixed Date Container -->
+            <div id="hearing-fixed-date-wrap">
               <input type="date" class="form-control" id="add-hearing-next-date">
             </div>
-            <div class="form-group">
-              <label class="form-label">Purpose/Stage for Next Date</label>
-              <input type="text" class="form-control" id="add-hearing-next-stage" placeholder="Evidence, Written Statement...">
+
+            <!-- Relative Presets Container -->
+            <div id="hearing-relative-date-wrap" style="display:none;">
+              <div style="display:flex; flex-wrap:wrap; gap:0.4rem; margin-bottom:0.5rem;">
+                <button type="button" class="btn btn-secondary btn-sm rel-preset-btn" data-weeks="1">+1 Wk</button>
+                <button type="button" class="btn btn-secondary btn-sm rel-preset-btn" data-weeks="2">+2 Wks</button>
+                <button type="button" class="btn btn-secondary btn-sm rel-preset-btn" data-weeks="3">+3 Wks</button>
+                <button type="button" class="btn btn-secondary btn-sm rel-preset-btn" data-weeks="4">+4 Wks</button>
+                <button type="button" class="btn btn-secondary btn-sm rel-preset-btn" data-weeks="6">+6 Wks</button>
+                <button type="button" class="btn btn-secondary btn-sm rel-preset-btn" data-months="2">+2 Mos</button>
+              </div>
+              <div style="font-size:0.8rem; color:var(--color-warning); font-weight:600;" id="relative-preview-text">Not Before: Select preset above</div>
             </div>
           </div>
+
           <div class="form-group">
-            <label class="form-label">Daily Notes / Orders Summary</label>
-            <textarea class="form-control" id="add-hearing-notes" rows="4" placeholder="Brief outcome or next directions..."></textarea>
+            <label class="form-label">Daily Notes / Bench Directions Summary</label>
+            <textarea class="form-control" id="add-hearing-notes" rows="3" placeholder="Brief court proceedings, directions or order notes..."></textarea>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" id="add-hearing-cancel">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Hearing</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lock Confirmed Listed Date Modal -->
+  <div id="lock-hearing-date-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width:420px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Lock Confirmed Listing Date</h3>
+        <button class="modal-close" id="lock-date-close">&times;</button>
+      </div>
+      <form id="lock-date-form">
+        <input type="hidden" id="lock-date-case-id">
+        <div class="modal-body">
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1rem;">
+            Lock in the exact confirmed listing date published in the Daily Cause List for <strong><span id="lock-date-case-title">Case</span></strong>.
+          </p>
+          <div class="form-group">
+            <label class="form-label">Confirmed Hearing Date *</label>
+            <input type="date" class="form-control" id="lock-date-input" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="lock-date-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i data-lucide="check"></i> Confirm Listing Date</button>
         </div>
       </form>
     </div>
@@ -2427,6 +2475,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.81"></script>
+  <script type="module" src="js/app.js?v=1.0.83"></script>
 </body>
 </html>

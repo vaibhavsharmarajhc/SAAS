@@ -551,6 +551,12 @@ async function addHearing(tenantId, caseId, hearingData) {
     } else if (newHearing.date) {
       setFields.nextHearingDate = newHearing.date;
     }
+    if (hearingData.listingType) {
+      setFields.listingType = hearingData.listingType;
+    }
+    if (hearingData.notBeforeDate !== undefined) {
+      setFields.notBeforeDate = hearingData.notBeforeDate;
+    }
 
     await db.collection('cases').updateOne(
       { tenantId, _id: caseId },
@@ -572,6 +578,12 @@ async function addHearing(tenantId, caseId, hearingData) {
       localDb.cases[idx].nextHearingDate = nextHearingDate;
     } else if (newHearing.date) {
       localDb.cases[idx].nextHearingDate = newHearing.date;
+    }
+    if (hearingData.listingType) {
+      localDb.cases[idx].listingType = hearingData.listingType;
+    }
+    if (hearingData.notBeforeDate !== undefined) {
+      localDb.cases[idx].notBeforeDate = hearingData.notBeforeDate;
     }
     writeDb(localDb);
     return localDb.cases[idx];

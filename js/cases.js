@@ -13,6 +13,7 @@ const casesModule = {
     this.setupRegisterCaseForm();
     this.setupHearingForm();
     this.setupEditHearingForm();
+    this.setupLockDateForm();
     this.setupCaseDossierEvents();
     this.populateReferralDatalist();
     this.populateCategoryDropdowns();
@@ -249,9 +250,41 @@ const casesModule = {
       const catColor = catObj ? catObj.color : '#3b82f6';
       const badgeStyle = c.status === 'Active' ? 'badge-active' : 'badge-closed';
       const balanceStyle = balance.outstanding > 0 ? 'color: var(--color-danger); font-weight:700;' : 'color: var(--color-success); font-weight:700;';
-      const nextDate = this.getNextHearingDate(c);
-      const nextDateDisplay = nextDate ? nextDate : 'Not Scheduled';
-      const nextDateColor = nextDate ? 'var(--color-primary)' : 'var(--color-warning)';
+      let badgeBg = 'rgba(217, 119, 6, 0.05)';
+      let badgeBorder = 'rgba(217, 119, 6, 0.15)';
+      let badgeLabel = 'Next Hearing:';
+      let badgeText = 'Not Scheduled';
+      let badgeTextColor = 'var(--color-warning)';
+      let isRelativeMode = false;
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      const notBefore = c.notBeforeDate || (c.listingType === 'relative' ? c.nextHearingDate : null);
+
+      if (c.listingType === 'relative' || (notBefore && notBefore !== 'Not Scheduled')) {
+        isRelativeMode = true;
+        if (notBefore && todayStr >= notBefore) {
+          badgeBg = 'rgba(234, 179, 8, 0.12)';
+          badgeBorder = 'rgba(234, 179, 8, 0.35)';
+          badgeLabel = '👁️ Cause List Watch:';
+          badgeText = `Eligible for Listing (Not Before ${notBefore})`;
+          badgeTextColor = '#b45309';
+        } else if (notBefore) {
+          badgeBg = 'rgba(59, 130, 246, 0.08)';
+          badgeBorder = 'rgba(59, 130, 246, 0.25)';
+          badgeLabel = 'Not Before:';
+          badgeText = notBefore;
+          badgeTextColor = 'var(--color-primary)';
+        }
+      } else {
+        const nextDate = this.getNextHearingDate(c);
+        if (nextDate) {
+          badgeBg = 'rgba(16, 185, 129, 0.08)';
+          badgeBorder = 'rgba(16, 185, 129, 0.25)';
+          badgeLabel = 'Confirmed Listed:';
+          badgeText = nextDate;
+          badgeTextColor = 'var(--color-success)';
+        }
+      }
 
       card.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 0.75rem;">
@@ -271,18 +304,19 @@ const casesModule = {
           <div style="${balanceStyle}">O/S: ₹${balance.outstanding.toLocaleString('en-IN')}</div>
         </div>
 
-        <div class="next-hearing-pill" style="background-color: rgba(217, 119, 6, 0.05); padding:0.5rem; border-radius: var(--radius-sm); border:1px solid rgba(217, 119, 6, 0.15); margin-bottom:1rem; text-align:center; font-size:0.8rem; cursor:pointer;" title="Click to log or update next hearing date" data-id="${c.id}">
-          <span style="color:var(--text-secondary);">Next Hearing:</span> 
-          <strong style="color:${nextDateColor};">${nextDateDisplay}</strong>
+        <div class="next-hearing-pill" style="background-color: ${badgeBg}; padding:0.5rem; border-radius: var(--radius-sm); border:1px solid ${badgeBorder}; margin-bottom:1rem; text-align:center; font-size:0.8rem; cursor:pointer;" title="Click to log or update next hearing date" data-id="${c.id}">
+          <span style="color:var(--text-secondary);">${badgeLabel}</span> 
+          <strong style="color:${badgeTextColor};">${badgeText}</strong>
           <i data-lucide="edit-2" style="width:12px; height:12px; margin-left:4px; vertical-align:middle; color:var(--text-secondary);"></i>
         </div>
 
-        <div style="display:flex; gap:0.4rem;">
-          <button class="btn btn-secondary btn-case-ledger" style="flex:1; padding:0.4rem 0.5rem; font-size:0.75rem;" data-id="${c.id}"><i data-lucide="book-open"></i> Ledger</button>
-          <button class="btn btn-primary btn-case-hearing" style="flex:1; padding:0.4rem 0.5rem; font-size:0.75rem;" data-id="${c.id}"><i data-lucide="calendar"></i> Hearing</button>
-          <button class="btn btn-secondary btn-edit-case" style="padding:0.4rem 0.5rem; font-size:0.75rem;" data-id="${c.id}" title="Edit Case File & Hearing Date"><i data-lucide="edit-3" style="width:14px; height:14px;"></i> Edit</button>
-          <button class="btn btn-secondary btn-case-toggle" style="padding:0.4rem 0.5rem;" data-id="${c.id}" title="Toggle Case Status (Active/Closed)">
-            <i data-lucide="${c.status === 'Active' ? 'check-circle-2' : 'rotate-ccw'}" style="width:14px; height:14px;"></i>
+        <div style="display:flex; gap:0.35rem;">
+          <button class="btn btn-secondary btn-case-ledger" style="flex:1; padding:0.4rem 0.4rem; font-size:0.75rem;" data-id="${c.id}"><i data-lucide="book-open"></i> Ledger</button>
+          <button class="btn btn-primary btn-case-hearing" style="flex:1; padding:0.4rem 0.4rem; font-size:0.75rem;" data-id="${c.id}"><i data-lucide="calendar"></i> Hearing</button>
+          ${isRelativeMode ? `<button class="btn btn-warning btn-lock-date" style="padding:0.4rem 0.4rem; font-size:0.75rem; background:rgba(234,179,8,0.15); border:1px solid rgba(234,179,8,0.4); color:#b45309;" data-id="${c.id}" title="Lock confirmed date from Cause List"><i data-lucide="check-circle-2" style="width:13px; height:13px;"></i> Lock</button>` : ''}
+          <button class="btn btn-secondary btn-edit-case" style="padding:0.4rem 0.4rem; font-size:0.75rem;" data-id="${c.id}" title="Edit Case File & Hearing Date"><i data-lucide="edit-3" style="width:13px; height:13px;"></i></button>
+          <button class="btn btn-secondary btn-case-toggle" style="padding:0.4rem 0.4rem;" data-id="${c.id}" title="Toggle Case Status (Active/Closed)">
+            <i data-lucide="${c.status === 'Active' ? 'check-circle-2' : 'rotate-ccw'}" style="width:13px; height:13px;"></i>
           </button>
         </div>
       `;
@@ -293,6 +327,11 @@ const casesModule = {
       card.querySelector('.btn-case-hearing').addEventListener('click', () => this.showAddHearingModal(c.id));
       card.querySelector('.next-hearing-pill').addEventListener('click', () => this.showAddHearingModal(c.id));
       card.querySelector('.btn-edit-case').addEventListener('click', () => this.showEditCaseModal(c.id));
+
+      const lockBtn = card.querySelector('.btn-lock-date');
+      if (lockBtn) {
+        lockBtn.addEventListener('click', () => this.showLockDateModal(c.id));
+      }
       
       card.querySelector('.btn-case-toggle').addEventListener('click', async () => {
         const newStatus = c.status === 'Active' ? 'Closed' : 'Active';
@@ -319,6 +358,9 @@ const casesModule = {
           return h.nextHearingDate;
         }
       }
+      if (sorted[0] && sorted[0].date) {
+        return sorted[0].date;
+      }
     }
     return null;
   },
@@ -330,26 +372,98 @@ const casesModule = {
     const form = document.getElementById('add-hearing-form');
     const modal = document.getElementById('add-hearing-modal');
     const cancelBtn = document.getElementById('add-hearing-cancel');
+    const btnFixed = document.getElementById('btn-mode-fixed');
+    const btnRelative = document.getElementById('btn-mode-relative');
+    const fixedWrap = document.getElementById('hearing-fixed-date-wrap');
+    const relativeWrap = document.getElementById('hearing-relative-date-wrap');
+    const modeInput = document.getElementById('add-hearing-listing-mode');
+    const modeLbl = document.getElementById('add-hearing-mode-lbl');
+    const previewTxt = document.getElementById('relative-preview-text');
+
+    let calculatedRelativeDate = null;
+
+    if (btnFixed && btnRelative) {
+      btnFixed.addEventListener('click', () => {
+        btnFixed.classList.add('active');
+        btnRelative.classList.remove('active');
+        if (fixedWrap) fixedWrap.style.display = 'block';
+        if (relativeWrap) relativeWrap.style.display = 'none';
+        if (modeInput) modeInput.value = 'fixed';
+        if (modeLbl) modeLbl.textContent = 'Fixed Calendar Date';
+      });
+
+      btnRelative.addEventListener('click', () => {
+        btnRelative.classList.add('active');
+        btnFixed.classList.remove('active');
+        if (fixedWrap) fixedWrap.style.display = 'none';
+        if (relativeWrap) relativeWrap.style.display = 'block';
+        if (modeInput) modeInput.value = 'relative';
+        if (modeLbl) modeLbl.textContent = 'High Court Relative (Not Before)';
+      });
+    }
+
+    // Relative Presets Click Handlers
+    modal.querySelectorAll('.rel-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        modal.querySelectorAll('.rel-preset-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const baseDateStr = document.getElementById('add-hearing-date').value || new Date().toISOString().split('T')[0];
+        const dt = new Date(baseDateStr);
+
+        const weeks = btn.getAttribute('data-weeks');
+        const months = btn.getAttribute('data-months');
+
+        if (weeks) {
+          dt.setDate(dt.getDate() + (parseInt(weeks) * 7));
+        } else if (months) {
+          dt.setMonth(dt.getMonth() + parseInt(months));
+        }
+
+        calculatedRelativeDate = dt.toISOString().split('T')[0];
+        if (previewTxt) {
+          const formatted = dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+          previewTxt.textContent = `Not Before: ${calculatedRelativeDate} (${formatted})`;
+        }
+      });
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const caseId = document.getElementById('add-hearing-case-id').value;
       const date = document.getElementById('add-hearing-date').value;
       const stage = document.getElementById('add-hearing-stage').value.trim();
-      const nextHearingDate = document.getElementById('add-hearing-next-date').value || null;
-      const nextStage = document.getElementById('add-hearing-next-stage').value.trim() || null;
+      const listingMode = modeInput ? modeInput.value : 'fixed';
+      let nextHearingDate = null;
+      let notBeforeDate = null;
+
+      if (listingMode === 'relative') {
+        notBeforeDate = calculatedRelativeDate || document.getElementById('add-hearing-next-date').value || null;
+        nextHearingDate = notBeforeDate;
+      } else {
+        nextHearingDate = document.getElementById('add-hearing-next-date').value || null;
+      }
+
       const notes = document.getElementById('add-hearing-notes').value.trim();
 
       // Register Hearing
-      await db.addHearing(caseId, { date, stage, nextHearingDate, nextStage, notes });
+      await db.addHearing(caseId, { 
+        date, 
+        stage, 
+        nextHearingDate, 
+        listingType: listingMode, 
+        notBeforeDate, 
+        notes 
+      });
 
-      alert("Hearing history logged.");
+      alert("Hearing proceedings & listing recorded successfully.");
       form.reset();
       modal.classList.remove('active');
-      
+      calculatedRelativeDate = null;
+
       // If we are looking at a dossier modal, refresh it
       const dossierOverlay = document.getElementById('case-dossier-overlay');
-      if (dossierOverlay.classList.contains('active')) {
+      if (dossierOverlay && dossierOverlay.classList.contains('active')) {
         this.showCaseDossier(caseId);
       }
 
@@ -359,6 +473,7 @@ const casesModule = {
     cancelBtn.addEventListener('click', () => {
       form.reset();
       modal.classList.remove('active');
+      calculatedRelativeDate = null;
     });
   },
 
@@ -367,14 +482,60 @@ const casesModule = {
     if (!cs) return;
 
     document.getElementById('add-hearing-case-id').value = caseId;
-    // Set default date to today
     document.getElementById('add-hearing-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('add-hearing-stage').value = cs.stage || '';
-    document.getElementById('add-hearing-next-stage').value = '';
     document.getElementById('add-hearing-next-date').value = '';
+    document.getElementById('add-hearing-notes').value = '';
     
+    const btnFixed = document.getElementById('btn-mode-fixed');
+    if (btnFixed) btnFixed.click();
+
     const modal = document.getElementById('add-hearing-modal');
     modal.classList.add('active');
+  },
+
+  setupLockDateForm() {
+    const form = document.getElementById('lock-date-form');
+    const modal = document.getElementById('lock-hearing-date-modal');
+    const closeBtn = document.getElementById('lock-date-close');
+    const cancelBtn = document.getElementById('lock-date-cancel');
+
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const caseId = document.getElementById('lock-date-case-id').value;
+      const confirmedDate = document.getElementById('lock-date-input').value;
+      if (!caseId || !confirmedDate) return;
+
+      await db.updateCase(caseId, {
+        nextHearingDate: confirmedDate,
+        listingType: 'fixed',
+        notBeforeDate: null
+      });
+
+      alert("Confirmed listing date locked.");
+      modal.classList.remove('active');
+      this.render();
+    });
+
+    const hide = () => modal.classList.remove('active');
+    if (closeBtn) closeBtn.addEventListener('click', hide);
+    if (cancelBtn) cancelBtn.addEventListener('click', hide);
+  },
+
+  showLockDateModal(caseId) {
+    const cs = db.getCase(caseId);
+    if (!cs) return;
+
+    document.getElementById('lock-date-case-id').value = caseId;
+    const titleEl = document.getElementById('lock-date-case-title');
+    if (titleEl) titleEl.textContent = cs.title;
+
+    document.getElementById('lock-date-input').value = cs.nextHearingDate || new Date().toISOString().split('T')[0];
+
+    const modal = document.getElementById('lock-hearing-date-modal');
+    if (modal) modal.classList.add('active');
   },
 
   setupEditHearingForm() {
