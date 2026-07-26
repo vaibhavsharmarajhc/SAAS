@@ -271,15 +271,17 @@ const casesModule = {
           <div style="${balanceStyle}">O/S: ₹${balance.outstanding.toLocaleString('en-IN')}</div>
         </div>
 
-        <div style="background-color: rgba(217, 119, 6, 0.05); padding:0.5rem; border-radius: var(--radius-sm); border:1px solid rgba(217, 119, 6, 0.15); margin-bottom:1rem; text-align:center; font-size:0.8rem;">
+        <div class="next-hearing-pill" style="background-color: rgba(217, 119, 6, 0.05); padding:0.5rem; border-radius: var(--radius-sm); border:1px solid rgba(217, 119, 6, 0.15); margin-bottom:1rem; text-align:center; font-size:0.8rem; cursor:pointer;" title="Click to log or update next hearing date" data-id="${c.id}">
           <span style="color:var(--text-secondary);">Next Hearing:</span> 
           <strong style="color:${nextDateColor};">${nextDateDisplay}</strong>
+          <i data-lucide="edit-2" style="width:12px; height:12px; margin-left:4px; vertical-align:middle; color:var(--text-secondary);"></i>
         </div>
 
-        <div style="display:flex; gap:0.5rem;">
+        <div style="display:flex; gap:0.4rem;">
           <button class="btn btn-secondary btn-case-ledger" style="flex:1; padding:0.4rem 0.5rem; font-size:0.75rem;" data-id="${c.id}"><i data-lucide="book-open"></i> Ledger</button>
           <button class="btn btn-primary btn-case-hearing" style="flex:1; padding:0.4rem 0.5rem; font-size:0.75rem;" data-id="${c.id}"><i data-lucide="calendar"></i> Hearing</button>
-          <button class="btn btn-secondary btn-case-toggle" style="padding:0.4rem 0.6rem;" data-id="${c.id}" title="Toggle Case Status (Active/Closed)">
+          <button class="btn btn-secondary btn-edit-case" style="padding:0.4rem 0.5rem; font-size:0.75rem;" data-id="${c.id}" title="Edit Case File & Hearing Date"><i data-lucide="edit-3" style="width:14px; height:14px;"></i> Edit</button>
+          <button class="btn btn-secondary btn-case-toggle" style="padding:0.4rem 0.5rem;" data-id="${c.id}" title="Toggle Case Status (Active/Closed)">
             <i data-lucide="${c.status === 'Active' ? 'check-circle-2' : 'rotate-ccw'}" style="width:14px; height:14px;"></i>
           </button>
         </div>
@@ -289,6 +291,8 @@ const casesModule = {
       card.querySelector('.case-title-link').addEventListener('click', () => this.showCaseDossier(c.id));
       card.querySelector('.btn-case-ledger').addEventListener('click', () => this.showCaseDossier(c.id));
       card.querySelector('.btn-case-hearing').addEventListener('click', () => this.showAddHearingModal(c.id));
+      card.querySelector('.next-hearing-pill').addEventListener('click', () => this.showAddHearingModal(c.id));
+      card.querySelector('.btn-edit-case').addEventListener('click', () => this.showEditCaseModal(c.id));
       
       card.querySelector('.btn-case-toggle').addEventListener('click', async () => {
         const newStatus = c.status === 'Active' ? 'Closed' : 'Active';
@@ -454,57 +458,67 @@ const casesModule = {
 
     editBtn.addEventListener('click', () => {
       if (!this.currentCaseId) return;
-      const cs = db.getCase(this.currentCaseId);
+      hide();
+      this.showEditCaseModal(this.currentCaseId);
+    });
+
+      deleteBtn.addEventListener('click', async () => {
+        if (!this.currentCaseId) return;
+        const cs = db.getCase(this.currentCaseId);
+        if (!cs) return;
+
+        if (confirm(`Are you sure you want to delete the case "${cs.title}"? This will permanently delete the case, all associated hearings, and linked transactions.`)) {
+          await db.deleteCase(this.currentCaseId);
+          hideEditModal();
+          this.renderCaseGrid();
+          alert("Case deleted successfully.");
+        }
+      });
+
+      editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('edit-case-id').value;
+        const title = document.getElementById('edit-case-title').value.trim();
+        const caseNumber = document.getElementById('edit-case-number').value.trim();
+        const caseType = document.getElementById('edit-case-type').value;
+        const court = document.getElementById('edit-case-court').value.trim();
+        const stage = document.getElementById('edit-case-stage').value.trim();
+        const nextHearingDate = document.getElementById('edit-case-next-date').value || null;
+        const status = document.getElementById('edit-case-status').value;
+        const referredBy = document.getElementById('edit-case-referred-by').value.trim() || 'Self';
+        const description = document.getElementById('edit-case-desc').value.trim();
+
+        await db.updateCase(id, { title, caseNumber, caseType, court, stage, nextHearingDate, status, description, referredBy });
+
+        hideEditModal();
+        this.renderCaseGrid();
+        this.populateReferralDatalist();
+        this.showCaseDossier(id);
+      });
+    },
+
+    showEditCaseModal(id) {
+      const cs = db.getCase(id);
       if (!cs) return;
 
+      this.currentCaseId = id;
       document.getElementById('edit-case-id').value = cs.id;
       document.getElementById('edit-case-title').value = cs.title || '';
       document.getElementById('edit-case-number').value = cs.caseNumber || '';
       document.getElementById('edit-case-type').value = cs.caseType || 'Civil';
       document.getElementById('edit-case-court').value = cs.court || '';
       document.getElementById('edit-case-stage').value = cs.stage || '';
+      document.getElementById('edit-case-next-date').value = cs.nextHearingDate || '';
       document.getElementById('edit-case-status').value = cs.status || 'Active';
       document.getElementById('edit-case-referred-by').value = cs.referredBy || 'Self';
       document.getElementById('edit-case-desc').value = cs.description || '';
 
-      hide();
-      editModal.classList.add('active');
-      lucide.createIcons();
-    });
-
-    deleteBtn.addEventListener('click', async () => {
-      if (!this.currentCaseId) return;
-      const cs = db.getCase(this.currentCaseId);
-      if (!cs) return;
-
-      if (confirm(`Are you sure you want to delete the case "${cs.title}"? This will permanently delete the case, all associated hearings, and linked transactions.`)) {
-        await db.deleteCase(this.currentCaseId);
-        hideEditModal();
-        this.renderCaseGrid();
-        alert("Case deleted successfully.");
+      const editModal = document.getElementById('edit-case-modal');
+      if (editModal) {
+        editModal.classList.add('active');
+        lucide.createIcons();
       }
-    });
-
-    editForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id = document.getElementById('edit-case-id').value;
-      const title = document.getElementById('edit-case-title').value.trim();
-      const caseNumber = document.getElementById('edit-case-number').value.trim();
-      const caseType = document.getElementById('edit-case-type').value;
-      const court = document.getElementById('edit-case-court').value.trim();
-      const stage = document.getElementById('edit-case-stage').value.trim();
-      const status = document.getElementById('edit-case-status').value;
-      const referredBy = document.getElementById('edit-case-referred-by').value.trim() || 'Self';
-      const description = document.getElementById('edit-case-desc').value.trim();
-
-      await db.updateCase(id, { title, caseNumber, caseType, court, stage, status, description, referredBy });
-
-      hideEditModal();
-      this.renderCaseGrid();
-      this.populateReferralDatalist();
-      this.showCaseDossier(id);
-    });
-  },
+    },
 
   showCaseDossier(id) {
     this.currentCaseId = id;

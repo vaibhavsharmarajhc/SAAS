@@ -17,7 +17,7 @@
   <title>Track My Chambers - Practice Workspace</title>
   <meta name="description" content="Advocate Chambers Practice Management Workspace.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.80">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.81">
   <!-- Local Vendor Bundles (Zero External CDNs) -->
   <script src="/js/vendor/lucide.min.js" defer></script>
   <script src="/js/vendor/chart.min.js" defer></script>
@@ -43,13 +43,13 @@
         navigator.serviceWorker.getRegistrations().then(registrations => {
           return Promise.all(registrations.map(r => r.unregister()));
         }).then(() => {
-          return navigator.serviceWorker.register('/sw.js?v=80');
+          return navigator.serviceWorker.register('/sw.js?v=81');
         }).then(reg => {
           reg.update();
           if (window.caches) {
             caches.keys().then(keys => {
               keys.forEach(key => {
-                if (key !== 'trackmychambers-cache-v80') {
+                if (key !== 'trackmychambers-cache-v81') {
                   caches.delete(key);
                 }
               });
@@ -2007,12 +2007,16 @@
               <input type="text" class="form-control" id="edit-case-stage">
             </div>
             <div class="form-group">
-              <label class="form-label">Case Status *</label>
-              <select class="form-control" id="edit-case-status" required>
-                <option value="Active">Active</option>
-                <option value="Closed">Closed</option>
-              </select>
+              <label class="form-label">Next Hearing Date</label>
+              <input type="date" class="form-control" id="edit-case-next-date">
             </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Case Status *</label>
+            <select class="form-control" id="edit-case-status" required>
+              <option value="Active">Active</option>
+              <option value="Closed">Closed</option>
+            </select>
           </div>
           <div class="form-group">
             <label class="form-label">Referred By</label>
@@ -2423,6 +2427,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.80"></script>
+  <script type="module" src="js/app.js?v=1.0.81"></script>
 </body>
 </html>
