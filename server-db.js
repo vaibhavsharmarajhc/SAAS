@@ -519,15 +519,18 @@ async function addHearing(tenantId, caseId, hearingData) {
     if (!cs) return null;
     const hearings = cs.hearings || [];
     hearings.push(newHearing);
+
+    const setFields = { hearings };
+    if (hearingData.nextStage || hearingData.stage) {
+      setFields.stage = hearingData.nextStage || hearingData.stage;
+    }
+    if (hearingData.nextHearingDate) {
+      setFields.nextHearingDate = hearingData.nextHearingDate;
+    }
+
     await db.collection('cases').updateOne(
       { tenantId, _id: caseId },
-      { 
-        $set: { 
-          hearings,
-          stage: hearingData.nextStage || hearingData.stage,
-          nextHearingDate: hearingData.nextHearingDate || null
-        } 
-      }
+      { $set: setFields }
     );
     const updated = await db.collection('cases').findOne({ tenantId, _id: caseId });
     return mapId(updated);
@@ -538,8 +541,12 @@ async function addHearing(tenantId, caseId, hearingData) {
   if (idx !== -1) {
     localDb.cases[idx].hearings = localDb.cases[idx].hearings || [];
     localDb.cases[idx].hearings.push(newHearing);
-    localDb.cases[idx].stage = hearingData.nextStage || hearingData.stage;
-    localDb.cases[idx].nextHearingDate = hearingData.nextHearingDate || null;
+    if (hearingData.nextStage || hearingData.stage) {
+      localDb.cases[idx].stage = hearingData.nextStage || hearingData.stage;
+    }
+    if (hearingData.nextHearingDate) {
+      localDb.cases[idx].nextHearingDate = hearingData.nextHearingDate;
+    }
     writeDb(localDb);
     return localDb.cases[idx];
   }

@@ -252,13 +252,36 @@ class LegalDB {
   }
 
   async addHearing(caseId, hearing) {
-    const updatedCase = await api.cases.addHearing(caseId, hearing);
+    let updatedCase;
+    try {
+      updatedCase = await api.cases.addHearing(caseId, hearing);
+    } catch (e) {
+      console.warn("api.cases.addHearing error, updating local cache:", e);
+    }
+
     const idx = this.cache.cases.findIndex(c => c.id === caseId);
-    if (idx !== -1 && updatedCase) {
-      this.cache.cases[idx] = updatedCase;
+    if (idx !== -1) {
+      if (updatedCase) {
+        this.cache.cases[idx] = { ...this.cache.cases[idx], ...updatedCase };
+      } else {
+        if (!this.cache.cases[idx].hearings) this.cache.cases[idx].hearings = [];
+        this.cache.cases[idx].hearings.push({
+          id: "h_" + Date.now(),
+          date: hearing.date || new Date().toISOString().split('T')[0],
+          stage: hearing.stage || "Hearing",
+          nextStage: hearing.nextStage || null,
+          notes: hearing.notes || ""
+        });
+        if (hearing.nextHearingDate) {
+          this.cache.cases[idx].nextHearingDate = hearing.nextHearingDate;
+        }
+        if (hearing.nextStage || hearing.stage) {
+          this.cache.cases[idx].stage = hearing.nextStage || hearing.stage;
+        }
+      }
       document.dispatchEvent(new CustomEvent('casesUpdated'));
     }
-    return updatedCase;
+    return this.cache.cases[idx] || updatedCase;
   }
 
   async updateHearing(caseId, hearingId, hearingData) {

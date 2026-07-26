@@ -26,6 +26,14 @@ const casesModule = {
         this.showCaseDossier(this.currentCaseId);
       }
     });
+
+    document.addEventListener('casesUpdated', () => {
+      this.renderCaseGrid();
+      const overlay = document.getElementById('case-dossier-overlay');
+      if (overlay && overlay.classList.contains('active') && this.currentCaseId) {
+        this.showCaseDossier(this.currentCaseId);
+      }
+    });
   },
 
   render() {
@@ -241,6 +249,9 @@ const casesModule = {
       const catColor = catObj ? catObj.color : '#3b82f6';
       const badgeStyle = c.status === 'Active' ? 'badge-active' : 'badge-closed';
       const balanceStyle = balance.outstanding > 0 ? 'color: var(--color-danger); font-weight:700;' : 'color: var(--color-success); font-weight:700;';
+      const nextDate = this.getNextHearingDate(c);
+      const nextDateDisplay = nextDate ? nextDate : 'Not Scheduled';
+      const nextDateColor = nextDate ? 'var(--color-primary)' : 'var(--color-warning)';
 
       card.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 0.75rem;">
@@ -262,7 +273,7 @@ const casesModule = {
 
         <div style="background-color: rgba(217, 119, 6, 0.05); padding:0.5rem; border-radius: var(--radius-sm); border:1px solid rgba(217, 119, 6, 0.15); margin-bottom:1rem; text-align:center; font-size:0.8rem;">
           <span style="color:var(--text-secondary);">Next Hearing:</span> 
-          <strong style="color:var(--color-primary);">${c.nextHearingDate ? c.nextHearingDate : 'Not Scheduled'}</strong>
+          <strong style="color:${nextDateColor};">${nextDateDisplay}</strong>
         </div>
 
         <div style="display:flex; gap:0.5rem;">
@@ -291,6 +302,21 @@ const casesModule = {
     });
 
     lucide.createIcons();
+  },
+
+  getNextHearingDate(c) {
+    if (c.nextHearingDate && c.nextHearingDate !== 'Not Scheduled' && String(c.nextHearingDate).trim() !== '') {
+      return c.nextHearingDate;
+    }
+    if (c.hearings && c.hearings.length > 0) {
+      const sorted = [...c.hearings].sort((a, b) => new Date(b.date) - new Date(a.date));
+      for (let h of sorted) {
+        if (h.nextHearingDate && String(h.nextHearingDate).trim() !== '') {
+          return h.nextHearingDate;
+        }
+      }
+    }
+    return null;
   },
 
   /**
