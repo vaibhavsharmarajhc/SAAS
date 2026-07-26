@@ -1779,6 +1779,19 @@ function deletePendingRegistration(email) {
   pendingRegistrations.delete(email.toLowerCase());
 }
 
+const blacklistedTokens = new Set();
+
+function blacklistToken(token) {
+  if (!token) return;
+  blacklistedTokens.add(token);
+  setTimeout(() => blacklistedTokens.delete(token), 30 * 24 * 60 * 60 * 1000);
+}
+
+function isTokenBlacklisted(token) {
+  if (!token) return false;
+  return blacklistedTokens.has(token);
+}
+
 module.exports = {
   getDb,
   initDatabase,
@@ -1789,28 +1802,13 @@ module.exports = {
   setTenantResetCode,
   resetTenantPassword,
   createTenant,
+  addTenant: createTenant,
   updateTenantSettings,
-  getClients,
-  getClient,
-  getCases,
-  getCase,
-  addCase,
-  updateCase,
-  deleteCase,
-  getDb,
-  initDatabase,
-  getTenantByEmail,
-  getTenantById,
-  registerTenant,
-  updateTenantPassword,
-  updateTenantProfile,
-  resetTenantData,
   getClients,
   getClient,
   addClient,
   updateClient,
   deleteClient,
-  writeOffClientBadDebt,
   getCases,
   getCase,
   addCase,
@@ -1821,6 +1819,7 @@ module.exports = {
   getTransactions,
   addTransaction,
   deleteTransaction,
+  seedTenantData,
   importTenantBackup,
   getColleagues,
   addColleague,
@@ -1832,6 +1831,9 @@ module.exports = {
   addTaskComment,
   getNotifications,
   addNotification,
+  markNotificationRead,
+  markAllNotificationsRead,
+  clearNotifications,
   getPlatformAdminMetrics,
   getPublicClientPortalData,
   regenerateClientToken,
