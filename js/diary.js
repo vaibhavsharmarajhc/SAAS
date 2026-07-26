@@ -20,11 +20,11 @@ const diaryModule = {
     this.setupNavigation();
     this.setupModal();
 
-    // Listen for case updates to refresh the unscheduled list in real-time
+    // Listen for case updates to refresh the diary & calendar view in real-time
     document.addEventListener('casesUpdated', () => {
       const diaryPage = document.getElementById('diary-page');
       if (diaryPage && diaryPage.classList.contains('active')) {
-        this.renderUnscheduledCases();
+        this.render();
       }
     });
 

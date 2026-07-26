@@ -482,7 +482,13 @@ const casesModule = {
     if (!cs) return;
 
     document.getElementById('add-hearing-case-id').value = caseId;
-    document.getElementById('add-hearing-date').value = new Date().toISOString().split('T')[0];
+    
+    // Use the case's scheduled listing date if available (e.g. 2026-07-25), else fallback to today
+    const listedDate = (cs.nextHearingDate && cs.nextHearingDate !== 'Not Scheduled') 
+      ? cs.nextHearingDate 
+      : new Date().toISOString().split('T')[0];
+
+    document.getElementById('add-hearing-date').value = listedDate;
     document.getElementById('add-hearing-stage').value = cs.stage || '';
     document.getElementById('add-hearing-next-date').value = '';
     document.getElementById('add-hearing-notes').value = '';
