@@ -111,6 +111,8 @@ const clientsModule = {
     const caseCourt = document.getElementById('case-court').value.trim();
     const caseType = document.getElementById('case-type').value;
     const caseStage = document.getElementById('case-stage').value.trim();
+    const caseNextDateEl = document.getElementById('case-next-date');
+    const caseNextDate = caseNextDateEl ? caseNextDateEl.value || null : null;
     const caseReferredBy = document.getElementById('case-referred-by').value.trim() || 'Self';
     const caseDesc = document.getElementById('case-description').value.trim();
     
@@ -131,6 +133,7 @@ const clientsModule = {
         caseType,
         referredBy: caseReferredBy,
         stage: caseStage || 'Filing',
+        nextHearingDate: caseNextDate,
         description: caseDesc
       });
     }
