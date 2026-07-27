@@ -102,10 +102,23 @@ const casesModule = {
     const dropdown = document.getElementById('add-case-client-id');
     if (!dropdown) return;
 
-    dropdown.innerHTML = '<option value="" disabled selected>-- Select Onboarded Client --</option>';
-    clients.forEach(c => {
-      dropdown.innerHTML += `<option value="${c.id}">${c.name} (${c.type})</option>`;
-    });
+    dropdown.innerHTML = '<option value="" disabled selected>-- Select Onboarded Client --</option>' +
+      clients.map(c => `<option value="${c.id}">${c.name} (${c.type})</option>`).join('') +
+      '<option value="__ONBOARD_NEW__" style="font-weight:600; color:var(--color-primary);">+ Onboard New Client...</option>';
+
+    if (!dropdown.hasAttribute('data-onboard-listener')) {
+      dropdown.setAttribute('data-onboard-listener', 'true');
+      dropdown.addEventListener('change', (e) => {
+        if (e.target.value === '__ONBOARD_NEW__') {
+          const modal = document.getElementById('add-case-modal');
+          if (modal) modal.classList.remove('active');
+          dropdown.selectedIndex = 0;
+          if (typeof window.switchView === 'function') {
+            window.switchView('onboarding-page');
+          }
+        }
+      });
+    }
   },
 
   /**

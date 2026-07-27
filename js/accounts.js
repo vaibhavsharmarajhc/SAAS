@@ -160,10 +160,25 @@ const accountsModule = {
 
     // 2. Add entry form client select
     const formSelect = document.getElementById('log-tx-client-id');
-    formSelect.innerHTML = '<option value="" disabled selected>-- Choose Client --</option>';
-    clients.forEach(c => {
-      formSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
-    });
+    if (formSelect) {
+      formSelect.innerHTML = '<option value="" disabled selected>-- Choose Client --</option>' +
+        clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('') +
+        '<option value="__ONBOARD_NEW__" style="font-weight:600; color:var(--color-primary);">+ Onboard New Client...</option>';
+
+      if (!formSelect.hasAttribute('data-onboard-listener')) {
+        formSelect.setAttribute('data-onboard-listener', 'true');
+        formSelect.addEventListener('change', (e) => {
+          if (e.target.value === '__ONBOARD_NEW__') {
+            const modal = document.getElementById('log-tx-modal');
+            if (modal) modal.classList.remove('active');
+            formSelect.selectedIndex = 0;
+            if (typeof window.switchView === 'function') {
+              window.switchView('onboarding-page');
+            }
+          }
+        });
+      }
+    }
   },
 
   /**
