@@ -1156,6 +1156,121 @@ app.get('/sw.js', (req, res) => {
   res.sendFile(path.join(__dirname, 'sw.js'));
 });
 
+// Standalone Pre-Rendered Pure HTML Client Portal Route (Zero JS dependency)
+app.get(['/portal', '/portal/:token'], async (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Clear-Site-Data', '"cache"');
+
+  let token = req.query.token || req.query.client || req.params.token || '';
+  if (!token) {
+    const parts = req.path.split('/').filter(Boolean);
+    if (parts.length >= 2 && parts[0].toLowerCase() === 'portal') {
+      token = parts[1];
+    }
+  }
+
+  let portalData = null;
+  if (token) {
+    try {
+      portalData = await db.getPublicClientPortalData(token);
+    } catch (err) {
+      console.error("Portal DB fetch error:", err);
+    }
+  }
+
+  const client = portalData?.client || { name: 'Chamber Client', type: 'Individual' };
+  const chambers = portalData?.chambers || { lawyerName: 'Adv. Vaibhav Sharma', firmName: 'VSH Legal Chambers' };
+  const casesList = portalData?.cases || [];
+
+  const casesHtml = casesList.length === 0 ? `
+    <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 2.5rem; text-align: center; color: #94a3b8;">
+      <p style="margin: 0; font-size: 1rem;">No active legal matters are currently listed under this access portal.</p>
+    </div>
+  ` : casesList.map(cs => {
+    const hearingsList = cs.hearings || [];
+    const hearingsHtml = hearingsList.length > 0 ? `
+      <div style="margin-top: 1.25rem; border-top: 1px solid #334155; padding-top: 1rem;">
+        <h4 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin: 0 0 0.75rem 0;">Hearing Progress Timeline</h4>
+        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+          ${hearingsList.map(h => `
+            <div style="background: #0f172a; border-radius: 8px; padding: 0.75rem 1rem; border: 1px solid #334155;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                <strong style="color: #fbbf24; font-size: 0.9rem;">${h.date || 'Date N/A'}</strong>
+                <span style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 10px;">${h.stage || 'Hearing'}</span>
+              </div>
+              <p style="margin: 0; color: #f1f5f9; font-size: 0.85rem; line-height: 1.4;">${h.notes || 'Court hearing proceedings logged.'}</p>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    return `
+      <div style="background: #1e293b; border: 1px solid #334155; border-left: 5px solid #d97706; border-radius: 12px; margin-bottom: 1.5rem; padding: 1.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <span style="background: rgba(217, 119, 6, 0.2); color: #fbbf24; font-weight: 700; font-size: 0.75rem; padding: 3px 10px; border-radius: 12px; display: inline-block; margin-bottom: 0.4rem;">${cs.caseType || 'Legal Matter'}</span>
+            <h3 style="margin: 0; font-size: 1.35rem; color: #ffffff; font-family: Georgia, serif;">${cs.title}</h3>
+            <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.3rem;">
+              <span>Ref / CNR: <strong style="color: #f1f5f9;">${cs.caseNumber}</strong></span> &bull; 
+              <span>Forum: <strong style="color: #f1f5f9;">${cs.court}</strong></span>
+            </div>
+          </div>
+          <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-weight: 700; font-size: 0.8rem; padding: 4px 12px; border-radius: 12px;">${cs.status || 'Active'}</span>
+        </div>
+
+        <div style="background: #0f172a; border: 1px solid rgba(217, 119, 6, 0.3); border-radius: 10px; padding: 1rem; text-align: center; margin-bottom: 1rem;">
+          <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; display: block; margin-bottom: 0.25rem;">Next Hearing Schedule</span>
+          <strong style="color: #fbbf24; font-size: 1.25rem; display: block;">${cs.nextHearingDate || 'TBD / Pending Fixation'}</strong>
+          <span style="font-size: 0.85rem; color: #f1f5f9; margin-top: 0.25rem; display: inline-block;">Listed Stage: <strong>${cs.stage || 'In Progress'}</strong></span>
+        </div>
+
+        ${hearingsHtml}
+      </div>
+    `;
+  }).join('');
+
+  const fullHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${client.name} - Case Progress Portal</title>
+  <style>
+    body { background-color: #0f172a; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; min-height: 100vh; }
+    .portal-container { max-width: 850px; margin: 0 auto; padding: 2rem 1rem; }
+    @media print { .no-print { display: none !important; } body { background: #fff; color: #000; } }
+  </style>
+</head>
+<body>
+  <div class="portal-container">
+    <!-- Header Banner -->
+    <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; margin-bottom: 1.5rem; padding: 1.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #fbbf24; font-weight: 700;">PUBLIC CLIENT ACCESS PORTAL</span>
+          <h1 style="margin: 0.2rem 0; font-size: 1.6rem; color: #ffffff; font-family: Georgia, serif;">${client.name}</h1>
+          <p style="margin: 0; font-size: 0.85rem; color: #94a3b8;">${chambers.firmName} &bull; ${chambers.lawyerName}</p>
+        </div>
+        <div class="no-print" style="display: flex; gap: 0.5rem;">
+          <button onclick="window.print()" style="background: #334155; color: #f8fafc; border: 1px solid #475569; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem;">🖨️ Print / Save PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legal Matters -->
+    ${casesHtml}
+
+    <div style="text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #1e293b; font-size: 0.8rem; color: #64748b;">
+      Confidential Legal Progress Record &bull; ${chambers.firmName} &bull; ${chambers.lawyerName}
+    </div>
+  </div>
+</body>
+</html>`;
+
+  res.send(fullHtml);
+});
+
 // Serve app.html for all application workspace routes and SPA sub-routes
 app.use((req, res, next) => {
   if (req.method !== 'GET') return next();
@@ -1173,7 +1288,6 @@ app.use((req, res, next) => {
     p.startsWith('/superadmin') ||
     p.startsWith('/support') ||
     p.startsWith('/help') ||
-    p.startsWith('/portal') ||
     p.startsWith('/app') ||
     p.endsWith('-page')
   ) {

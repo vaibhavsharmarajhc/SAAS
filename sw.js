@@ -1,9 +1,9 @@
-const CACHE_NAME = 'trackmychambers-cache-v93';
+const CACHE_NAME = 'trackmychambers-cache-v94';
 const ASSETS = [
   '/dashboard',
   '/app.html',
-  '/css/styles.css?v=1.0.93',
-  '/js/app.js?v=1.0.93',
+  '/css/styles.css?v=1.0.94',
+  '/js/app.js?v=1.0.94',
   '/js/vendor/lucide.min.js',
   '/js/vendor/chart.min.js',
   '/js/workers/ledger.worker.js',
@@ -46,7 +46,7 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  if (e.request.method !== 'GET' || e.request.url.includes('/api/')) {
+  if (e.request.method !== 'GET' || e.request.url.includes('/api/') || e.request.url.includes('/portal')) {
     return;
   }
   e.respondWith(
