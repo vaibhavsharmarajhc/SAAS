@@ -148,6 +148,17 @@ const portalModule = {
     const chambers = dataObj.chambers || { lawyerName: 'Adv. Vaibhav Sharma', firmName: 'VSH Legal Chambers' };
     const casesList = dataObj.cases || [];
 
+    const formatSafeDate = (dStr) => {
+      if (!dStr) return 'TBD / Pending Fixation';
+      try {
+        const d = new Date(dStr);
+        if (isNaN(d.getTime())) return String(dStr);
+        return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      } catch (e) {
+        return String(dStr);
+      }
+    };
+
     let casesHtml = '';
     if (casesList.length === 0) {
       casesHtml = `
@@ -158,9 +169,7 @@ const portalModule = {
       `;
     } else {
       casesHtml = casesList.map(cs => {
-        const nextDateStr = cs.nextHearingDate 
-          ? new Date(cs.nextHearingDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
-          : 'TBD / Pending Fixation';
+        const nextDateStr = formatSafeDate(cs.nextHearingDate);
 
         let hearingsHtml = '';
         if (cs.hearings && cs.hearings.length > 0) {

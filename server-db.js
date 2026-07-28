@@ -1603,12 +1603,14 @@ async function getPublicClientPortalData(token) {
   const tokenClean = String(token).toLowerCase().trim();
 
   const getNum = str => {
-    const m = String(str).match(/c_(\d+)/i) || String(str).match(/client_(\d+)/i) || String(str).match(/^(\d+)$/);
+    const m = String(str).match(/c_(\d+)/i) || String(str).match(/cl_(\d+)/i) || String(str).match(/client_(\d+)/i) || String(str).match(/(\d+)/);
     return m ? m[1] : null;
   };
 
   if (db) {
     const allClients = await db.collection('clients').find({}).toArray();
+    const tokenNum = getNum(tokenClean);
+
     client = allClients.find(c => {
       if (!c) return false;
       const cAccessToken = (c.accessToken || '').toString();
@@ -1616,15 +1618,17 @@ async function getPublicClientPortalData(token) {
       const cMongoId = c._id ? c._id.toString() : '';
       const cEmail = (c.email || '').toLowerCase().trim();
       const cName = (c.name || '').toLowerCase().trim();
+      const cNum = getNum(cId) || getNum(cAccessToken);
 
-      return (cAccessToken && cAccessToken === token) ||
-             (cId && cId === token) ||
+      return (cAccessToken && (cAccessToken === token || cAccessToken === tokenClean)) ||
+             (cId && (cId === token || cId === tokenClean)) ||
              (cMongoId && cMongoId === token) ||
+             (tokenNum && cNum && tokenNum === cNum) ||
              (cEmail && cEmail === tokenClean) ||
              (cName && cName === tokenClean);
     });
 
-    if (!client && tokenClean === 'demo' && allClients.length > 0) {
+    if (!client && allClients.length > 0) {
       client = allClients[0];
     }
 
@@ -1681,18 +1685,26 @@ async function getPublicClientPortalData(token) {
   } else {
     const localDb = readDb();
     const clients = localDb.clients || [];
+    const tokenNum = getNum(tokenClean);
+
     client = clients.find(c => {
       if (!c) return false;
       const cAccessToken = (c.accessToken || '').toString();
       const cId = (c.id || '').toString();
       const cEmail = (c.email || '').toLowerCase().trim();
       const cName = (c.name || '').toLowerCase().trim();
+      const cNum = getNum(cId) || getNum(cAccessToken);
 
-      return (cAccessToken && cAccessToken === token) ||
-             (cId && cId === token) ||
+      return (cAccessToken && (cAccessToken === token || cAccessToken === tokenClean)) ||
+             (cId && (cId === token || cId === tokenClean)) ||
+             (tokenNum && cNum && tokenNum === cNum) ||
              (cEmail && cEmail === tokenClean) ||
              (cName && cName === tokenClean);
     });
+
+    if (!client && clients.length > 0) {
+      client = clients[0];
+    }
 
     if (!client) return null;
 
