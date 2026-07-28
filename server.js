@@ -1173,6 +1173,7 @@ app.use((req, res, next) => {
     p.startsWith('/superadmin') ||
     p.startsWith('/support') ||
     p.startsWith('/help') ||
+    p.startsWith('/portal') ||
     p.startsWith('/app') ||
     p.endsWith('-page')
   ) {

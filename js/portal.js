@@ -17,9 +17,16 @@ const portalModule = {
     const container = document.getElementById('portal-page-content');
     if (!container) return;
 
-    // Extract token from URL search parameter if not passed
+    // Extract token from URL search parameter or path parameter
     const urlParams = new URLSearchParams(window.location.search);
-    const token = tokenFromUrl || urlParams.get('token') || urlParams.get('client') || '';
+    let token = tokenFromUrl || urlParams.get('token') || urlParams.get('client') || '';
+
+    if (!token) {
+      const parts = window.location.pathname.split('/').filter(Boolean);
+      if (parts.length >= 2 && parts[0].toLowerCase() === 'portal') {
+        token = parts[1];
+      }
+    }
 
     if (!token) {
       this.renderError(container, "Missing Client Access Token", "Please use the direct link provided by your advocate's chamber.");
