@@ -540,11 +540,20 @@ async function router() {
       const header = document.querySelector('.app-header');
       if (header) header.style.display = 'none';
 
+      const mainCanvas = document.querySelector('.app-main');
+      if (mainCanvas) {
+        mainCanvas.style.width = '100%';
+        mainCanvas.style.height = '100vh';
+        mainCanvas.style.overflowY = 'auto';
+      }
+
       getPageContainers().forEach(container => {
         if (container.id === 'portal-page') {
           container.classList.add('active');
+          container.style.display = 'block';
         } else {
           container.classList.remove('active');
+          container.style.display = 'none';
         }
       });
       portalModule.render();
