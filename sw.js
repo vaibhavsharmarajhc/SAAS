@@ -1,9 +1,9 @@
-const CACHE_NAME = 'trackmychambers-cache-v87';
+const CACHE_NAME = 'trackmychambers-cache-v88';
 const ASSETS = [
   '/dashboard',
   '/app.html',
-  '/css/styles.css?v=1.0.87',
-  '/js/app.js?v=1.0.87',
+  '/css/styles.css?v=1.0.88',
+  '/js/app.js?v=1.0.88',
   '/js/vendor/lucide.min.js',
   '/js/vendor/chart.min.js',
   '/js/workers/ledger.worker.js',

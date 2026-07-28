@@ -113,13 +113,27 @@ const dashboardModule = {
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>
-          <div style="font-weight: 600;">${c.title}</div>
-          <div style="font-size: 0.75rem; color: var(--text-secondary);">${c.caseNumber}</div>
+          <div style="font-weight: 600;">${window.sanitizeText(c.title)}</div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary);">${window.sanitizeText(c.caseNumber)}</div>
         </td>
-        <td>${c.court}</td>
-        <td><span class="badge badge-hearing">${c.stage}</span></td>
+        <td>${window.sanitizeText(c.court)}</td>
+        <td>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem;">
+            <span class="badge badge-hearing">${window.sanitizeText(c.stage)}</span>
+            <button class="btn btn-primary btn-sm btn-update-today" data-id="${c.id}" style="padding:0.25rem 0.5rem; font-size:0.75rem; display:inline-flex; align-items:center; gap:3px;" title="Record hearing outcome or mark as Disposed/Closed">
+              <i data-lucide="edit-3" style="width:12px; height:12px;"></i> Outcome
+            </button>
+          </div>
+        </td>
       `;
-      // Clicking the row redirects to Case Registry view
+      
+      row.querySelector('.btn-update-today').addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (typeof casesModule !== 'undefined' && casesModule.showAddHearingModal) {
+          casesModule.showAddHearingModal(c.id);
+        }
+      });
+
       row.style.cursor = 'pointer';
       row.addEventListener('click', () => {
         window.viewCaseDetails(c.id);

@@ -387,13 +387,38 @@ const casesModule = {
     const cancelBtn = document.getElementById('add-hearing-cancel');
     const btnFixed = document.getElementById('btn-mode-fixed');
     const btnRelative = document.getElementById('btn-mode-relative');
+    const btnContinued = document.getElementById('btn-outcome-continued');
+    const btnDisposed = document.getElementById('btn-outcome-disposed');
+    
     const fixedWrap = document.getElementById('hearing-fixed-date-wrap');
     const relativeWrap = document.getElementById('hearing-relative-date-wrap');
+    const listingContainer = document.getElementById('next-listing-container');
+    const disposalWrap = document.getElementById('hearing-disposal-wrap');
+    
     const modeInput = document.getElementById('add-hearing-listing-mode');
+    const outcomeInput = document.getElementById('add-hearing-outcome-status');
     const modeLbl = document.getElementById('add-hearing-mode-lbl');
     const previewTxt = document.getElementById('relative-preview-text');
 
     let calculatedRelativeDate = null;
+
+    if (btnContinued && btnDisposed) {
+      btnContinued.addEventListener('click', () => {
+        btnContinued.classList.add('active');
+        btnDisposed.classList.remove('active');
+        if (outcomeInput) outcomeInput.value = 'continued';
+        if (listingContainer) listingContainer.style.display = 'block';
+        if (disposalWrap) disposalWrap.style.display = 'none';
+      });
+
+      btnDisposed.addEventListener('click', () => {
+        btnDisposed.classList.add('active');
+        btnContinued.classList.remove('active');
+        if (outcomeInput) outcomeInput.value = 'disposed';
+        if (listingContainer) listingContainer.style.display = 'none';
+        if (disposalWrap) disposalWrap.style.display = 'block';
+      });
+    }
 
     if (btnFixed && btnRelative) {
       btnFixed.addEventListener('click', () => {
@@ -445,41 +470,71 @@ const casesModule = {
       e.preventDefault();
       const caseId = document.getElementById('add-hearing-case-id').value;
       const date = document.getElementById('add-hearing-date').value;
-      const stage = document.getElementById('add-hearing-stage').value.trim();
-      const listingMode = modeInput ? modeInput.value : 'fixed';
+      const stageInput = document.getElementById('add-hearing-stage').value.trim();
+      const isDisposed = outcomeInput ? outcomeInput.value === 'disposed' : false;
+      
       let nextHearingDate = null;
       let notBeforeDate = null;
+      let listingMode = modeInput ? modeInput.value : 'fixed';
+      let finalStage = stageInput;
+      let finalNotes = document.getElementById('add-hearing-notes').value.trim();
 
-      if (listingMode === 'relative') {
-        notBeforeDate = calculatedRelativeDate || document.getElementById('add-hearing-next-date').value || null;
-        nextHearingDate = notBeforeDate;
+      if (isDisposed) {
+        const disposalType = document.getElementById('add-hearing-disposal-type').value;
+        const disposalRemarks = document.getElementById('add-hearing-disposal-remarks').value.trim();
+        finalStage = `${stageInput} (Disposed: ${disposalType})`;
+        if (disposalRemarks) {
+          finalNotes = finalNotes ? `${finalNotes}\n[Disposal Remarks: ${disposalRemarks}]` : `[Disposal Remarks: ${disposalRemarks}]`;
+        }
+        listingMode = 'disposed';
       } else {
-        nextHearingDate = document.getElementById('add-hearing-next-date').value || null;
+        if (listingMode === 'relative') {
+          notBeforeDate = calculatedRelativeDate || document.getElementById('add-hearing-next-date').value || null;
+          nextHearingDate = notBeforeDate;
+        } else {
+          nextHearingDate = document.getElementById('add-hearing-next-date').value || null;
+        }
       }
-
-      const notes = document.getElementById('add-hearing-notes').value.trim();
 
       // Register Hearing
       await db.addHearing(caseId, { 
         date, 
-        stage, 
+        stage: finalStage, 
         nextHearingDate, 
         listingType: listingMode, 
         notBeforeDate, 
-        notes 
+        notes: finalNotes 
       });
 
-      alert("Hearing proceedings & listing recorded successfully.");
+      if (isDisposed) {
+        const disposalType = document.getElementById('add-hearing-disposal-type').value;
+        const disposalRemarks = document.getElementById('add-hearing-disposal-remarks').value.trim();
+        await db.updateCase(caseId, {
+          status: 'Closed',
+          stage: `Disposed (${disposalType})`,
+          nextHearingDate: null,
+          listingType: 'disposed',
+          notBeforeDate: null,
+          disposalType,
+          disposalRemarks,
+          disposalDate: date
+        });
+        alert(`Case marked as Finally Disposed (${disposalType}). File closed.`);
+      } else {
+        alert("Hearing proceedings & listing recorded successfully.");
+      }
+
       form.reset();
       modal.classList.remove('active');
       calculatedRelativeDate = null;
 
-      // If we are looking at a dossier modal, refresh it
+      // Refresh views
       const dossierOverlay = document.getElementById('case-dossier-overlay');
       if (dossierOverlay && dossierOverlay.classList.contains('active')) {
         this.showCaseDossier(caseId);
       }
 
+      document.dispatchEvent(new CustomEvent('casesUpdated'));
       this.render();
     });
 
@@ -505,7 +560,11 @@ const casesModule = {
     document.getElementById('add-hearing-stage').value = cs.stage || '';
     document.getElementById('add-hearing-next-date').value = '';
     document.getElementById('add-hearing-notes').value = '';
+    document.getElementById('add-hearing-disposal-remarks').value = '';
     
+    const btnContinued = document.getElementById('btn-outcome-continued');
+    if (btnContinued) btnContinued.click();
+
     const btnFixed = document.getElementById('btn-mode-fixed');
     if (btnFixed) btnFixed.click();
 
