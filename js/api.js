@@ -306,6 +306,11 @@ const api = {
         method: 'GET'
       });
     }
+  },
+  portal: {
+    async get(token) {
+      return await fetchAPI(`/api/portal/${encodeURIComponent(token)}`);
+    }
   }
 };
 
