@@ -2009,6 +2009,25 @@ document.addEventListener('DOMContentLoaded', () => {
   initHelpAccordions();
   initHelpActionLaunchers();
   initSupportTicketTelemetry();
+
+  // iOS Safari Touchmove Scroll Lock on Backdrop
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (backdrop) {
+    backdrop.addEventListener('touchmove', (e) => {
+      if (backdrop.classList.contains('active')) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+  }
+
+  // Throttled Window Resize Listener (60fps mobile keyboard transition)
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    if (resizeTimeout) cancelAnimationFrame(resizeTimeout);
+    resizeTimeout = requestAnimationFrame(() => {
+      if (window.safeCreateIcons) window.safeCreateIcons();
+    });
+  }, { passive: true });
 });
 setTimeout(() => {
   initAuthenticationHandlers();
