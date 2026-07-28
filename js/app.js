@@ -67,6 +67,7 @@ window.clientsModule = clients;
 window.dashboardModule = dashboard;
 window.adminModule = adminModule;
 window.portalModule = portalModule;
+window.switchView = switchView;
 
 window.viewCaseDetails = function(caseId) {
   if (!caseId) return;

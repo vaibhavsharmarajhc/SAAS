@@ -114,7 +114,7 @@ const casesModule = {
           if (modal) modal.classList.remove('active');
           dropdown.selectedIndex = 0;
           if (typeof window.switchView === 'function') {
-            window.switchView('onboarding-page');
+            window.switchView('clients-page');
           }
         }
       });

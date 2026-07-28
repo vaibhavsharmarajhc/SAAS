@@ -173,7 +173,7 @@ const accountsModule = {
             if (modal) modal.classList.remove('active');
             formSelect.selectedIndex = 0;
             if (typeof window.switchView === 'function') {
-              window.switchView('onboarding-page');
+              window.switchView('clients-page');
             }
           }
         });
