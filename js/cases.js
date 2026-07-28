@@ -226,12 +226,77 @@ const casesModule = {
    */
   renderCaseGrid() {
     const cases = db.getCases();
-    const searchVal = document.getElementById('case-search-input').value.toLowerCase();
-    const filterStatus = document.getElementById('case-filter-status').value;
-    const filterCategory = document.getElementById('case-filter-category').value;
+    const searchVal = (document.getElementById('case-search-input')?.value || '').toLowerCase();
+    const filterStatus = document.getElementById('case-filter-status')?.value || 'All';
+    const filterCategory = document.getElementById('case-filter-category')?.value || 'All';
     const gridContainer = document.getElementById('cases-grid-list');
+    if (!gridContainer) return;
 
     gridContainer.innerHTML = '';
+
+    // Setup single delegated event listener once
+    if (!gridContainer.hasAttribute('data-delegated')) {
+      gridContainer.setAttribute('data-delegated', 'true');
+      gridContainer.addEventListener('click', (e) => {
+        const titleLink = e.target.closest('.case-title-link');
+        if (titleLink) {
+          const id = titleLink.getAttribute('data-id');
+          if (id) this.showCaseDossier(id);
+          return;
+        }
+
+        const btnLedger = e.target.closest('.btn-case-ledger');
+        if (btnLedger) {
+          const id = btnLedger.getAttribute('data-id');
+          if (id) this.showCaseDossier(id);
+          return;
+        }
+
+        const btnHearing = e.target.closest('.btn-case-hearing');
+        if (btnHearing) {
+          const id = btnHearing.getAttribute('data-id');
+          if (id) this.showAddHearingModal(id);
+          return;
+        }
+
+        const hearingPill = e.target.closest('.next-hearing-pill');
+        if (hearingPill) {
+          const id = hearingPill.getAttribute('data-id');
+          if (id) this.showAddHearingModal(id);
+          return;
+        }
+
+        const btnEdit = e.target.closest('.btn-edit-case');
+        if (btnEdit) {
+          const id = btnEdit.getAttribute('data-id');
+          if (id) this.showEditCaseModal(id);
+          return;
+        }
+
+        const btnLock = e.target.closest('.btn-lock-date');
+        if (btnLock) {
+          const id = btnLock.getAttribute('data-id');
+          if (id) this.showLockDateModal(id);
+          return;
+        }
+
+        const btnToggle = e.target.closest('.btn-case-toggle');
+        if (btnToggle) {
+          const id = btnToggle.getAttribute('data-id');
+          if (id) {
+            const cs = db.getCase(id);
+            if (cs) {
+              const newStatus = cs.status === 'Active' ? 'Closed' : 'Active';
+              db.updateCase(id, { status: newStatus }).then(() => {
+                document.dispatchEvent(new CustomEvent('casesUpdated'));
+                this.render();
+              });
+            }
+          }
+          return;
+        }
+      });
+    }
 
     const filteredCases = cases.filter(c => {
       const client = db.getClient(c.clientId);
@@ -253,6 +318,9 @@ const casesModule = {
       return;
     }
 
+    const fragment = document.createDocumentFragment();
+    const todayStr = new Date().toISOString().split('T')[0];
+
     filteredCases.forEach(c => {
       const client = db.getClient(c.clientId);
       const balance = db.getCaseBalance(c.id);
@@ -270,7 +338,6 @@ const casesModule = {
       let badgeTextColor = 'var(--color-warning)';
       let isRelativeMode = false;
 
-      const todayStr = new Date().toISOString().split('T')[0];
       const notBefore = c.notBeforeDate || (c.listingType === 'relative' ? c.nextHearingDate : null);
 
       if (c.listingType === 'relative' || (notBefore && notBefore !== 'Not Scheduled')) {
@@ -304,7 +371,7 @@ const casesModule = {
           <span style="font-size:0.7rem; text-transform:uppercase; color:${catColor}; font-weight:700; background:${catColor}18; padding:2px 8px; border-radius:4px; border:1px solid ${catColor}40;">${window.sanitizeText(c.caseType)}</span>
           <span class="badge ${badgeStyle}">${c.status}</span>
         </div>
-        <h3 style="font-size:1.15rem; color:var(--text-primary); line-height:1.3; margin-bottom:0.5rem;" class="case-title-link">${window.sanitizeText(c.title)}</h3>
+        <h3 style="font-size:1.15rem; color:var(--text-primary); line-height:1.3; margin-bottom:0.5rem; cursor:pointer;" class="case-title-link" data-id="${c.id}">${window.sanitizeText(c.title)}</h3>
         
         <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:1rem; display:flex; flex-direction:column; gap:0.25rem;">
           <div><i data-lucide="user" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> Client: <strong>${client ? window.sanitizeText(client.name) : 'Unknown'}</strong></div>
@@ -333,31 +400,13 @@ const casesModule = {
           </button>
         </div>
       `;
-
-      // Set up click handlers
-      card.querySelector('.case-title-link').addEventListener('click', () => this.showCaseDossier(c.id));
-      card.querySelector('.btn-case-ledger').addEventListener('click', () => this.showCaseDossier(c.id));
-      card.querySelector('.btn-case-hearing').addEventListener('click', () => this.showAddHearingModal(c.id));
-      card.querySelector('.next-hearing-pill').addEventListener('click', () => this.showAddHearingModal(c.id));
-      card.querySelector('.btn-edit-case').addEventListener('click', () => this.showEditCaseModal(c.id));
-
-      const lockBtn = card.querySelector('.btn-lock-date');
-      if (lockBtn) {
-        lockBtn.addEventListener('click', () => this.showLockDateModal(c.id));
-      }
-      
-      card.querySelector('.btn-case-toggle').addEventListener('click', async () => {
-        const newStatus = c.status === 'Active' ? 'Closed' : 'Active';
-        if (confirm(`Do you want to mark this case status as "${newStatus}"?`)) {
-          await db.updateCase(c.id, { status: newStatus });
-          this.render();
-        }
-      });
-
-      gridContainer.appendChild(card);
+      fragment.appendChild(card);
     });
 
-    lucide.createIcons();
+    gridContainer.appendChild(fragment);
+    if (window.safeCreateIcons) {
+      window.safeCreateIcons(gridContainer);
+    }
   },
 
   getNextHearingDate(c) {

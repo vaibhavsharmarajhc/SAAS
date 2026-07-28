@@ -395,15 +395,17 @@ h1, h2, h3, h4, h5, h6 {
   padding: 2rem;
   overflow-y: auto;
   display: none;
-  animation: fadeIn 0.4s ease-out;
+  contain: layout style;
 }
 
 .page-container.active {
   display: block;
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -735,6 +737,10 @@ textarea.form-control {
   pointer-events: auto;
 }
 
+.modal-overlay {
+  will-change: opacity;
+}
+
 .modal-container {
   background-color: var(--bg-sidebar);
   border: 1px solid var(--border-color);
@@ -746,6 +752,8 @@ textarea.form-control {
   box-shadow: var(--shadow-lg);
   transform: scale(0.95);
   transition: transform var(--transition-normal);
+  will-change: transform, opacity;
+  contain: layout style;
 }
 
 .modal-overlay.active .modal-container {

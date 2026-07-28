@@ -631,7 +631,7 @@ const diaryModule = {
           <p style="font-size:0.8rem; margin:0;">All active cases have next hearing dates scheduled!</p>
         </div>
       `;
-      lucide.createIcons();
+      if (window.safeCreateIcons) window.safeCreateIcons(listContainer);
       return;
     }
 
@@ -646,40 +646,31 @@ const diaryModule = {
       item.style.flexDirection = 'column';
       item.style.gap = '0.25rem';
       item.style.cursor = 'pointer';
-      item.style.transition = 'all var(--transition-fast)';
-
-      // Hover effects
-      item.addEventListener('mouseenter', () => {
-        item.style.backgroundColor = 'rgba(239, 68, 68, 0.06)';
-        item.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-      });
-      item.addEventListener('mouseleave', () => {
-        item.style.backgroundColor = 'rgba(239, 68, 68, 0.03)';
-        item.style.borderColor = 'rgba(239, 68, 68, 0.15)';
-      });
 
       item.innerHTML = `
         <div style="font-size:0.7rem; text-transform:uppercase; color:var(--text-muted); font-weight:600; display:flex; justify-content:space-between;">
-          <span>${c.caseType}</span>
+          <span>${window.sanitizeText(c.caseType)}</span>
           <span style="color:var(--color-danger); font-weight:700;">No Next Date</span>
         </div>
-        <strong style="font-size:0.85rem; color:var(--text-primary); line-height:1.2; margin-top:0.15rem;">${c.title}</strong>
+        <strong style="font-size:0.85rem; color:var(--text-primary); line-height:1.2; margin-top:0.15rem;">${window.sanitizeText(c.title)}</strong>
         <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.15rem;">
-          CNR/Ref: ${c.caseNumber}
+          CNR/Ref: ${window.sanitizeText(c.caseNumber)}
         </div>
         <div style="font-size:0.75rem; color:var(--text-secondary);">
-          Client: ${client ? client.name : 'Unknown'}
+          Client: ${client ? window.sanitizeText(client.name) : 'Unknown'}
         </div>
       `;
 
       item.addEventListener('click', () => {
-        casesModule.showCaseDossier(c.id);
+        if (typeof casesModule !== 'undefined' && casesModule.showCaseDossier) {
+          casesModule.showCaseDossier(c.id);
+        }
       });
 
       listContainer.appendChild(item);
     });
     
-    lucide.createIcons();
+    if (window.safeCreateIcons) window.safeCreateIcons(listContainer);
   }
 };
 

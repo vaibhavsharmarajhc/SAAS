@@ -34,17 +34,28 @@ window.sanitizeText = function(str) {
             .replace(/'/g, '&#039;');
 };
 
-function safeCreateIcons() {
+window.debounce = function(func, wait = 200) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+};
+
+function safeCreateIcons(rootElement) {
   try {
-    if (typeof window.safeCreateIcons === 'function') {
-      window.safeCreateIcons();
-    } else if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') {
-      lucide.createIcons();
+    if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') {
+      if (rootElement && rootElement instanceof HTMLElement) {
+        lucide.createIcons({ root: rootElement });
+      } else {
+        lucide.createIcons();
+      }
     }
   } catch (e) {
     console.warn("Lucide safe icon create error:", e);
   }
 }
+window.safeCreateIcons = safeCreateIcons;
 
 import db from './db.js';
 import api from './api.js';

@@ -310,6 +310,7 @@ class LegalDB {
   async addTransaction(tx) {
     const newTx = await api.transactions.create(tx);
     this.cache.transactions.push(newTx);
+    this.invalidateBalanceCache();
     return newTx;
   }
 
@@ -324,12 +325,14 @@ class LegalDB {
     if (idx !== -1) {
       this.cache.transactions[idx] = { ...this.cache.transactions[idx], ...updated };
     }
+    this.invalidateBalanceCache();
     return updated;
   }
 
   async deleteTransaction(id) {
     await api.transactions.delete(id);
     this.cache.transactions = this.cache.transactions.filter(t => t.id !== id);
+    this.invalidateBalanceCache();
   }
 
   // Calculate client or case finances synchronously from local cache
@@ -356,7 +359,16 @@ class LegalDB {
     };
   }
 
+  invalidateBalanceCache() {
+    this._caseBalanceCache = null;
+  }
+
   getCaseBalance(caseId) {
+    if (!this._caseBalanceCache) this._caseBalanceCache = new Map();
+    if (this._caseBalanceCache.has(caseId)) {
+      return this._caseBalanceCache.get(caseId);
+    }
+
     const txs = this.getTransactionsForCase(caseId);
     let billed = 0;
     let received = 0;
@@ -370,13 +382,15 @@ class LegalDB {
       else if (t.type === "WrittenOff") writtenOff += t.amount;
     });
 
-    return {
+    const res = {
       billed,
       received,
       disbursed,
       writtenOff,
       outstanding: Math.max(0, (billed + disbursed) - received - writtenOff)
     };
+    this._caseBalanceCache.set(caseId, res);
+    return res;
   }
 
   getReferralPartners() {
