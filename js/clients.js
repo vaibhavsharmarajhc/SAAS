@@ -172,9 +172,15 @@ const clientsModule = {
       gotoOnboardBtn.addEventListener('click', () => {
         this.resetWizard();
         if (typeof window.switchView === 'function') {
-          window.switchView('onboarding-page');
-        } else {
-          document.querySelector('[data-view="onboarding-page"]')?.click();
+          window.switchView('clients-page');
+        }
+        const wizardCard = document.getElementById('onboard-client-wizard-card') || document.querySelector('#clients-page .card');
+        if (wizardCard) {
+          wizardCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        const clientNameInput = document.getElementById('client-name');
+        if (clientNameInput) {
+          setTimeout(() => clientNameInput.focus(), 300);
         }
       });
     }
