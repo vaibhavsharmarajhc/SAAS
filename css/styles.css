@@ -3501,7 +3501,8 @@ mark.search-highlight {
     width: 280px !important;
     height: 100dvh !important;
     z-index: 10000 !important;
-    background-color: var(--bg-sidebar) !important;
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5) !important;
     transform: translateX(-100%) !important;
     transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
@@ -3511,6 +3512,63 @@ mark.search-highlight {
     contain: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+  }
+
+  .app-sidebar .brand-name,
+  .app-sidebar .lawyer-name,
+  .app-sidebar .menu-item a,
+  .app-sidebar .theme-toggle-btn,
+  .app-sidebar .backup-btn {
+    color: #f8fafc !important;
+  }
+
+  .app-sidebar .menu-item a i,
+  .app-sidebar .menu-item a svg {
+    color: #fbbf24 !important;
+    stroke: #fbbf24 !important;
+  }
+
+  .app-sidebar .brand-subtitle,
+  .app-sidebar .lawyer-title {
+    color: #94a3b8 !important;
+  }
+
+  .app-sidebar .menu-item.active a {
+    background-color: rgba(217, 119, 6, 0.25) !important;
+    color: #fbbf24 !important;
+    border-color: rgba(217, 119, 6, 0.5) !important;
+  }
+
+  /* Light Theme Specific Mobile Sidebar Contrast Overrides */
+  [data-theme="light"] .app-sidebar {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-right: 1px solid rgba(15, 23, 42, 0.15) !important;
+  }
+
+  [data-theme="light"] .app-sidebar .brand-name,
+  [data-theme="light"] .app-sidebar .lawyer-name,
+  [data-theme="light"] .app-sidebar .menu-item a,
+  [data-theme="light"] .app-sidebar .theme-toggle-btn,
+  [data-theme="light"] .app-sidebar .backup-btn {
+    color: #0f172a !important;
+  }
+
+  [data-theme="light"] .app-sidebar .menu-item a i,
+  [data-theme="light"] .app-sidebar .menu-item a svg {
+    color: #b45309 !important;
+    stroke: #b45309 !important;
+  }
+
+  [data-theme="light"] .app-sidebar .brand-subtitle,
+  [data-theme="light"] .app-sidebar .lawyer-title {
+    color: #475569 !important;
+  }
+
+  [data-theme="light"] .app-sidebar .menu-item.active a {
+    background-color: rgba(180, 83, 9, 0.12) !important;
+    color: #b45309 !important;
+    border-color: rgba(180, 83, 9, 0.3) !important;
   }
 
   .app-sidebar.open {
