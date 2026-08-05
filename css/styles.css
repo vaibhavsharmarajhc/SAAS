@@ -3464,53 +3464,91 @@ mark.search-highlight {
 }
 
 /* ==========================================================================
-   Master 60fps Mobile Performance Optimization Architecture (v1.0.95)
+   Master 60fps Mobile Performance Optimization Architecture (v1.0.98)
    ========================================================================== */
 @media (max-width: 768px) {
-  /* Disable heavy GPU backdrop blurs on mobile viewports */
+  /* 1. Disable heavy GPU backdrop blurs on mobile viewports */
   .card,
   .modal-content,
   .app-header,
-  .app-sidebar,
   .notification-dropdown-menu,
   .security-badge-pill {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    background-color: rgba(15, 23, 42, 0.96) !important;
   }
 
-  /* GPU Hardware-Accelerated Sidebar Drawer (60fps transform) */
+  /* 2. REMOVE BROKEN CONTAINMENT RULES THAT CAUSE ELEMENTS TO DISAPPEAR */
+  .app-main,
+  .page-container {
+    contain: none !important;
+    min-height: 100dvh !important;
+  }
+
+  /* 3. Fixed Mobile Header Bar */
+  .app-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+  }
+
+  /* 4. Fixed Hardware-Accelerated Sidebar Drawer (60fps slide-in) */
   .app-sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 280px !important;
+    height: 100dvh !important;
+    z-index: 10000 !important;
+    background-color: var(--bg-sidebar) !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5) !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
     will-change: transform;
-    contain: paint layout;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    contain: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   .app-sidebar.open {
     transform: translateX(0) !important;
   }
 
-  /* Dynamic Viewport Sizing (100dvh) */
-  .app-main,
-  .page-container {
-    min-height: 100dvh !important;
-    contain: paint;
-    -webkit-overflow-scrolling: touch;
+  /* 5. Mobile Backdrop Overlay */
+  #sidebar-backdrop {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    z-index: 9999 !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease !important;
   }
 
-  /* Reserve Aspect-Ratio for Chart Canvases (Zero CLS) */
+  #sidebar-backdrop.active {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  /* 6. Reserve Aspect-Ratio for Chart Canvases (Zero CLS) */
   #caseTypeChart,
   #revenueByCaseTypeChart {
     aspect-ratio: 16 / 9 !important;
     min-height: 280px !important;
   }
 
-  /* Compositing-Only Tap Animations & Touch Targets (min 44px) */
+  /* 7. Compositing-Only Tap Animations & Touch Targets (min 44px) */
   .btn,
   button,
   .menu-item {
-    min-height: 44px;
-    transition: transform 0.12s ease, opacity 0.12s ease !important;
+    min-height: 44px !important;
+    touch-action: manipulation;
   }
 
   .btn:active,
@@ -3518,7 +3556,7 @@ mark.search-highlight {
     transform: scale(0.97);
   }
 
-  /* Async Image Decoding */
+  /* 8. Async Image Decoding */
   img {
     decoding: async;
   }

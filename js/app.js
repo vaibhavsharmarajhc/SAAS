@@ -1175,19 +1175,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 4b. Setup mobile sidebar drawer toggle
-  const sidebar = document.querySelector('.app-sidebar');
-  const toggleBtn = document.getElementById('btn-sidebar-toggle');
+  // 4b. Setup mobile sidebar drawer toggle (Global Delegation)
+  document.addEventListener('click', (e) => {
+    const toggleBtn = e.target.closest('#btn-sidebar-toggle');
+    if (toggleBtn) {
+      e.stopPropagation();
+      const sidebar = document.querySelector('.app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      if (sidebar) sidebar.classList.toggle('open');
+      if (backdrop) backdrop.classList.toggle('active');
+    }
+  });
+
   const backdrop = document.getElementById('sidebar-backdrop');
-
-  if (toggleBtn && sidebar && backdrop) {
-    toggleBtn.addEventListener('click', () => {
-      sidebar.classList.add('open');
-      backdrop.classList.add('active');
-    });
-
+  if (backdrop) {
     backdrop.addEventListener('click', () => {
-      sidebar.classList.remove('open');
+      const sidebar = document.querySelector('.app-sidebar');
+      if (sidebar) sidebar.classList.remove('open');
       backdrop.classList.remove('active');
     });
   }
