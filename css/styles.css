@@ -3560,5 +3560,112 @@ mark.search-highlight {
   img {
     decoding: async;
   }
+
+  /* 9. Ultra-Sleek High-Density 2x2 KPI Grid on Mobile */
+  .kpi-card-clients {
+    display: flex !important;
+  }
+
+  #dashboard-page .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+
+  /* 10. Compact Mobile Screen Padding System */
+  .app-main {
+    padding: 0.5rem 0.65rem !important;
+  }
+
+  .card {
+    padding: 0.85rem !important;
+    margin-bottom: 0.65rem !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  /* 11. Compact Mobile Header (54px) */
+  .app-header {
+    height: 54px !important;
+    padding: 0.4rem 0.65rem !important;
+    box-sizing: border-box !important;
+  }
+
+  #header-page-title {
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+  }
+
+  /* 12. Compact KPI Cards */
+  .kpi-card {
+    padding: 0.6rem 0.75rem !important;
+    margin-bottom: 0 !important;
+  }
+
+  .kpi-label {
+    font-size: 0.65rem !important;
+    font-weight: 600 !important;
+    color: var(--text-muted) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  .kpi-value {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+  }
+
+  /* 13. Compact Form & Toolbar Controls */
+  .search-filter-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+  }
+
+  .search-filter-bar select,
+  .search-filter-bar .search-wrapper {
+    width: 100% !important;
+  }
+
+  /* 14. Responsive Mobile Card Transformations for Tables */
+  .table-custom,
+  .table-custom tbody,
+  .table-custom tr,
+  .table-custom td {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .table-custom thead {
+    display: none !important;
+  }
+
+  .table-custom tr {
+    margin-bottom: 0.65rem !important;
+    background: rgba(30, 41, 59, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 10px !important;
+    padding: 0.75rem !important;
+  }
+
+  .table-custom td {
+    padding: 0.25rem 0 !important;
+    border: none !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* 15. Mobile Modal Fitting */
+  .modal-content {
+    width: 94% !important;
+    max-width: 480px !important;
+    max-height: 88vh !important;
+    padding: 1.15rem !important;
+    border-radius: 14px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
 }
 
