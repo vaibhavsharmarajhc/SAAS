@@ -17,7 +17,7 @@
   <title>Track My Chambers - Practice Workspace</title>
   <meta name="description" content="Advocate Chambers Practice Management Workspace.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.102">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.103">
   <!-- Local Vendor Bundles (Zero External CDNs) -->
   <script src="/js/vendor/lucide.min.js" defer></script>
   <script src="/js/vendor/chart.min.js" defer></script>
@@ -40,16 +40,12 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.getRegistrations().then(registrations => {
-          return Promise.all(registrations.map(r => r.unregister()));
-        }).then(() => {
-          return navigator.serviceWorker.register('/sw.js?v=102');
-        }).then(reg => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(reg => {
           reg.update();
           if (window.caches) {
             caches.keys().then(keys => {
               keys.forEach(key => {
-                if (key !== 'trackmychambers-cache-v102') {
+                if (key !== 'trackmychambers-cache-v103') {
                   caches.delete(key);
                 }
               });
@@ -247,30 +243,6 @@
           </div>
         </div>
 
-        <!-- Charts Layout -->
-        <div class="grid-cols-2 dashboard-charts-grid">
-          <div class="card" style="position: relative; min-height: 290px; display: flex; flex-direction: column;">
-            <div class="section-header">
-              <h3>Case Type Breakdown</h3>
-            </div>
-            <div id="caseTypeChart-placeholder" style="display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); gap: 0.5rem; width: 100%;">
-              <i data-lucide="pie-chart" style="width: 32px; height: 32px; color: var(--text-muted);"></i>
-              <span style="font-size: 0.85rem;">No data yet — add your first case to see insights here</span>
-            </div>
-            <canvas id="caseTypeChart" style="max-height: 250px; width: 100%;"></canvas>
-          </div>
-          <div class="card" style="position: relative; min-height: 290px; display: flex; flex-direction: column;">
-            <div class="section-header">
-              <h3>Revenue by Case Type</h3>
-            </div>
-            <div id="revenueByCaseTypeChart-placeholder" style="display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); gap: 0.5rem; width: 100%;">
-              <i data-lucide="bar-chart-3" style="width: 32px; height: 32px; color: var(--text-muted);"></i>
-              <span style="font-size: 0.85rem;">No data yet — add your first case to see insights here</span>
-            </div>
-            <canvas id="revenueByCaseTypeChart" style="max-height: 250px; width: 100%;"></canvas>
-          </div>
-        </div>
-
         <!-- Today's Schedule & Pending Dues -->
         <div class="grid-cols-2">
           <!-- Today's Hearings Diary Peek -->
@@ -318,6 +290,40 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Practice Overview View Container -->
+      <div id="overview-page" class="page-container">
+        <div class="section-header" style="margin-bottom: 1.5rem;">
+          <div>
+            <h2 style="font-family:'Playfair Display', serif; font-size:1.5rem; margin:0;">Practice Overview & Performance Analytics</h2>
+            <span style="font-size:0.85rem; color:var(--text-secondary);">Comprehensive insights, case breakdown charts, and referral revenue analytics</span>
+          </div>
+        </div>
+
+        <!-- Charts Layout -->
+        <div class="grid-cols-2 dashboard-charts-grid">
+          <div class="card" style="position: relative; min-height: 290px; display: flex; flex-direction: column;">
+            <div class="section-header">
+              <h3>Case Type Breakdown</h3>
+            </div>
+            <div id="caseTypeChart-placeholder" style="display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); gap: 0.5rem; width: 100%;">
+              <i data-lucide="pie-chart" style="width: 32px; height: 32px; color: var(--text-muted);"></i>
+              <span style="font-size: 0.85rem;">No data yet — add your first case to see insights here</span>
+            </div>
+            <canvas id="caseTypeChart" style="max-height: 250px; width: 100%;"></canvas>
+          </div>
+          <div class="card" style="position: relative; min-height: 290px; display: flex; flex-direction: column;">
+            <div class="section-header">
+              <h3>Revenue by Case Type</h3>
+            </div>
+            <div id="revenueByCaseTypeChart-placeholder" style="display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); gap: 0.5rem; width: 100%;">
+              <i data-lucide="bar-chart-3" style="width: 32px; height: 32px; color: var(--text-muted);"></i>
+              <span style="font-size: 0.85rem;">No data yet — add your first case to see insights here</span>
+            </div>
+            <canvas id="revenueByCaseTypeChart" style="max-height: 250px; width: 100%;"></canvas>
+          </div>
+        </div>
 
         <!-- Referral Network & Revenue Contributions -->
         <div class="card dashboard-referrals-card" style="margin-top: 1.5rem;">
@@ -343,11 +349,6 @@
             </table>
           </div>
         </div>
-      </div>
-
-      <!-- Practice Overview View Container -->
-      <div id="overview-page" class="page-container">
-        <!-- Charts and referrals cards are moved here dynamically on mobile viewports -->
       </div>
 
       <!-- Clients Onboarding & Directory View Container -->
@@ -2511,6 +2512,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.102"></script>
+  <script type="module" src="js/app.js?v=1.0.103"></script>
 </body>
 </html>

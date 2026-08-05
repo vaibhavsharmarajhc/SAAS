@@ -282,6 +282,11 @@ async function refreshPageView(viewId) {
     case 'dashboard-page':
     case 'overview-page':
       dashboard.render();
+      requestAnimationFrame(() => {
+        if (typeof dashboard.renderCharts === 'function') {
+          dashboard.renderCharts();
+        }
+      });
       break;
     case 'clients-page':
       clients.render();
