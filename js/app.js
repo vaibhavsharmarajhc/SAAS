@@ -1646,37 +1646,8 @@ function initFeaturesTabs() {
 }
 
 function setupMobileOverviewPage() {
-  const isMobile = window.innerWidth <= 768;
-  const overviewPage = document.getElementById('overview-page');
-  const dashboardPage = document.getElementById('dashboard-page');
-  
-  if (!overviewPage || !dashboardPage) return;
-  
-  const dashboardCharts = document.querySelector('.dashboard-charts-grid');
-  const dashboardReferrals = document.querySelector('.dashboard-referrals-card');
-  
-  if (isMobile) {
-    if (dashboardCharts && dashboardCharts.parentElement !== overviewPage) {
-      overviewPage.appendChild(dashboardCharts);
-    }
-    if (dashboardReferrals && dashboardReferrals.parentElement !== overviewPage) {
-      overviewPage.appendChild(dashboardReferrals);
-    }
-  } else {
-    const kpiContainer = document.getElementById('dashboard-kpis');
-    if (kpiContainer) {
-      if (dashboardCharts && dashboardCharts.parentElement !== dashboardPage) {
-        kpiContainer.parentNode.insertBefore(dashboardCharts, kpiContainer.nextSibling);
-      }
-      if (dashboardReferrals && dashboardReferrals.parentElement !== dashboardPage) {
-        dashboardPage.appendChild(dashboardReferrals);
-      }
-    }
-  }
+  // Pure CSS media queries handle responsive layouts without mutating DOM nodes or breaking Chart.js canvases
 }
-
-// Bind resize listener for responsive layout swapping
-window.addEventListener('resize', setupMobileOverviewPage);
 
 /**
  * Change Password Handler

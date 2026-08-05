@@ -50,12 +50,8 @@
 
 /* Hardware GPU Acceleration & Smooth Performance Optimizations */
 .app-sidebar,
-.header-bar,
-.help-jump-menu,
-.modal-overlay,
-.card {
+.modal-overlay {
   will-change: transform;
-  transform: translateZ(0);
   backface-visibility: hidden;
 }
 
@@ -3467,29 +3463,52 @@ mark.search-highlight {
    Master 60fps Mobile Performance Optimization Architecture (v1.0.98)
    ========================================================================== */
 @media (max-width: 768px) {
-  /* 1. Disable heavy GPU backdrop blurs on mobile viewports */
+  /* 1. Decouple Mobile Container Layout Flow (Eliminates Left White Void) */
+  .app-container {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 100dvh !important;
+    overflow-x: hidden !important;
+  }
+
+  .app-main {
+    width: 100% !important;
+    max-width: 100vw !important;
+    margin-left: 0 !important;
+    padding: 0.5rem 0.65rem !important;
+    box-sizing: border-box !important;
+    contain: none !important;
+    min-height: 100dvh !important;
+  }
+
+  .page-container {
+    contain: none !important;
+  }
+
+  /* 2. Hide Security Badge Pill on Mobile to fit header on single 54px row */
+  .security-badge-pill {
+    display: none !important;
+  }
+
+  /* 3. Disable heavy GPU backdrop blurs on mobile viewports */
   .card,
   .modal-content,
   .app-header,
-  .notification-dropdown-menu,
-  .security-badge-pill {
+  .notification-dropdown-menu {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     background-color: rgba(15, 23, 42, 0.96) !important;
   }
 
-  /* 2. REMOVE BROKEN CONTAINMENT RULES THAT CAUSE ELEMENTS TO DISAPPEAR */
-  .app-main,
-  .page-container {
-    contain: none !important;
-    min-height: 100dvh !important;
-  }
-
-  /* 3. Fixed Mobile Header Bar */
+  /* 4. Fixed Mobile Header Bar */
   .app-header {
     position: sticky !important;
     top: 0 !important;
     z-index: 100 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   /* 4. Fixed Hardware-Accelerated Sidebar Drawer (60fps slide-in) */
