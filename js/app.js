@@ -218,9 +218,18 @@ export async function switchView(targetViewId) {
     }
   });
 
-  // Toggle active menu state
+  // Toggle active menu state (Sidebar & Mobile Bottom Nav)
   getSidebarMenuItems().forEach(item => {
     if (item.getAttribute('data-target') === targetViewId) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
+
+  document.querySelectorAll('.mobile-bottom-nav .mobile-nav-item').forEach(item => {
+    const target = item.getAttribute('data-target');
+    if (target && target === targetViewId) {
       item.classList.add('active');
     } else {
       item.classList.remove('active');
@@ -1161,6 +1170,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
+  // 3b. Setup routing events for mobile bottom navigation bar items
+  document.querySelectorAll('.mobile-bottom-nav .mobile-nav-item').forEach(item => {
+    item.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (item.id === 'mobile-nav-more-btn') {
+        const sidebar = document.querySelector('.app-sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        if (sidebar && backdrop) {
+          sidebar.classList.toggle('open');
+          backdrop.classList.toggle('active');
+        }
+        return;
+      }
+
+      const target = item.getAttribute('data-target');
+      if (target) {
+        window.history.pushState({}, '', '/' + target);
+        await router();
+      }
+    });
+  });
+
   // Global click interceptor for client-side routing (Features, About, Pricing, FAQs, Privacy, Terms)
   document.addEventListener('click', async (e) => {
     const link = e.target.closest('a[data-link]');
@@ -1180,15 +1211,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 4b. Setup mobile sidebar drawer toggle (Global Delegation)
+  // 4b. Setup mobile & desktop sidebar drawer toggle & close (Global Delegation)
   document.addEventListener('click', (e) => {
-    const toggleBtn = e.target.closest('#btn-sidebar-toggle');
+    const toggleBtn = e.target.closest('#btn-sidebar-toggle, .menu-toggle-btn');
+    const closeBtn = e.target.closest('#btn-sidebar-close, .sidebar-close-btn');
+    const container = document.getElementById('dashboard-app-container') || document.querySelector('.app-container');
+    const sidebar = document.querySelector('.app-sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+
     if (toggleBtn) {
       e.stopPropagation();
-      const sidebar = document.querySelector('.app-sidebar');
-      const backdrop = document.getElementById('sidebar-backdrop');
-      if (sidebar) sidebar.classList.toggle('open');
-      if (backdrop) backdrop.classList.toggle('active');
+      if (window.innerWidth <= 900) {
+        if (sidebar) sidebar.classList.toggle('open');
+        if (backdrop) backdrop.classList.toggle('active');
+      } else {
+        if (container) container.classList.toggle('sidebar-collapsed');
+      }
+    } else if (closeBtn) {
+      e.stopPropagation();
+      if (sidebar) sidebar.classList.remove('open');
+      if (backdrop) backdrop.classList.remove('active');
+      if (container) container.classList.remove('sidebar-collapsed');
     }
   });
 

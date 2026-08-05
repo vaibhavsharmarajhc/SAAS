@@ -328,6 +328,93 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 100;
 }
 
+/* Sidebar Toggle Hamburger Button (Always Visible across All Screen Sizes & Themes) */
+.menu-toggle-btn,
+#btn-sidebar-toggle,
+#btn-floating-sidebar-toggle {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  min-height: 42px !important;
+  padding: 0 !important;
+  border-radius: var(--radius-md, 10px) !important;
+  background: var(--bg-card, rgba(30, 41, 59, 0.85)) !important;
+  border: 1.5px solid var(--border-color, rgba(255, 255, 255, 0.25)) !important;
+  color: var(--text-primary, #f8fafc) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0 !important;
+  margin-right: 0.75rem !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25) !important;
+  z-index: 1000 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.menu-toggle-btn i,
+.menu-toggle-btn svg,
+#btn-sidebar-toggle i,
+#btn-sidebar-toggle svg,
+#btn-floating-sidebar-toggle i,
+#btn-floating-sidebar-toggle svg {
+  width: 22px !important;
+  height: 22px !important;
+  stroke: var(--text-primary, #f8fafc) !important;
+  color: var(--text-primary, #f8fafc) !important;
+  stroke-width: 2.2px !important;
+  display: block !important;
+}
+
+.menu-toggle-btn:hover,
+.menu-toggle-btn:active,
+#btn-sidebar-toggle:hover,
+#btn-sidebar-toggle:active,
+#btn-floating-sidebar-toggle:hover,
+#btn-floating-sidebar-toggle:active {
+  background: var(--color-primary-light, rgba(99, 102, 241, 0.25)) !important;
+  border-color: var(--color-primary, #6366f1) !important;
+  color: var(--color-primary, #6366f1) !important;
+  transform: scale(1.05) !important;
+}
+
+/* LIGHT THEME EXPLICIT CONTRAST OVERRIDES */
+[data-theme="light"] .menu-toggle-btn,
+[data-theme="light"] #btn-sidebar-toggle,
+[data-theme="light"] #btn-floating-sidebar-toggle {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(15, 23, 42, 0.25) !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.12) !important;
+}
+
+[data-theme="light"] .menu-toggle-btn i,
+[data-theme="light"] .menu-toggle-btn svg,
+[data-theme="light"] #btn-sidebar-toggle i,
+[data-theme="light"] #btn-sidebar-toggle svg,
+[data-theme="light"] #btn-floating-sidebar-toggle i,
+[data-theme="light"] #btn-floating-sidebar-toggle svg {
+  stroke: #0f172a !important;
+  color: #0f172a !important;
+  fill: none !important;
+}
+
+[data-theme="light"] .menu-toggle-btn:hover,
+[data-theme="light"] #btn-sidebar-toggle:hover,
+[data-theme="light"] #btn-floating-sidebar-toggle:hover {
+  background: rgba(99, 102, 241, 0.12) !important;
+  border-color: #6366f1 !important;
+  color: #6366f1 !important;
+}
+
+[data-theme="light"] .menu-toggle-btn:hover svg,
+[data-theme="light"] #btn-sidebar-toggle:hover svg,
+[data-theme="light"] #btn-floating-sidebar-toggle:hover svg {
+  stroke: #6366f1 !important;
+}
+
 .page-title-section h2 {
   font-size: 1.7rem;
   color: var(--text-primary);
@@ -1357,9 +1444,71 @@ input:checked + .slider:before {
     width: 100% !important;
   }
   
-  /* Hamburger menu button display in header */
-  .menu-toggle-btn {
+  /* Hamburger menu button display in header (Always Visible Across All Screen Sizes) */
+  .menu-toggle-btn,
+  #btn-sidebar-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    border-radius: var(--radius-md, 8px) !important;
+    background: var(--bg-card, rgba(30, 41, 59, 0.7)) !important;
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15)) !important;
+    color: var(--text-primary, #f8fafc) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    flex-shrink: 0 !important;
+    margin-right: 0.5rem !important;
+    z-index: 105 !important;
+  }
+  .menu-toggle-btn:hover,
+  .menu-toggle-btn:active,
+  #btn-sidebar-toggle:hover,
+  #btn-sidebar-toggle:active {
+    background: var(--color-primary-light, rgba(99, 102, 241, 0.2)) !important;
+    border-color: var(--color-primary, #6366f1) !important;
+    color: var(--color-primary, #6366f1) !important;
+  }
+
+  /* Desktop Collapsed Sidebar Mode */
+  @media (min-width: 769px) {
+    .app-container.sidebar-collapsed .app-sidebar {
+      transform: translateX(-100%) !important;
+      position: fixed !important;
+      left: 0 !important;
+      top: 0 !important;
+      bottom: 0 !important;
+      z-index: 1000 !important;
+      transition: transform 0.25s ease !important;
+    }
+    .app-container.sidebar-collapsed .app-main {
+      margin-left: 0 !important;
+      width: 100% !important;
+      transition: margin-left 0.25s ease !important;
+    }
+  }
+
+  .sidebar-close-btn {
     display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+    color: var(--text-secondary, #94a3b8);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .sidebar-close-btn:hover,
+  .sidebar-close-btn:active {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--color-danger, #ef4444);
+    border-color: var(--color-danger, #ef4444);
   }
   
   /* Sidebar backdrop overlay active state */
@@ -3512,7 +3661,6 @@ mark.search-highlight {
   /* 3. Disable heavy GPU backdrop blurs on mobile viewports */
   .card,
   .modal-content,
-  .app-header,
   .notification-dropdown-menu {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -3773,15 +3921,291 @@ mark.search-highlight {
     font-size: 0.85rem !important;
   }
 
-  /* 15. Mobile Modal Fitting */
+  /* 15. Mobile Modal Fitting & Bottom Sheet */
+  .modal-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .modal-container,
   .modal-content {
-    width: 94% !important;
-    max-width: 480px !important;
-    max-height: 88vh !important;
-    padding: 1.15rem !important;
-    border-radius: 14px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 90vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    animation: slideUpMobile 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)) !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .modal-header {
+    position: sticky !important;
+    top: 0 !important;
+    background: var(--bg-card, #1e293b) !important;
+    z-index: 10 !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    padding: 1rem 1.25rem !important;
+  }
+
+  .modal-body {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
+    padding: 1.25rem !important;
+    flex: 1 1 auto !important;
+  }
+
+  .modal-footer {
+    position: sticky !important;
+    bottom: 0 !important;
+    background: var(--bg-card, #1e293b) !important;
+    z-index: 10 !important;
+    border-top: 1px solid var(--border-color) !important;
+    padding: 0.85rem 1.25rem !important;
+    display: flex !important;
+    gap: 0.5rem !important;
   }
 }
+
+@keyframes slideUpMobile {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* ==========================================================================
+   MOBILE BOTTOM NAVIGATION BAR & TOUCH OPTIMIZATIONS (<768px)
+   ========================================================================== */
+.mobile-bottom-nav {
+  display: none;
+}
+
+/* Explicit Light Theme Header & Control System */
+[data-theme="light"] .app-header {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05) !important;
+}
+
+[data-theme="light"] .page-title-section h2,
+[data-theme="light"] #header-page-title {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .menu-toggle-btn,
+[data-theme="light"] #btn-sidebar-toggle {
+  background: #f1f5f9 !important;
+  border: 1.5px solid rgba(15, 23, 42, 0.25) !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08) !important;
+}
+
+[data-theme="light"] .menu-toggle-btn i,
+[data-theme="light"] .menu-toggle-btn svg,
+[data-theme="light"] #btn-sidebar-toggle i,
+[data-theme="light"] #btn-sidebar-toggle svg {
+  stroke: #0f172a !important;
+  color: #0f172a !important;
+  stroke-width: 2.2px !important;
+  fill: none !important;
+}
+
+[data-theme="light"] #btn-notification-bell {
+  background: #ffffff !important;
+  border: 1px solid rgba(15, 23, 42, 0.2) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] #btn-notification-bell i,
+[data-theme="light"] #btn-notification-bell svg {
+  stroke: #0f172a !important;
+  color: #0f172a !important;
+}
+
+@media (max-width: 768px) {
+  /* Sticky App Header on Mobile */
+  .app-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+    background: var(--bg-sidebar) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    padding: 0.65rem 0.85rem !important;
+    margin-bottom: 0.75rem !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+  }
+
+  .security-badge-pill {
+    display: none !important;
+  }
+
+  .page-title-section h2 {
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+  }
+
+  .header-actions {
+    gap: 0.4rem !important;
+  }
+
+  /* Fixed Bottom Navigation Bar */
+  .mobile-bottom-nav {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
+    background: var(--bg-sidebar, rgba(15, 23, 42, 0.94)) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.1)) !important;
+    z-index: 999 !important;
+    justify-content: space-around !important;
+    align-items: flex-start !important;
+    padding-top: 6px !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  .mobile-nav-item {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--text-secondary, #94a3b8) !important;
+    font-size: 0.65rem !important;
+    font-weight: 500 !important;
+    padding: 4px 0 !important;
+    cursor: pointer !important;
+    transition: color 0.15s ease, transform 0.15s ease !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .mobile-nav-item i,
+  .mobile-nav-item svg {
+    width: 20px !important;
+    height: 20px !important;
+    stroke-width: 2px !important;
+    transition: stroke 0.15s ease, transform 0.15s ease !important;
+  }
+
+  .mobile-nav-item.active {
+    color: var(--color-primary, #6366f1) !important;
+    font-weight: 700 !important;
+  }
+
+  .mobile-nav-item.active i,
+  .mobile-nav-item.active svg {
+    stroke: var(--color-primary, #6366f1) !important;
+    transform: translateY(-2px) !important;
+  }
+
+  .mobile-nav-item:active {
+    transform: scale(0.92) !important;
+  }
+
+  /* Padding offset so main canvas content is clear of bottom bar */
+  .app-main {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Interactive Elements Touch Optimization */
+  .btn, 
+  .form-control, 
+  input[type="text"], 
+  input[type="number"], 
+  input[type="date"], 
+  select {
+    min-height: 44px !important;
+    font-size: 0.95rem !important;
+    touch-action: manipulation !important;
+  }
+
+  .btn-sm {
+    min-height: 36px !important;
+  }
+
+  /* Card and Grid spacing for phone screens */
+  .card, 
+  .metric-card, 
+  .dashboard-widget {
+    padding: 0.95rem !important;
+    border-radius: var(--radius-md, 12px) !important;
+  }
+}
+
+/* ==========================================================================
+   FINAL OVERRIDE RULESET: LIGHT THEME CONTRAST & HEADER PURITY (100% PRECEDENCE)
+   ========================================================================== */
+[data-theme="light"] .app-header,
+[data-theme="light"] header.app-header {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05) !important;
+}
+
+[data-theme="light"] .page-title-section h2,
+[data-theme="light"] #header-page-title {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .menu-toggle-btn,
+[data-theme="light"] #btn-sidebar-toggle {
+  background: #f1f5f9 !important;
+  border: 1.5px solid rgba(15, 23, 42, 0.25) !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08) !important;
+}
+
+[data-theme="light"] .menu-toggle-btn i,
+[data-theme="light"] .menu-toggle-btn svg,
+[data-theme="light"] #btn-sidebar-toggle i,
+[data-theme="light"] #btn-sidebar-toggle svg {
+  stroke: #0f172a !important;
+  color: #0f172a !important;
+  stroke-width: 2.2px !important;
+  fill: none !important;
+}
+
+[data-theme="light"] #btn-notification-bell {
+  background: #ffffff !important;
+  border: 1px solid rgba(15, 23, 42, 0.2) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] #btn-notification-bell i,
+[data-theme="light"] #btn-notification-bell svg {
+  stroke: #0f172a !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .mobile-bottom-nav {
+  background: #ffffff !important;
+  border-top: 1px solid rgba(15, 23, 42, 0.12) !important;
+}
+
+[data-theme="light"] .mobile-nav-item {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .mobile-nav-item.active {
+  color: #b45309 !important;
+}
+
+[data-theme="light"] .mobile-nav-item.active i,
+[data-theme="light"] .mobile-nav-item.active svg {
+  stroke: #b45309 !important;
+}
+
+
 
