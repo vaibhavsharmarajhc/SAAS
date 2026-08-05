@@ -397,7 +397,7 @@ h1, h2, h3, h4, h5, h6 {
 .page-container.active {
   display: block;
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
+  will-change: auto;
 }
 
 @keyframes fadeIn {
@@ -3483,8 +3483,13 @@ mark.search-highlight {
     min-height: 100dvh !important;
   }
 
-  .page-container {
+  .page-container,
+  .page-container.active,
+  .card,
+  .modal-container,
+  .menu-item {
     contain: none !important;
+    will-change: auto !important;
   }
 
   /* 2. Hide Security Badge Pill on Mobile to fit header on single 54px row */
