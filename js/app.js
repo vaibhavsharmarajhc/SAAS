@@ -532,7 +532,7 @@ async function router() {
 
   if (path.startsWith('/portal') || path.startsWith('/portal-page')) {
     if (dashboardApp) {
-      dashboardApp.style.display = 'flex';
+      dashboardApp.style.display = '';
       document.body.classList.add('app-active');
       
       const sidebar = document.querySelector('.app-sidebar');
@@ -564,7 +564,7 @@ async function router() {
       router();
     } else {
       if (dashboardApp) {
-        dashboardApp.style.display = 'flex';
+        dashboardApp.style.display = '';
         document.body.classList.add('app-active');
         
         const sidebar = document.querySelector('.app-sidebar');

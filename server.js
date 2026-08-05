@@ -1138,11 +1138,23 @@ app.get('/api/admin/metrics', authenticateToken, requireSuperAdmin, async (req, 
 
 // ================= SERVE STATIC CLIENT ASSETS =================
 
-// Serve styles.css from /css
-app.use('/css', express.static(path.join(__dirname, 'css')));
+// Serve styles.css from /css with no-cache headers to prevent mobile disk cache persistence
+app.use('/css', express.static(path.join(__dirname, 'css'), {
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+}));
 
-// Serve modules from /js
-app.use('/js', express.static(path.join(__dirname, 'js')));
+// Serve modules from /js with no-cache headers
+app.use('/js', express.static(path.join(__dirname, 'js'), {
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+}));
 
 // Serve images from /images
 app.use('/images', express.static(path.join(__dirname, 'images')));
@@ -1153,6 +1165,9 @@ app.get('/manifest.json', (req, res) => {
 
 app.get('/sw.js', (req, res) => {
   res.setHeader('Service-Worker-Allowed', '/');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.sendFile(path.join(__dirname, 'sw.js'));
 });
 
@@ -1291,6 +1306,9 @@ app.use((req, res, next) => {
     p.startsWith('/app') ||
     p.endsWith('-page')
   ) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     return res.sendFile(path.join(__dirname, 'app.html'));
   }
   next();

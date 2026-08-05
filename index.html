@@ -18,7 +18,7 @@
   <!-- SEO & Styling Meta -->
   <meta name="description" content="Premium Case Diary, Billing, Client Onboarding, and Practice Management Suite for Track My Chambers.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.101">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.102">
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest" defer></script>
   <!-- Chart.js CDN -->
@@ -45,13 +45,13 @@
         navigator.serviceWorker.getRegistrations().then(registrations => {
           return Promise.all(registrations.map(r => r.unregister()));
         }).then(() => {
-          return navigator.serviceWorker.register('/sw.js?v=101');
+          return navigator.serviceWorker.register('/sw.js?v=102');
         }).then(reg => {
           reg.update();
           if (window.caches) {
             caches.keys().then(keys => {
               keys.forEach(key => {
-                if (key !== 'trackmychambers-cache-v101') {
+                if (key !== 'trackmychambers-cache-v102') {
                   caches.delete(key);
                 }
               });
