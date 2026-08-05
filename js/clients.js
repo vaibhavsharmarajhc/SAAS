@@ -266,10 +266,36 @@ const clientsModule = {
     const portalUrl = `${baseUrl}/portal?token=${token}`;
 
     const handleCopy = async () => {
+      let copied = false;
       try {
-        await navigator.clipboard.writeText(portalUrl);
-        alert(`Verified Client Access Portal Link copied to clipboard:\n\n${portalUrl}`);
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+          await navigator.clipboard.writeText(portalUrl);
+          copied = true;
+          alert(`Verified Client Access Portal Link copied to clipboard:\n\n${portalUrl}`);
+        }
       } catch (err) {
+        console.warn("Clipboard API write failed, attempting fallback:", err);
+      }
+
+      if (!copied) {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = portalUrl;
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          const ok = document.execCommand('copy');
+          document.body.removeChild(ta);
+          if (ok) {
+            alert(`Verified Client Access Portal Link copied to clipboard:\n\n${portalUrl}`);
+            copied = true;
+          }
+        } catch (e) {}
+      }
+
+      if (!copied) {
         prompt("Copy Verified Client Access Portal Link below:", portalUrl);
       }
       if (modal) modal.classList.remove('active');

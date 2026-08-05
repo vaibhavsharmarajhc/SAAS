@@ -13,12 +13,12 @@
     }
   </script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>Track My Chambers - Case & Practice Manager</title>
   <!-- SEO & Styling Meta -->
   <meta name="description" content="Premium Case Diary, Billing, Client Onboarding, and Practice Management Suite for Track My Chambers.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.96">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.97">
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest" defer></script>
   <!-- Chart.js CDN -->
@@ -45,13 +45,13 @@
         navigator.serviceWorker.getRegistrations().then(registrations => {
           return Promise.all(registrations.map(r => r.unregister()));
         }).then(() => {
-          return navigator.serviceWorker.register('/sw.js?v=96');
+          return navigator.serviceWorker.register('/sw.js?v=97');
         }).then(reg => {
           reg.update();
           if (window.caches) {
             caches.keys().then(keys => {
               keys.forEach(key => {
-                if (key !== 'trackmychambers-cache-v96') {
+                if (key !== 'trackmychambers-cache-v97') {
                   caches.delete(key);
                 }
               });
