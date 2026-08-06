@@ -540,21 +540,38 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 1.1rem 1.25rem;
 }
 
-.kpi-info .kpi-label {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+.kpi-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.kpi-info .kpi-label,
+.kpi-label {
+  display: block;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  margin-bottom: 0.2rem;
 }
 
-.kpi-info .kpi-value {
-  font-size: 1.45rem;
-  font-weight: 700;
+.kpi-info .kpi-value,
+.kpi-value {
+  display: block;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
   color: var(--text-primary);
-  font-family: 'Inter', sans-serif;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 .kpi-icon-wrapper {
@@ -4228,6 +4245,48 @@ mark.search-highlight {
   #btn-floating-sidebar-toggle {
     display: none !important;
   }
+}
+
+/* ==========================================================================
+   UNIFORM DASHBOARD KPI METRIC CARD TYPOGRAPHY & LAYOUT (100% PRECEDENCE)
+   ========================================================================== */
+.kpi-info {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+}
+
+.kpi-label,
+.kpi-info .kpi-label {
+  display: block !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  white-space: nowrap !important;
+  margin-bottom: 0.2rem !important;
+}
+
+.kpi-value,
+.kpi-info .kpi-value {
+  display: block !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.02em !important;
+}
+
+[data-theme="light"] .kpi-label,
+[data-theme="light"] .kpi-info .kpi-label {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .kpi-value,
+[data-theme="light"] .kpi-info .kpi-value {
+  color: #0f172a !important;
 }
 
 
