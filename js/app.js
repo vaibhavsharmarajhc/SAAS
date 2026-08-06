@@ -503,7 +503,16 @@ async function router() {
       window.scrollTo({ top: 0, behavior: 'instant' });
     } else if (path === '/features') {
       if (featuresPage) featuresPage.style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      if (marketingPage) marketingPage.style.display = 'block';
+      setTimeout(() => {
+        const targetSection = document.getElementById('features') || document.getElementById('features-page');
+        if (targetSection) {
+          const headerOffset = 70;
+          const elementPosition = targetSection.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          window.scrollTo({ top: Math.max(0, offsetPosition), behavior: 'smooth' });
+        }
+      }, 50);
     } else if (path === '/about') {
       if (aboutPage) aboutPage.style.display = 'block';
       if (marketingPage) marketingPage.style.display = 'block';
@@ -518,7 +527,16 @@ async function router() {
       }, 50);
     } else if (path === '/pricing') {
       if (pricingPage) pricingPage.style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      if (marketingPage) marketingPage.style.display = 'block';
+      setTimeout(() => {
+        const targetSection = document.getElementById('pricing') || document.getElementById('pricing-page-standalone');
+        if (targetSection) {
+          const headerOffset = 70;
+          const elementPosition = targetSection.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          window.scrollTo({ top: Math.max(0, offsetPosition), behavior: 'smooth' });
+        }
+      }, 50);
     } else if (path === '/login' || path === '/register') {
       if (marketingPage) marketingPage.style.display = 'block'; // Keep background page intact under modal
       if (authPage) {
