@@ -1747,8 +1747,22 @@ function initChangePasswordHandler() {
  */
 async function renderSupportPage() {
   initSupportTicketHandlers();
+  initHelpSearch();
+  initHelpAccordions();
+  initHelpActionLaunchers();
+
   const guideTab = document.getElementById('support-tab-guide');
   if (guideTab) guideTab.style.display = 'block';
+
+  const ticketsTab = document.getElementById('support-tab-tickets');
+  if (ticketsTab) ticketsTab.style.display = 'none';
+
+  const cards = document.querySelectorAll('#support-page .help-searchable-card, #support-page .card');
+  cards.forEach(card => {
+    if (!card.classList.contains('support-tab-content')) {
+      card.style.display = 'block';
+    }
+  });
 
   const listEl = document.getElementById('support-tickets-list');
   if (!listEl) return;

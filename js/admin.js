@@ -38,18 +38,19 @@ const adminModule = {
     const container = document.getElementById('superadmin-page-content') || document.getElementById('superadmin-page');
     if (!container) return;
 
-    let data = null;
+    // 1. Immediately render local metrics so console displays 100% instantly
+    const localData = this.calculateLocalMetrics();
+    this.renderAdminConsole(container, localData);
+
+    // 2. Asynchronously update with server metrics if available
     try {
-      data = await api.admin.getMetrics();
+      const serverData = await api.admin.getMetrics();
+      if (serverData && serverData.users && serverData.users.length > 0) {
+        this.renderAdminConsole(container, serverData);
+      }
     } catch (err) {
-      console.warn("Admin API fallback active:", err);
+      console.warn("Admin API async background update fallback active:", err);
     }
-
-    if (!data || !data.users || data.users.length === 0) {
-      data = this.calculateLocalMetrics();
-    }
-
-    this.renderAdminConsole(container, data);
   },
 
   calculateLocalMetrics() {
