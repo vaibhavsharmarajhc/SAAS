@@ -514,7 +514,6 @@ async function router() {
       if (marketingPage) marketingPage.style.display = 'block'; // Keep background page intact under modal
       if (authPage) {
         authPage.style.display = 'flex';
-        window.scrollTo({ top: 0, behavior: 'instant' });
         const targetView = (path === '/login') ? 'login' : 'signup';
         showAuthView(targetView);
         updateDbStatusBadge();
@@ -1762,7 +1761,7 @@ document.addEventListener('click', (e) => {
     if (targetPath && targetPath !== '#' && !targetPath.startsWith('javascript:')) {
       e.preventDefault();
 
-      // If user clicked Login or Register button, ensure auth modal opens cleanly
+      // If user clicked Login or Register button, ensure auth modal opens cleanly without resetting scroll position
       if (targetPath === '/login' || targetPath === '/register') {
         const authPage = document.getElementById('auth-page');
         const marketingPage = document.getElementById('marketing-page');
@@ -1771,7 +1770,6 @@ document.addEventListener('click', (e) => {
             marketingPage.style.display = 'block';
           }
           authPage.style.display = 'flex';
-          window.scrollTo({ top: 0, behavior: 'instant' });
           const targetView = (targetPath === '/login') ? 'login' : 'signup';
           if (typeof window.showAuthView === 'function') window.showAuthView(targetView);
           window.history.pushState({}, '', targetPath);

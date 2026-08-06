@@ -18,7 +18,7 @@
   <!-- SEO & Styling Meta -->
   <meta name="description" content="Premium Case Diary, Billing, Client Onboarding, and Practice Management Suite for Track My Chambers.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.130">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.131">
   <!-- Local Lucide Icons Vendor -->
   <script src="/js/vendor/lucide.min.js" defer></script>
   <!-- Chart.js CDN -->
@@ -53,7 +53,7 @@
           if (window.caches) {
             caches.keys().then(keys => {
               keys.forEach(key => {
-                if (key !== 'trackmychambers-cache-v130') {
+                if (key !== 'trackmychambers-cache-v131') {
                   caches.delete(key);
                 }
               });
@@ -358,7 +358,7 @@
             <span style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
               <i data-lucide="shield" style="width: 12px; height: 12px; color: var(--color-success);"></i> High-grade secure SSL data protection
             </span>
-            <a class="feature-detail-cta btn-nav-register" href="/dashboard?view=cases" style="padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: 4px; text-decoration: none;" data-link="/dashboard">Open Registry</a>
+            <a class="feature-detail-cta btn-primary-gradient" href="/dashboard?view=cases" style="padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: 4px; text-decoration: none;" data-link="/dashboard">Open Registry</a>
           </div>
         </div>
       </div>
@@ -699,7 +699,7 @@
             <span style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
               <i data-lucide="shield" style="width: 12px; height: 12px; color: var(--color-success);"></i> High-grade secure SSL data protection
             </span>
-            <a class="feature-detail-cta btn-nav-register" href="/dashboard?view=cases" style="padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: 4px; text-decoration: none;" data-link="/dashboard">Open Registry</a>
+            <a class="feature-detail-cta btn-primary-gradient" href="/dashboard?view=cases" style="padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: 4px; text-decoration: none;" data-link="/dashboard">Open Registry</a>
           </div>
         </div>
       </div>
@@ -976,6 +976,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.130"></script>
+  <script type="module" src="js/app.js?v=1.0.131"></script>
 </body>
 </html>
