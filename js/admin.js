@@ -54,11 +54,20 @@ const adminModule = {
   },
 
   calculateLocalMetrics() {
-    const clients = db.getClients() || [];
-    const cases = db.getCases() || [];
-    const txs = db.getTransactions() || [];
-    const tasks = db.getTasks() || [];
-    const currentUser = db.getUser() || { email: SUPER_ADMIN_EMAIL, lawyerName: 'Adv. Vaibhav Sharma', firmName: 'VSH Legal Chambers' };
+    let clients = [];
+    let cases = [];
+    let txs = [];
+    let tasks = [];
+    let currentUser = { email: SUPER_ADMIN_EMAIL, lawyerName: 'Adv. Vaibhav Sharma', firmName: 'VSH Legal Chambers' };
+
+    try { if (typeof db.getClients === 'function') clients = db.getClients() || []; } catch (e) {}
+    try { if (typeof db.getCases === 'function') cases = db.getCases() || []; } catch (e) {}
+    try { if (typeof db.getTransactions === 'function') txs = db.getTransactions() || []; } catch (e) {}
+    try {
+      if (typeof db.getTasks === 'function') tasks = db.getTasks() || [];
+      else if (window.tasksModule && Array.isArray(window.tasksModule.tasks)) tasks = window.tasksModule.tasks;
+    } catch (e) {}
+    try { if (typeof db.getUser === 'function') currentUser = db.getUser() || currentUser; } catch (e) {}
 
     let totalReceived = 0;
     if (Array.isArray(txs)) {
