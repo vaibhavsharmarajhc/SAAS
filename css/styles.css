@@ -114,8 +114,10 @@ body {
 }
 
 body.app-active {
-  overflow: hidden;
-  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto !important;
+  min-height: 100vh;
+  height: auto !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -144,13 +146,16 @@ h1, h2, h3, h4, h5, h6 {
 .app-container {
   display: flex;
   min-height: 100vh;
-  width: 100vw;
+  width: 100%;
+  overflow: visible;
 }
 
 /* Sidebar Navigation */
 .app-sidebar {
   width: var(--sidebar-width);
   height: 100vh;
+  position: sticky;
+  top: 0;
   background-color: var(--bg-sidebar);
   border-right: 1px solid var(--border-color);
   display: flex;
@@ -160,6 +165,7 @@ h1, h2, h3, h4, h5, h6 {
   transition: background-color var(--transition-normal);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  flex-shrink: 0;
 }
 
 .brand-section {
@@ -4205,6 +4211,23 @@ mark.search-highlight {
 [data-theme="light"] .mobile-nav-item.active i,
 [data-theme="light"] .mobile-nav-item.active svg {
   stroke: #b45309 !important;
+}
+
+/* ==========================================================================
+   DESKTOP VIEW (> 900px): HIDE ALL SIDEBAR TOGGLE BUTTONS (SIDEBAR ALWAYS OPEN)
+   ========================================================================== */
+.floating-sidebar-toggle-btn,
+#btn-floating-sidebar-toggle {
+  display: none !important;
+}
+
+@media (min-width: 901px) {
+  .menu-toggle-btn,
+  #btn-sidebar-toggle,
+  .floating-sidebar-toggle-btn,
+  #btn-floating-sidebar-toggle {
+    display: none !important;
+  }
 }
 
 
