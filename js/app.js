@@ -68,7 +68,6 @@ import accounts from './accounts.js';
 import share from './share.js';
 import tasks from './tasks.js';
 import notificationsModule from './notifications.js';
-import adminModule from './admin.js';
 import portalModule from './portal.js';
 window.tasksModule = tasks;
 window.notificationsModule = notificationsModule;
@@ -76,7 +75,6 @@ window.casesModule = cases;
 window.accountsModule = accounts;
 window.clientsModule = clients;
 window.dashboardModule = dashboard;
-window.adminModule = adminModule;
 window.portalModule = portalModule;
 window.switchView = switchView;
 
@@ -172,15 +170,6 @@ const viewQuickActions = {
  * Switch Active View Router (Async)
  */
 export async function switchView(targetViewId) {
-  const currentUser = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || '{}');
-  if (typeof adminModule !== 'undefined' && adminModule.updateAdminVisibility) {
-    adminModule.updateAdminVisibility(currentUser);
-  }
-
-  if (targetViewId === 'superadmin-page' && typeof adminModule !== 'undefined' && !adminModule.isSuperAdmin(currentUser)) {
-    targetViewId = 'dashboard-page';
-  }
-
   state.activeView = targetViewId;
 
   // Auto-close mobile drawer sidebar
@@ -228,8 +217,7 @@ export async function switchView(targetViewId) {
                                 capitalizedTitle === 'Accounts' ? 'Accounts & Income Ledger' : 
                                 capitalizedTitle === 'Share' ? 'Client Intimation' : 
                                 capitalizedTitle === 'Tasks' ? 'Task Manager' : 
-                                capitalizedTitle === 'Support' ? 'Help & Support Center' :
-                                capitalizedTitle === 'Superadmin' ? 'Super Admin Console' : capitalizedTitle;
+                                capitalizedTitle === 'Support' ? 'Help & Support Center' : capitalizedTitle;
 
   if (targetViewId === 'tasks-page' && typeof window.tasksModule !== 'undefined') {
     window.tasksModule.render();
@@ -295,9 +283,6 @@ async function refreshPageView(viewId) {
         break;
       case 'settings-page':
         loadSettingsForm();
-        break;
-      case 'superadmin-page':
-        if (typeof adminModule !== 'undefined' && adminModule.render) adminModule.render();
         break;
       case 'portal-page':
         if (typeof portalModule !== 'undefined' && portalModule.render) portalModule.render();
@@ -607,7 +592,6 @@ async function router() {
           share.init();
           tasks.init();
           notificationsModule.init();
-          adminModule.init();
           appInitialized = true;
         }
 
@@ -623,7 +607,6 @@ async function router() {
         else if (path.startsWith('/share-page') || path.startsWith('/share')) targetView = 'share-page';
         else if (path.startsWith('/tasks-page') || path.startsWith('/tasks')) targetView = 'tasks-page';
         else if (path.startsWith('/settings-page') || path.startsWith('/settings')) targetView = 'settings-page';
-        else if (path.startsWith('/superadmin-page') || path.startsWith('/superadmin')) targetView = 'superadmin-page';
         
         await switchView(targetView);
       }
@@ -1396,7 +1379,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
  
   // 11. Run router to handle initial page load route
-  adminModule.updateAdminVisibility();
   await router();
 });
 
