@@ -165,14 +165,6 @@ const viewQuickActions = {
     action: () => {
       db.exportBackup();
     }
-  },
-  'support-page': {
-    text: 'Raise Ticket',
-    icon: 'message-square',
-    action: () => {
-      const subjectInput = document.getElementById('support-ticket-subject');
-      if (subjectInput) subjectInput.focus();
-    }
   }
 };
 
@@ -303,9 +295,6 @@ async function refreshPageView(viewId) {
         break;
       case 'settings-page':
         loadSettingsForm();
-        break;
-      case 'support-page':
-        renderSupportPage();
         break;
       case 'superadmin-page':
         if (typeof adminModule !== 'undefined' && adminModule.render) adminModule.render();
@@ -635,7 +624,6 @@ async function router() {
         else if (path.startsWith('/tasks-page') || path.startsWith('/tasks')) targetView = 'tasks-page';
         else if (path.startsWith('/settings-page') || path.startsWith('/settings')) targetView = 'settings-page';
         else if (path.startsWith('/superadmin-page') || path.startsWith('/superadmin')) targetView = 'superadmin-page';
-        else if (path.startsWith('/support-page') || path.startsWith('/help') || path.startsWith('/support')) targetView = 'support-page';
         
         await switchView(targetView);
       }
@@ -1774,338 +1762,6 @@ function initChangePasswordHandler() {
   initPasswordToggleHandlers();
 }
 
-/**
- * Support Tickets Manager & Loader
- */
-async function renderSupportPage() {
-  try {
-    initSupportTicketHandlers();
-    initHelpSearch();
-    initHelpAccordions();
-    initHelpActionLaunchers();
-  } catch (initErr) {
-    console.warn("Help page sub-initialization warning:", initErr);
-  }
-
-  // Auto-populate diagnostic telemetry badge string
-  const telemetryInfoEl = document.getElementById('telemetry-info-text');
-  if (telemetryInfoEl) {
-    telemetryInfoEl.textContent = `Track My Chambers v1.0.124 | ${navigator.platform || 'Client'} | ${navigator.userAgent.slice(0, 45)}...`;
-  }
-
-  // 1. Reset card search display state & search input on view entry
-  const searchInput = document.getElementById('help-search-input');
-  if (searchInput) searchInput.value = '';
-  document.querySelectorAll('.help-searchable-card').forEach(card => {
-    card.style.display = '';
-  });
-
-  // 2. Persistent sub-tab display restoration (remembers advocate's selected sub-tab)
-  const activeTab = state.activeHelpTab || 'guide';
-
-  const guideTab = document.getElementById('support-tab-guide');
-  const ticketsTab = document.getElementById('support-tab-tickets');
-
-  document.querySelectorAll('.support-tab-btn').forEach(btn => {
-    if (btn.getAttribute('data-tab') === activeTab) {
-      btn.classList.add('active');
-      btn.classList.replace('btn-secondary', 'btn-primary');
-    } else {
-      btn.classList.remove('active');
-      btn.classList.replace('btn-primary', 'btn-secondary');
-    }
-  });
-
-  if (activeTab === 'tickets') {
-    if (guideTab) {
-      guideTab.style.display = 'none';
-      guideTab.classList.remove('active');
-    }
-    if (ticketsTab) {
-      ticketsTab.style.display = 'block';
-      ticketsTab.classList.add('active');
-    }
-  } else {
-    if (guideTab) {
-      guideTab.style.display = 'block';
-      guideTab.classList.add('active');
-    }
-    if (ticketsTab) {
-      ticketsTab.style.display = 'none';
-      ticketsTab.classList.remove('active');
-    }
-  }
-
-  const listEl = document.getElementById('support-tickets-list');
-  if (!listEl) return;
-
-  try {
-    const tickets = await api.tickets.getAll();
-    if (!tickets || !Array.isArray(tickets) || tickets.length === 0) {
-      listEl.innerHTML = `
-        <div style="text-align:center; padding:3rem;" class="text-muted">
-          <p>No support tickets raised yet.</p>
-        </div>
-      `;
-      return;
-    }
-
-    // Sort tickets by createdAt desc
-    tickets.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    let html = '';
-    tickets.forEach(ticket => {
-      const dateStr = new Date(ticket.createdAt).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-
-      const statusColors = {
-        'Open': { bg: 'rgba(59, 130, 246, 0.15)', text: '#60a5fa' },
-        'In Progress': { bg: 'rgba(245, 158, 11, 0.15)', text: '#fbbf24' },
-        'Resolved': { bg: 'rgba(16, 185, 129, 0.15)', text: '#34d399' }
-      };
-      const status = statusColors[ticket.status] || { bg: 'rgba(255,255,255,0.05)', text: '#cbd5e1' };
-
-      let repliesHtml = '';
-      if (ticket.replies && ticket.replies.length > 0) {
-        repliesHtml = `
-          <div style="margin-top: 1rem; border-top: 1px dashed var(--border-color); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem;">
-            <div style="font-size: 0.7rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.5px;">Ticket Thread</div>
-            ${ticket.replies.map(r => `
-              <div style="background: rgba(0,0,0,0.15); border: 1px solid var(--border-color); padding: 0.6rem 0.8rem; border-radius: 4px; font-size: 0.75rem;">
-                <div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
-                  <strong style="color: #fff;">${r.sender} <span style="font-weight:400; color:var(--text-muted); font-size:0.7rem;">(${r.role})</span></strong>
-                  <span style="color: var(--text-muted); font-size: 0.65rem;">${new Date(r.date).toLocaleDateString()}</span>
-                </div>
-                <div style="color: #94a3b8; line-height: 1.4;">${r.text}</div>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
-
-      html += `
-        <div class="card" style="background: rgba(30, 41, 59, 0.2); border: 1px solid var(--border-color); padding: 1.25rem; margin-bottom: 0.5rem;">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap: 1rem;">
-            <div>
-              <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600;">TICKET #${ticket.id.split('_')[1] || ticket.id} • ${ticket.category}</span>
-              <h4 style="color: #fff; margin: 4px 0 6px 0; font-size: 1rem; font-weight: 600;">${ticket.subject}</h4>
-              <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0; line-height: 1.5;">${ticket.description}</p>
-            </div>
-            <span style="font-size: 0.65rem; font-weight: 700; background: ${status.bg}; color: ${status.text}; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
-              ${ticket.status}
-            </span>
-          </div>
-          <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.75rem;">Raised on: ${dateStr}</div>
-          ${repliesHtml}
-        </div>
-      `;
-    });
-
-    listEl.innerHTML = html;
-  } catch (err) {
-    listEl.innerHTML = `<div style="color: var(--color-danger); padding: 1rem; text-align: center;">Error loading support tickets: ${err.message}</div>`;
-  }
-}
-
-function initSupportTicketHandlers() {
-  const tabBtns = document.querySelectorAll('.support-tab-btn');
-  tabBtns.forEach(btn => {
-    if (!btn.getAttribute('data-bound')) {
-      btn.setAttribute('data-bound', 'true');
-      btn.addEventListener('click', () => {
-        const targetTab = btn.getAttribute('data-tab');
-        state.activeHelpTab = targetTab;
-        tabBtns.forEach(b => {
-          b.classList.remove('active');
-          b.classList.replace('btn-primary', 'btn-secondary');
-        });
-        btn.classList.add('active');
-        btn.classList.replace('btn-secondary', 'btn-primary');
-
-        document.querySelectorAll('.support-tab-content').forEach(content => {
-          content.style.display = 'none';
-          content.classList.remove('active');
-        });
-        const targetEl = document.getElementById(`support-tab-${targetTab}`);
-        if (targetEl) {
-          targetEl.style.display = 'block';
-          targetEl.classList.add('active');
-        }
-        safeCreateIcons();
-      });
-    }
-  });
-
-  const form = document.getElementById('support-ticket-form');
-  if (form && !form.getAttribute('data-bound')) {
-    form.setAttribute('data-bound', 'true');
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const subject = document.getElementById('support-ticket-subject').value.trim();
-      const category = document.getElementById('support-ticket-category').value;
-      const description = document.getElementById('support-ticket-desc').value.trim();
-      const telemetryInfo = document.getElementById('telemetry-info-text') ? document.getElementById('telemetry-info-text').textContent : '';
-
-      const errorEl = document.getElementById('support-ticket-error');
-      const successEl = document.getElementById('support-ticket-success');
-
-      errorEl.style.display = 'none';
-      successEl.style.display = 'none';
-
-      try {
-        const btn = form.querySelector('button[type="submit"]');
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="spinner" style="width: 14px; height: 14px; margin-right: 4px;"></i> Submitting...';
-        btn.disabled = true;
-
-        await api.tickets.create({ subject, category, description, telemetry: telemetryInfo });
-
-        btn.innerHTML = originalHtml;
-        btn.disabled = false;
-
-        successEl.textContent = "Support ticket submitted successfully! Check your email inbox for confirmation.";
-        successEl.style.display = 'block';
-
-        document.getElementById('support-ticket-subject').value = '';
-        document.getElementById('support-ticket-desc').value = '';
-
-        await renderSupportPage();
-      } catch (err) {
-        const btn = form.querySelector('button[type="submit"]');
-        btn.innerHTML = '<i data-lucide="message-square"></i> Submit Support Ticket';
-        btn.disabled = false;
-        safeCreateIcons();
-
-        errorEl.textContent = err.message;
-        errorEl.style.display = 'block';
-      }
-    });
-  }
-}
-
-/**
- * Help Center Real-Time Live Search Engine
- */
-function initHelpSearch() {
-  const searchInput = document.getElementById('help-search-input');
-  const clearBtn = document.getElementById('help-search-clear');
-  if (!searchInput || searchInput.getAttribute('data-bound')) return;
-  searchInput.setAttribute('data-bound', 'true');
-
-  searchInput.addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase().trim();
-    if (clearBtn) clearBtn.style.display = query.length > 0 ? 'block' : 'none';
-
-    const cards = document.querySelectorAll('.help-searchable-card');
-    cards.forEach(card => {
-      const text = card.textContent.toLowerCase();
-      const isMatch = !query || text.includes(query);
-      card.style.display = isMatch ? '' : 'none';
-
-      // Auto-expand closed accordions inside matching cards so search terms are 100% visible
-      if (query && isMatch) {
-        card.querySelectorAll('details.help-accordion').forEach(acc => {
-          if (acc.textContent.toLowerCase().includes(query)) {
-            acc.setAttribute('open', 'true');
-          }
-        });
-      }
-    });
-  });
-
-  if (clearBtn) {
-    clearBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      clearBtn.style.display = 'none';
-      searchInput.dispatchEvent(new Event('input'));
-    });
-  }
-}
-
-/**
- * Help Center Accordion Expand/Collapse Controls
- */
-function initHelpAccordions() {
-  const expandBtn = document.getElementById('btn-help-expand-all');
-  const collapseBtn = document.getElementById('btn-help-collapse-all');
-
-  if (expandBtn && !expandBtn.getAttribute('data-bound')) {
-    expandBtn.setAttribute('data-bound', 'true');
-    expandBtn.addEventListener('click', () => {
-      document.querySelectorAll('.help-accordion').forEach(el => el.setAttribute('open', 'true'));
-    });
-  }
-
-  if (collapseBtn && !collapseBtn.getAttribute('data-bound')) {
-    collapseBtn.setAttribute('data-bound', 'true');
-    collapseBtn.addEventListener('click', () => {
-      document.querySelectorAll('.help-accordion').forEach(el => el.removeAttribute('open'));
-    });
-  }
-}
-
-/**
- * Help Center "Try It Now" Action Launchers
- */
-function initHelpActionLaunchers() {
-  document.querySelectorAll('.help-action-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const actionTarget = btn.getAttribute('data-target-action');
-      if (!actionTarget) return;
-
-      if (actionTarget === 'overview') {
-        switchView('overview-page');
-      } else if (actionTarget === 'register-case') {
-        switchView('cases-page');
-        setTimeout(() => {
-          const addCaseBtn = document.getElementById('btn-add-case') || document.getElementById('cases-add-btn') || document.querySelector('[data-action="add-case"]');
-          if (addCaseBtn) addCaseBtn.click();
-        }, 150);
-      } else if (actionTarget === 'diary') {
-        switchView('diary-page');
-      } else if (actionTarget === 'log-tx') {
-        switchView('accounts-page');
-        setTimeout(() => {
-          const logTxBtn = document.getElementById('btn-open-tx-modal') || document.getElementById('accounts-add-tx-btn') || document.querySelector('[data-action="add-tx"]');
-          if (logTxBtn) logTxBtn.click();
-        }, 150);
-      } else if (actionTarget === 'onboard-client') {
-        switchView('clients-page');
-        setTimeout(() => {
-          const addClientBtn = document.getElementById('btn-add-client') || document.getElementById('clients-add-btn') || document.querySelector('[data-action="add-client"]');
-          if (addClientBtn) addClientBtn.click();
-        }, 150);
-      } else if (actionTarget === 'create-task') {
-        switchView('tasks-page');
-        setTimeout(() => {
-          const addTaskBtn = document.getElementById('btn-add-task') || document.getElementById('tasks-add-btn') || document.querySelector('[data-action="add-task"]');
-          if (addTaskBtn) addTaskBtn.click();
-        }, 150);
-      } else if (actionTarget === 'settings') {
-        switchView('settings-page');
-      }
-    });
-  });
-}
-
-/**
- * Support Ticket Auto-Captured Telemetry
- */
-function initSupportTicketTelemetry() {
-  const telemetryText = document.getElementById('telemetry-info-text');
-  if (telemetryText) {
-    const userAgent = navigator.userAgent.includes('Chrome') ? 'Chrome' : navigator.userAgent.includes('Firefox') ? 'Firefox' : 'Browser';
-    const os = navigator.platform.includes('Win') ? 'Windows' : navigator.platform.includes('Mac') ? 'macOS' : 'OS';
-    const screenRes = `${window.screen.width}x${window.screen.height}`;
-    telemetryText.textContent = `Chamber v1.0.48 | ${userAgent} on ${os} (${screenRes})`;
-  }
-}
-
 // Global click interceptor for all client-side navigation links (a[data-link])
 document.addEventListener('click', (e) => {
   const link = e.target.closest('a[data-link]');
@@ -2141,10 +1797,6 @@ window.addEventListener('popstate', () => {
 // Global initialization call on DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
   initAuthenticationHandlers();
-  initHelpSearch();
-  initHelpAccordions();
-  initHelpActionLaunchers();
-  initSupportTicketTelemetry();
 
   // iOS Safari Touchmove Scroll Lock on Backdrop
   const backdrop = document.getElementById('sidebar-backdrop');
@@ -2167,9 +1819,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 setTimeout(() => {
   initAuthenticationHandlers();
-  initHelpSearch();
-  initHelpAccordions();
-  initHelpActionLaunchers();
-  initSupportTicketTelemetry();
-}, 500);
+}, 200);
 
