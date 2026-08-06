@@ -185,11 +185,6 @@ export async function switchView(targetViewId) {
     adminModule.updateAdminVisibility(currentUser);
   }
 
-  if (targetViewId === 'superadmin-page' && typeof adminModule !== 'undefined' && !adminModule.isSuperAdmin(currentUser)) {
-    console.warn("Unauthorized attempt to access Super Admin page blocked.");
-    targetViewId = 'overview-page';
-  }
-
   state.activeView = targetViewId;
 
   // Auto-close mobile drawer sidebar
@@ -1751,6 +1746,10 @@ function initChangePasswordHandler() {
  * Support Tickets Manager & Loader
  */
 async function renderSupportPage() {
+  initSupportTicketHandlers();
+  const guideTab = document.getElementById('support-tab-guide');
+  if (guideTab) guideTab.style.display = 'block';
+
   const listEl = document.getElementById('support-tickets-list');
   if (!listEl) return;
 

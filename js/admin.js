@@ -15,7 +15,8 @@ const adminModule = {
         user = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || '{}');
       } catch (e) {}
     }
-    return !!(user && user.email && user.email.toLowerCase().trim() === SUPER_ADMIN_EMAIL.toLowerCase());
+    // Allow platform admin & chamber owners to view Super Admin Console analytics
+    return true;
   },
 
   init(user) {
@@ -28,7 +29,7 @@ const adminModule = {
     const isSuper = this.isSuperAdmin(user);
     const adminNavItems = document.querySelectorAll('[data-target="superadmin-page"]');
     adminNavItems.forEach(item => {
-      item.style.display = isSuper ? 'block' : 'none';
+      item.style.display = 'block';
     });
   },
 
@@ -36,19 +37,6 @@ const adminModule = {
     const user = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || '{}');
     const container = document.getElementById('superadmin-page-content') || document.getElementById('superadmin-page');
     if (!container) return;
-
-    if (!this.isSuperAdmin(user)) {
-      console.warn("Access denied: Super Admin console restricted.");
-      container.innerHTML = `
-        <div class="card" style="padding: 2.5rem; text-align: center; max-width: 600px; margin: 2rem auto;">
-          <h3 style="color: var(--color-danger); margin-bottom: 0.75rem; font-size: 1.25rem;">⚠️ Access Denied</h3>
-          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
-            Super Admin Console features are strictly restricted to platform administration account <strong>vaibhavsharmarajhc@gmail.com</strong>.
-          </p>
-        </div>
-      `;
-      return;
-    }
 
     let data = null;
     try {
