@@ -483,9 +483,9 @@ async function router() {
     return;
   }
 
-  // If on app.html (dashboardApp exists) and trying to access a marketing route (features, pricing, about, privacy, terms), redirect to index.html
-  if (dashboardApp && isPublicRoute && (path === '/features' || path === '/about' || path === '/pricing' || path === '/privacy' || path === '/terms')) {
-    console.log("Navigating from app.html to marketing route:", path);
+  // If on app.html (dashboardApp exists) and trying to access a marketing or auth route, redirect to index.html
+  if (dashboardApp && isPublicRoute && path !== '/dashboard' && !path.startsWith('/portal')) {
+    console.log("Navigating from app.html workspace to public route:", path);
     window.location.href = path;
     return;
   }
@@ -497,15 +497,21 @@ async function router() {
       if (marketingPage) marketingPage.style.display = 'block';
     } else if (path === '/privacy') {
       if (privacyPage) privacyPage.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } else if (path === '/terms') {
       if (termsPage) termsPage.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } else if (path === '/features') {
       if (featuresPage) featuresPage.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } else if (path === '/about') {
       if (aboutPage) aboutPage.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } else if (path === '/pricing') {
       if (pricingPage) pricingPage.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } else if (path === '/login' || path === '/register') {
+      if (marketingPage) marketingPage.style.display = 'block'; // Keep background page intact under modal
       if (authPage) {
         authPage.style.display = 'flex';
         window.scrollTo({ top: 0, behavior: 'instant' });
@@ -1748,21 +1754,45 @@ function initChangePasswordHandler() {
   initPasswordToggleHandlers();
 }
 
-// Global click interceptor for all client-side navigation links (a[data-link])
+// Global click interceptor for all client-side navigation links, buttons & CTAs
 document.addEventListener('click', (e) => {
-  const link = e.target.closest('a[data-link]');
+  const link = e.target.closest('a[data-link], button[data-link], .btn-nav-login, .btn-nav-register, .hero-cta-primary, .hero-cta-secondary');
   if (link) {
-    e.preventDefault();
-    const targetPath = link.getAttribute('data-link');
-    window.history.pushState({}, '', targetPath);
-    router();
-    return;
+    const targetPath = link.getAttribute('data-link') || link.getAttribute('href');
+    if (targetPath && targetPath !== '#' && !targetPath.startsWith('javascript:')) {
+      e.preventDefault();
+
+      // If user clicked Login or Register button, ensure auth modal opens cleanly
+      if (targetPath === '/login' || targetPath === '/register') {
+        const authPage = document.getElementById('auth-page');
+        const marketingPage = document.getElementById('marketing-page');
+        if (authPage) {
+          if (marketingPage && marketingPage.style.display === 'none') {
+            marketingPage.style.display = 'block';
+          }
+          authPage.style.display = 'flex';
+          window.scrollTo({ top: 0, behavior: 'instant' });
+          const targetView = (targetPath === '/login') ? 'login' : 'signup';
+          if (typeof window.showAuthView === 'function') window.showAuthView(targetView);
+          window.history.pushState({}, '', targetPath);
+          return;
+        }
+      }
+
+      window.history.pushState({}, '', targetPath);
+      router();
+      return;
+    }
   }
 
   const hashLink = e.target.closest('a[href^="#"]');
   if (hashLink) {
     const hash = hashLink.getAttribute('href');
     if (hash && hash !== '#' && hash !== '#!') {
+      const marketingPage = document.getElementById('marketing-page');
+      if (marketingPage && marketingPage.style.display === 'none') {
+        marketingPage.style.display = 'block';
+      }
       const targetEl = document.querySelector(hash);
       if (targetEl) {
         e.preventDefault();
