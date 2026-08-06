@@ -269,49 +269,58 @@ async function refreshPageView(viewId) {
   if (urlParams.has('test_auth')) {
     window.isTestAuth = true;
   }
-  const authOk = window.isTestAuth ? true : await db.loadAll();
-  if (!authOk) {
-    showAuthModal();
-    return;
+
+  // 1. Dispatch view render first so UI canvas displays instantly
+  try {
+    switch (viewId) {
+      case 'dashboard-page':
+      case 'overview-page':
+        if (typeof dashboard !== 'undefined' && dashboard.render) dashboard.render();
+        requestAnimationFrame(() => {
+          if (typeof dashboard !== 'undefined' && typeof dashboard.renderCharts === 'function') {
+            dashboard.renderCharts();
+          }
+        });
+        break;
+      case 'clients-page':
+        if (typeof clients !== 'undefined' && clients.render) clients.render();
+        break;
+      case 'cases-page':
+        if (typeof cases !== 'undefined' && cases.render) cases.render();
+        break;
+      case 'diary-page':
+        if (typeof diary !== 'undefined' && diary.render) diary.render();
+        break;
+      case 'accounts-page':
+        if (typeof accounts !== 'undefined' && accounts.render) accounts.render();
+        break;
+      case 'share-page':
+        if (typeof share !== 'undefined' && share.render) share.render();
+        break;
+      case 'settings-page':
+        loadSettingsForm();
+        break;
+      case 'support-page':
+        renderSupportPage();
+        break;
+      case 'superadmin-page':
+        if (typeof adminModule !== 'undefined' && adminModule.render) adminModule.render();
+        break;
+      case 'portal-page':
+        if (typeof portalModule !== 'undefined' && portalModule.render) portalModule.render();
+        break;
+    }
+  } catch (renderErr) {
+    console.warn("View render execution warning:", renderErr);
   }
 
-  switch (viewId) {
-    case 'dashboard-page':
-    case 'overview-page':
-      dashboard.render();
-      requestAnimationFrame(() => {
-        if (typeof dashboard.renderCharts === 'function') {
-          dashboard.renderCharts();
-        }
-      });
-      break;
-    case 'clients-page':
-      clients.render();
-      break;
-    case 'cases-page':
-      cases.render();
-      break;
-    case 'diary-page':
-      diary.render();
-      break;
-    case 'accounts-page':
-      accounts.render();
-      break;
-    case 'share-page':
-      share.render();
-      break;
-    case 'settings-page':
-      loadSettingsForm();
-      break;
-    case 'support-page':
-      renderSupportPage();
-      break;
-    case 'superadmin-page':
-      adminModule.render();
-      break;
-    case 'portal-page':
-      portalModule.render();
-      break;
+  // 2. Non-fatal background session check
+  try {
+    if (!window.isTestAuth && typeof db.loadAll === 'function') {
+      await db.loadAll();
+    }
+  } catch (authErr) {
+    console.warn("Session check non-fatal fallback:", authErr);
   }
 }
 
