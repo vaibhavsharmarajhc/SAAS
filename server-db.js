@@ -17,7 +17,8 @@ const DEFAULT_SCHEMA = {
   cases: [],
   transactions: [],
   colleagues: [],
-  tasks: []
+  tasks: [],
+  tickets: []
 };
 
 // MongoDB connection management
@@ -74,6 +75,7 @@ function readDb() {
     const parsed = JSON.parse(data);
     parsed.colleagues = parsed.colleagues || [];
     parsed.tasks = parsed.tasks || [];
+    parsed.tickets = parsed.tickets || [];
     return parsed;
   } catch (e) {
     console.error("Error reading JSON database file. Returning default schema.", e);
@@ -1847,6 +1849,91 @@ async function getSupportTickets(tenantId) {
   return tickets.filter(t => t.tenantId === tenantId);
 }
 
+async function getAllSupportTicketsAdmin() {
+  const db = await getDb();
+  let tickets = [];
+  let tenants = [];
+
+  if (db) {
+    const rawTickets = await db.collection('tickets').find({}).toArray();
+    tickets = mapIds(rawTickets);
+    const rawTenants = await db.collection('tenants').find({}).toArray();
+    tenants = mapIds(rawTenants);
+  } else {
+    const localDb = readDb();
+    tickets = localDb.tickets || [];
+    tenants = localDb.tenants || [];
+  }
+
+  const tenantMap = new Map();
+  tenants.forEach(t => tenantMap.set(t.id, t));
+
+  return tickets.map(t => {
+    const tenant = tenantMap.get(t.tenantId) || {};
+    return {
+      ...t,
+      tenantFirmName: tenant.firmName || "Track My Chambers",
+      tenantLawyerName: tenant.lawyerName || "Advocate",
+      tenantEmail: tenant.email || "Unknown"
+    };
+  });
+}
+
+async function addTicketReply(ticketId, senderName, role, text) {
+  const reply = {
+    sender: senderName || "Super Admin",
+    role: role || "Platform Support Desk",
+    text: text || "",
+    date: new Date().toISOString()
+  };
+
+  const db = await getDb();
+  if (db) {
+    await db.collection('tickets').updateOne(
+      { _id: ticketId },
+      { $push: { replies: reply } }
+    );
+    const doc = await db.collection('tickets').findOne({ _id: ticketId });
+    return mapId(doc);
+  }
+
+  const localDb = readDb();
+  const tickets = localDb.tickets || [];
+  const ticket = tickets.find(t => t.id === ticketId);
+  if (ticket) {
+    ticket.replies = ticket.replies || [];
+    ticket.replies.push(reply);
+    writeDb(localDb);
+    return ticket;
+  }
+  throw new Error("Ticket not found.");
+}
+
+async function updateTicketStatus(ticketId, status) {
+  const validStatuses = ['Open', 'In Progress', 'Resolved'];
+  const newStatus = validStatuses.includes(status) ? status : 'Open';
+
+  const db = await getDb();
+  if (db) {
+    await db.collection('tickets').updateOne(
+      { _id: ticketId },
+      { $set: { status: newStatus } }
+    );
+    const doc = await db.collection('tickets').findOne({ _id: ticketId });
+    return mapId(doc);
+  }
+
+  const localDb = readDb();
+  const tickets = localDb.tickets || [];
+  const ticket = tickets.find(t => t.id === ticketId);
+  if (ticket) {
+    ticket.status = newStatus;
+    writeDb(localDb);
+    return ticket;
+  }
+  throw new Error("Ticket not found.");
+}
+
 // Pending Registrations Memory Store for Signup OTP Verification
 const pendingRegistrations = new Map();
 
@@ -1927,6 +2014,9 @@ module.exports = {
   regenerateClientToken,
   addSupportTicket,
   getSupportTickets,
+  getAllSupportTicketsAdmin,
+  addTicketReply,
+  updateTicketStatus,
   storePendingRegistration,
   getPendingRegistration,
   deletePendingRegistration,

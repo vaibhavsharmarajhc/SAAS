@@ -185,6 +185,10 @@ export async function switchView(targetViewId) {
     adminModule.updateAdminVisibility(currentUser);
   }
 
+  if (targetViewId === 'superadmin-page' && typeof adminModule !== 'undefined' && !adminModule.isSuperAdmin(currentUser)) {
+    targetViewId = 'dashboard-page';
+  }
+
   state.activeView = targetViewId;
 
   // Auto-close mobile drawer sidebar
@@ -498,6 +502,20 @@ async function router() {
   const publicRoutes = ['/', '/index.html', '/privacy', '/terms', '/login', '/register', '/features', '/about', '/pricing'];
   const isPublicRoute = publicRoutes.includes(path);
 
+  // If on index.html (!dashboardApp) and trying to access an app route, redirect to app.html via browser location
+  if (!dashboardApp && !isPublicRoute) {
+    console.log("Navigating from index.html to app workspace route:", path);
+    window.location.href = path;
+    return;
+  }
+
+  // If on app.html (dashboardApp exists) and trying to access a marketing route (features, pricing, about, privacy, terms), redirect to index.html
+  if (dashboardApp && isPublicRoute && (path === '/features' || path === '/about' || path === '/pricing' || path === '/privacy' || path === '/terms')) {
+    console.log("Navigating from app.html to marketing route:", path);
+    window.location.href = path;
+    return;
+  }
+
   if (isPublicRoute) {
     if (marketingNav) marketingNav.style.display = 'flex';
 
@@ -516,9 +534,14 @@ async function router() {
     } else if (path === '/login' || path === '/register') {
       if (authPage) {
         authPage.style.display = 'flex';
+        window.scrollTo({ top: 0, behavior: 'instant' });
         const targetView = (path === '/login') ? 'login' : 'signup';
         showAuthView(targetView);
         updateDbStatusBadge();
+        setTimeout(() => {
+          const emailInput = document.getElementById(targetView === 'login' ? 'auth-login-email' : 'auth-signup-email');
+          if (emailInput) emailInput.focus();
+        }, 50);
       }
     }
     safeCreateIcons();
@@ -601,17 +624,17 @@ async function router() {
 
         setupMobileOverviewPage();
 
-        // Determine view from path
+        // Determine view from path (supports both short /view and long /view-page formats)
         let targetView = 'dashboard-page';
-        if (path.startsWith('/overview-page')) targetView = 'overview-page';
-        else if (path.startsWith('/clients-page')) targetView = 'clients-page';
-        else if (path.startsWith('/cases-page')) targetView = 'cases-page';
-        else if (path.startsWith('/diary-page')) targetView = 'diary-page';
-        else if (path.startsWith('/accounts-page')) targetView = 'accounts-page';
-        else if (path.startsWith('/share-page')) targetView = 'share-page';
-        else if (path.startsWith('/tasks-page')) targetView = 'tasks-page';
-        else if (path.startsWith('/settings-page')) targetView = 'settings-page';
-        else if (path.startsWith('/superadmin-page')) targetView = 'superadmin-page';
+        if (path.startsWith('/overview-page') || path.startsWith('/overview')) targetView = 'overview-page';
+        else if (path.startsWith('/clients-page') || path.startsWith('/clients')) targetView = 'clients-page';
+        else if (path.startsWith('/cases-page') || path.startsWith('/cases')) targetView = 'cases-page';
+        else if (path.startsWith('/diary-page') || path.startsWith('/diary')) targetView = 'diary-page';
+        else if (path.startsWith('/accounts-page') || path.startsWith('/accounts')) targetView = 'accounts-page';
+        else if (path.startsWith('/share-page') || path.startsWith('/share')) targetView = 'share-page';
+        else if (path.startsWith('/tasks-page') || path.startsWith('/tasks')) targetView = 'tasks-page';
+        else if (path.startsWith('/settings-page') || path.startsWith('/settings')) targetView = 'settings-page';
+        else if (path.startsWith('/superadmin-page') || path.startsWith('/superadmin')) targetView = 'superadmin-page';
         else if (path.startsWith('/support-page') || path.startsWith('/help') || path.startsWith('/support')) targetView = 'support-page';
         
         await switchView(targetView);
@@ -1760,25 +1783,26 @@ async function renderSupportPage() {
   initHelpAccordions();
   initHelpActionLaunchers();
 
+  const activeTabBtn = document.querySelector('.support-tab-btn.active');
+  const activeTab = activeTabBtn ? activeTabBtn.getAttribute('data-tab') : 'guide';
+
   const guideTab = document.getElementById('support-tab-guide');
-  if (guideTab) guideTab.style.display = 'block';
-
   const ticketsTab = document.getElementById('support-tab-tickets');
-  if (ticketsTab) ticketsTab.style.display = 'none';
 
-  const cards = document.querySelectorAll('#support-page .help-searchable-card, #support-page .card');
-  cards.forEach(card => {
-    if (!card.classList.contains('support-tab-content')) {
-      card.style.display = 'block';
-    }
-  });
+  if (activeTab === 'tickets') {
+    if (guideTab) guideTab.style.display = 'none';
+    if (ticketsTab) ticketsTab.style.display = 'block';
+  } else {
+    if (guideTab) guideTab.style.display = 'block';
+    if (ticketsTab) ticketsTab.style.display = 'none';
+  }
 
   const listEl = document.getElementById('support-tickets-list');
   if (!listEl) return;
 
   try {
     const tickets = await api.tickets.getAll();
-    if (!tickets || tickets.length === 0) {
+    if (!tickets || !Array.isArray(tickets) || tickets.length === 0) {
       listEl.innerHTML = `
         <div style="text-align:center; padding:3rem;" class="text-muted">
           <p>No support tickets raised yet.</p>
@@ -1850,69 +1874,70 @@ async function renderSupportPage() {
 }
 
 function initSupportTicketHandlers() {
-  const tabBtns = document.querySelectorAll('.support-tab-btn');
-  tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const targetTab = btn.getAttribute('data-tab');
-      tabBtns.forEach(b => {
-        b.classList.remove('active');
-        b.classList.replace('btn-primary', 'btn-secondary');
-      });
-      btn.classList.add('active');
-      btn.classList.replace('btn-secondary', 'btn-primary');
-
-      document.querySelectorAll('.support-tab-content').forEach(content => {
-        content.style.display = 'none';
-      });
-      const targetEl = document.getElementById(`support-tab-${targetTab}`);
-      if (targetEl) targetEl.style.display = 'block';
-      safeCreateIcons();
-    });
-  });
-
   const form = document.getElementById('support-ticket-form');
-  if (!form) return;
+  if (form && !form.getAttribute('data-bound')) {
+    form.setAttribute('data-bound', 'true');
+    const tabBtns = document.querySelectorAll('.support-tab-btn');
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetTab = btn.getAttribute('data-tab');
+        tabBtns.forEach(b => {
+          b.classList.remove('active');
+          b.classList.replace('btn-primary', 'btn-secondary');
+        });
+        btn.classList.add('active');
+        btn.classList.replace('btn-secondary', 'btn-primary');
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const subject = document.getElementById('support-ticket-subject').value.trim();
-    const category = document.getElementById('support-ticket-category').value;
-    const description = document.getElementById('support-ticket-desc').value.trim();
+        document.querySelectorAll('.support-tab-content').forEach(content => {
+          content.style.display = 'none';
+        });
+        const targetEl = document.getElementById(`support-tab-${targetTab}`);
+        if (targetEl) targetEl.style.display = 'block';
+        safeCreateIcons();
+      });
+    });
 
-    const errorEl = document.getElementById('support-ticket-error');
-    const successEl = document.getElementById('support-ticket-success');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const subject = document.getElementById('support-ticket-subject').value.trim();
+      const category = document.getElementById('support-ticket-category').value;
+      const description = document.getElementById('support-ticket-desc').value.trim();
 
-    errorEl.style.display = 'none';
-    successEl.style.display = 'none';
+      const errorEl = document.getElementById('support-ticket-error');
+      const successEl = document.getElementById('support-ticket-success');
 
-    try {
-      const btn = form.querySelector('button[type="submit"]');
-      const originalHtml = btn.innerHTML;
-      btn.innerHTML = '<i class="spinner" style="width: 14px; height: 14px; margin-right: 4px;"></i> Submitting...';
-      btn.disabled = true;
+      errorEl.style.display = 'none';
+      successEl.style.display = 'none';
 
-      await api.tickets.create({ subject, category, description });
+      try {
+        const btn = form.querySelector('button[type="submit"]');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="spinner" style="width: 14px; height: 14px; margin-right: 4px;"></i> Submitting...';
+        btn.disabled = true;
 
-      btn.innerHTML = originalHtml;
-      btn.disabled = false;
+        await api.tickets.create({ subject, category, description });
 
-      successEl.textContent = "Support ticket submitted successfully! Check your email inbox for confirmation.";
-      successEl.style.display = 'block';
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
 
-      document.getElementById('support-ticket-subject').value = '';
-      document.getElementById('support-ticket-desc').value = '';
+        successEl.textContent = "Support ticket submitted successfully! Check your email inbox for confirmation.";
+        successEl.style.display = 'block';
 
-      await renderSupportPage();
-    } catch (err) {
-      const btn = form.querySelector('button[type="submit"]');
-      btn.innerHTML = '<i data-lucide="message-square"></i> Submit Support Ticket';
-      btn.disabled = false;
-      safeCreateIcons();
+        document.getElementById('support-ticket-subject').value = '';
+        document.getElementById('support-ticket-desc').value = '';
 
-      errorEl.textContent = err.message;
-      errorEl.style.display = 'block';
-    }
-  });
+        await renderSupportPage();
+      } catch (err) {
+        const btn = form.querySelector('button[type="submit"]');
+        btn.innerHTML = '<i data-lucide="message-square"></i> Submit Support Ticket';
+        btn.disabled = false;
+        safeCreateIcons();
+
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+      }
+    });
+  }
 }
 
 /**
@@ -1921,7 +1946,8 @@ function initSupportTicketHandlers() {
 function initHelpSearch() {
   const searchInput = document.getElementById('help-search-input');
   const clearBtn = document.getElementById('help-search-clear');
-  if (!searchInput) return;
+  if (!searchInput || searchInput.getAttribute('data-bound')) return;
+  searchInput.setAttribute('data-bound', 'true');
 
   searchInput.addEventListener('input', (e) => {
     const query = e.target.value.toLowerCase().trim();
@@ -1954,13 +1980,15 @@ function initHelpAccordions() {
   const expandBtn = document.getElementById('btn-help-expand-all');
   const collapseBtn = document.getElementById('btn-help-collapse-all');
 
-  if (expandBtn) {
+  if (expandBtn && !expandBtn.getAttribute('data-bound')) {
+    expandBtn.setAttribute('data-bound', 'true');
     expandBtn.addEventListener('click', () => {
       document.querySelectorAll('.help-accordion').forEach(el => el.setAttribute('open', 'true'));
     });
   }
 
-  if (collapseBtn) {
+  if (collapseBtn && !collapseBtn.getAttribute('data-bound')) {
+    collapseBtn.setAttribute('data-bound', 'true');
     collapseBtn.addEventListener('click', () => {
       document.querySelectorAll('.help-accordion').forEach(el => el.removeAttribute('open'));
     });
@@ -1981,7 +2009,7 @@ function initHelpActionLaunchers() {
       } else if (actionTarget === 'register-case') {
         switchView('cases-page');
         setTimeout(() => {
-          const addCaseBtn = document.getElementById('add-case-btn') || document.querySelector('[data-action="add-case"]');
+          const addCaseBtn = document.getElementById('btn-add-case') || document.getElementById('cases-add-btn') || document.querySelector('[data-action="add-case"]');
           if (addCaseBtn) addCaseBtn.click();
         }, 150);
       } else if (actionTarget === 'diary') {
@@ -1989,19 +2017,19 @@ function initHelpActionLaunchers() {
       } else if (actionTarget === 'log-tx') {
         switchView('accounts-page');
         setTimeout(() => {
-          const logTxBtn = document.getElementById('add-tx-btn') || document.querySelector('[data-action="add-tx"]');
+          const logTxBtn = document.getElementById('btn-open-tx-modal') || document.getElementById('accounts-add-tx-btn') || document.querySelector('[data-action="add-tx"]');
           if (logTxBtn) logTxBtn.click();
         }, 150);
       } else if (actionTarget === 'onboard-client') {
         switchView('clients-page');
         setTimeout(() => {
-          const addClientBtn = document.getElementById('add-client-btn') || document.querySelector('[data-action="add-client"]');
+          const addClientBtn = document.getElementById('btn-add-client') || document.getElementById('clients-add-btn') || document.querySelector('[data-action="add-client"]');
           if (addClientBtn) addClientBtn.click();
         }, 150);
       } else if (actionTarget === 'create-task') {
         switchView('tasks-page');
         setTimeout(() => {
-          const addTaskBtn = document.getElementById('add-task-btn') || document.querySelector('[data-action="add-task"]');
+          const addTaskBtn = document.getElementById('btn-add-task') || document.getElementById('tasks-add-btn') || document.querySelector('[data-action="add-task"]');
           if (addTaskBtn) addTaskBtn.click();
         }, 150);
       } else if (actionTarget === 'settings') {
@@ -2032,6 +2060,19 @@ document.addEventListener('click', (e) => {
     const targetPath = link.getAttribute('data-link');
     window.history.pushState({}, '', targetPath);
     router();
+    return;
+  }
+
+  const hashLink = e.target.closest('a[href^="#"]');
+  if (hashLink) {
+    const hash = hashLink.getAttribute('href');
+    if (hash && hash !== '#' && hash !== '#!') {
+      const targetEl = document.querySelector(hash);
+      if (targetEl) {
+        e.preventDefault();
+        targetEl.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
   }
 });
 

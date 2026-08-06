@@ -1115,6 +1115,35 @@ app.delete('/api/notifications/clear', authenticateToken, async (req, res) => {
   }
 });
 
+// ================= SUPPORT TICKETS ROUTES =================
+app.get('/api/tickets', authenticateToken, async (req, res) => {
+  try {
+    const tickets = await db.getSupportTickets(req.user.id);
+    res.json(tickets);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/tickets', authenticateToken, async (req, res) => {
+  try {
+    const newTicket = await db.addSupportTicket(req.user.id, req.body);
+    res.status(201).json(newTicket);
+
+    // Send email alert to Super Admin desk
+    const tenant = await db.getTenantById(req.user.id);
+    const lawyer = tenant ? (tenant.lawyerName || tenant.email) : "Chocate Advocate";
+    sendEmail({
+      to: SUPER_ADMIN_EMAIL,
+      subject: `[Track My Chambers Support] New Ticket #${newTicket.id.split('_')[1] || newTicket.id}: ${newTicket.subject}`,
+      html: `<p>A new support ticket was raised by <strong>${lawyer}</strong> (${req.user.email}):</p><p><strong>Category:</strong> ${newTicket.category}</p><p><strong>Description:</strong> ${newTicket.description}</p>`
+    }).catch(e => console.warn("Ticket email alert fallback:", e));
+
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 // ================= SUPER ADMIN ROUTES =================
 const SUPER_ADMIN_EMAIL = 'vaibhavsharmarajhc@gmail.com';
 
@@ -1133,6 +1162,33 @@ app.get('/api/admin/metrics', authenticateToken, requireSuperAdmin, async (req, 
   } catch (err) {
     console.error("Failed to compile admin metrics:", err);
     res.status(500).json({ error: "Failed to compile admin metrics." });
+  }
+});
+
+app.get('/api/admin/tickets', authenticateToken, requireSuperAdmin, async (req, res) => {
+  try {
+    const tickets = await db.getAllSupportTicketsAdmin();
+    res.json(tickets);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/tickets/:id/reply', authenticateToken, requireSuperAdmin, async (req, res) => {
+  try {
+    const ticket = await db.addTicketReply(req.params.id, "Adv. Vaibhav Sharma", "Super Admin Platform Desk", req.body.text);
+    res.json(ticket);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.put('/api/admin/tickets/:id/status', authenticateToken, requireSuperAdmin, async (req, res) => {
+  try {
+    const ticket = await db.updateTicketStatus(req.params.id, req.body.status);
+    res.json(ticket);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 });
 

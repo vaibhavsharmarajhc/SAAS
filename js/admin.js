@@ -15,8 +15,8 @@ const adminModule = {
         user = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || '{}');
       } catch (e) {}
     }
-    // Allow platform admin & chamber owners to view Super Admin Console analytics
-    return true;
+    const email = user && user.email ? user.email.toLowerCase().trim() : '';
+    return email === SUPER_ADMIN_EMAIL.toLowerCase() || (user && user.role === 'superadmin');
   },
 
   init(user) {
@@ -29,24 +29,31 @@ const adminModule = {
     const isSuper = this.isSuperAdmin(user);
     const adminNavItems = document.querySelectorAll('[data-target="superadmin-page"]');
     adminNavItems.forEach(item => {
-      item.style.display = 'block';
+      item.style.display = isSuper ? 'block' : 'none';
     });
   },
 
   async render() {
     const user = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || '{}');
+    if (!this.isSuperAdmin(user)) {
+      window.location.replace('/dashboard');
+      return;
+    }
+
     const container = document.getElementById('superadmin-page-content') || document.getElementById('superadmin-page');
     if (!container) return;
 
     // 1. Immediately render local metrics so console displays 100% instantly
     const localData = this.calculateLocalMetrics();
     this.renderAdminConsole(container, localData);
+    this.loadAdminSupportDesk();
 
     // 2. Asynchronously update with server metrics if available
     try {
       const serverData = await api.admin.getMetrics();
       if (serverData && serverData.users && serverData.users.length > 0) {
         this.renderAdminConsole(container, serverData);
+        this.loadAdminSupportDesk();
       }
     } catch (err) {
       console.warn("Admin API async background update fallback active:", err);
@@ -191,6 +198,27 @@ const adminModule = {
           </table>
         </div>
       </div>
+
+      <!-- Platform Support Desk Management Panel -->
+      <div class="card" style="padding: 1.25rem; margin-top: 1.5rem;">
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+          <div>
+            <h3 style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="help-circle" style="width: 18px; height: 18px; color: var(--color-primary);"></i> Chamber Support Desk Tickets
+            </h3>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Review help tickets submitted by advocates, post official replies, and manage issue statuses</span>
+          </div>
+          <button type="button" class="btn btn-secondary" id="btn-admin-refresh-tickets" style="font-size: 0.75rem; padding: 0.35rem 0.75rem; display: flex; align-items: center; gap: 4px;">
+            <i data-lucide="rotate-cw" style="width: 12px; height: 12px;"></i> Refresh Tickets
+          </button>
+        </div>
+
+        <div id="admin-support-tickets-container" style="display: flex; flex-direction: column; gap: 1rem;">
+          <div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem;">
+            Loading chamber support tickets...
+          </div>
+        </div>
+      </div>
     `;
 
     container.innerHTML = html;
@@ -255,6 +283,144 @@ const adminModule = {
         </tr>
       `;
     }).join('');
+  },
+
+  async loadAdminSupportDesk() {
+    const container = document.getElementById('admin-support-tickets-container');
+    const refreshBtn = document.getElementById('btn-admin-refresh-tickets');
+    if (!container) return;
+
+    if (refreshBtn && !refreshBtn.getAttribute('data-bound')) {
+      refreshBtn.setAttribute('data-bound', 'true');
+      refreshBtn.addEventListener('click', () => this.loadAdminSupportDesk());
+    }
+
+    try {
+      const tickets = await api.admin.getTickets();
+      if (!tickets || !Array.isArray(tickets) || tickets.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem;">
+            No chamber support tickets submitted yet.
+          </div>
+        `;
+        return;
+      }
+
+      // Sort tickets desc by creation date
+      tickets.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      let html = '';
+      tickets.forEach(ticket => {
+        const dateStr = new Date(ticket.createdAt).toLocaleDateString('en-US', {
+          month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+
+        const statusOptions = ['Open', 'In Progress', 'Resolved'].map(st => 
+          `<option value="${st}" ${ticket.status === st ? 'selected' : ''}>${st}</option>`
+        ).join('');
+
+        let repliesHtml = '';
+        if (ticket.replies && ticket.replies.length > 0) {
+          repliesHtml = `
+            <div style="margin-top: 0.85rem; border-top: 1px dashed var(--border-color); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.6rem;">
+              <div style="font-size: 0.68rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.5px;">Ticket Thread</div>
+              ${ticket.replies.map(r => `
+                <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); padding: 0.6rem 0.8rem; border-radius: 6px; font-size: 0.75rem;">
+                  <div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
+                    <strong style="color: #fff;">${r.sender} <span style="font-weight:400; color:var(--text-muted); font-size:0.68rem;">(${r.role})</span></strong>
+                    <span style="color: var(--text-muted); font-size: 0.65rem;">${new Date(r.date).toLocaleDateString()}</span>
+                  </div>
+                  <div style="color: #cbd5e1; line-height: 1.4;">${r.text}</div>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+
+        html += `
+          <div class="card admin-ticket-card" data-ticket-id="${ticket.id}" style="background: rgba(17, 24, 39, 0.4); border: 1px solid var(--border-color); padding: 1rem; border-radius: 8px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap;">
+              <div>
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                  <span style="font-size: 0.65rem; color: var(--color-primary); font-weight: 700; background: rgba(217,119,6,0.1); padding: 2px 6px; border-radius: 4px;">TICKET #${ticket.id.split('_')[1] || ticket.id}</span>
+                  <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600;">${ticket.category}</span>
+                </div>
+                <h4 style="color: #fff; margin: 2px 0 4px 0; font-size: 0.95rem; font-weight: 600;">${ticket.subject}</h4>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                  Advocate: <strong style="color: var(--text-primary);">${ticket.tenantLawyerName || 'Advocate'}</strong> (${ticket.tenantFirmName || 'Chamber'}) &bull; ${ticket.tenantEmail || ''}
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0; line-height: 1.4; white-space: pre-wrap;">${ticket.description}</p>
+              </div>
+
+              <!-- Status Dropdown Select -->
+              <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+                <label style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600;">Status:</label>
+                <select class="form-control admin-ticket-status-select" data-ticket-id="${ticket.id}" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; min-height: 32px; background: rgba(0,0,0,0.3);">
+                  ${statusOptions}
+                </select>
+                <span style="font-size: 0.65rem; color: var(--text-muted); margin-top: 4px;">Raised: ${dateStr}</span>
+              </div>
+            </div>
+
+            ${repliesHtml}
+
+            <!-- Reply Form -->
+            <form class="admin-ticket-reply-form" data-ticket-id="${ticket.id}" style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
+              <input type="text" class="form-control admin-reply-input" placeholder="Type official response from Super Admin..." style="font-size: 0.8rem; min-height: 34px;" required>
+              <button type="submit" class="btn btn-primary" style="font-size: 0.78rem; padding: 0.35rem 0.85rem; min-height: 34px; white-space: nowrap;">
+                Send Reply
+              </button>
+            </form>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      if (typeof safeCreateIcons === 'function') safeCreateIcons(container);
+
+      // Attach status change listeners
+      container.querySelectorAll('.admin-ticket-status-select').forEach(select => {
+        select.addEventListener('change', async (e) => {
+          const ticketId = select.getAttribute('data-ticket-id');
+          const newStatus = e.target.value;
+          try {
+            await api.admin.updateTicketStatus(ticketId, newStatus);
+            this.loadAdminSupportDesk();
+          } catch (err) {
+            alert("Failed to update status: " + err.message);
+          }
+        });
+      });
+
+      // Attach reply submission listeners
+      container.querySelectorAll('.admin-ticket-reply-form').forEach(form => {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const ticketId = form.getAttribute('data-ticket-id');
+          const input = form.querySelector('.admin-reply-input');
+          const replyText = input.value.trim();
+          if (!replyText) return;
+
+          try {
+            const btn = form.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+
+            await api.admin.replyTicket(ticketId, replyText);
+            this.loadAdminSupportDesk();
+          } catch (err) {
+            alert("Failed to send reply: " + err.message);
+          }
+        });
+      });
+
+    } catch (err) {
+      container.innerHTML = `
+        <div style="color: var(--color-danger); padding: 1rem; text-align: center; font-size: 0.85rem;">
+          Failed to load support tickets: ${err.message}
+        </div>
+      `;
+    }
   },
 
   setupCategorySettingsManager() {

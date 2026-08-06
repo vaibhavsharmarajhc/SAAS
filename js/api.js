@@ -240,6 +240,21 @@ const api = {
   admin: {
     async getMetrics() {
       return await fetchAPI('/api/admin/metrics');
+    },
+    async getTickets() {
+      return await fetchAPI('/api/admin/tickets');
+    },
+    async replyTicket(ticketId, text) {
+      return await fetchAPI(`/api/admin/tickets/${ticketId}/reply`, {
+        method: 'POST',
+        body: { text }
+      });
+    },
+    async updateTicketStatus(ticketId, status) {
+      return await fetchAPI(`/api/admin/tickets/${ticketId}/status`, {
+        method: 'PUT',
+        body: { status }
+      });
     }
   },
 
