@@ -2121,7 +2121,10 @@ document.addEventListener('click', (e) => {
       const targetEl = document.querySelector(hash);
       if (targetEl) {
         e.preventDefault();
-        targetEl.scrollIntoView({ behavior: 'smooth' });
+        const headerOffset = 70;
+        const elementPosition = targetEl.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        window.scrollTo({ top: Math.max(0, offsetPosition), behavior: 'smooth' });
       }
     }
   }
