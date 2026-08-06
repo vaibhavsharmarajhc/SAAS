@@ -1787,6 +1787,12 @@ async function renderSupportPage() {
     console.warn("Help page sub-initialization warning:", initErr);
   }
 
+  // Auto-populate diagnostic telemetry badge string
+  const telemetryInfoEl = document.getElementById('telemetry-info-text');
+  if (telemetryInfoEl) {
+    telemetryInfoEl.textContent = `Track My Chambers v1.0.124 | ${navigator.platform || 'Client'} | ${navigator.userAgent.slice(0, 45)}...`;
+  }
+
   // 1. Reset card search display state & search input on view entry
   const searchInput = document.getElementById('help-search-input');
   if (searchInput) searchInput.value = '';
@@ -1794,12 +1800,21 @@ async function renderSupportPage() {
     card.style.display = '';
   });
 
-  // 2. Fail-safe active tab display restoration
-  const activeTabBtn = document.querySelector('.support-tab-btn.active');
-  const activeTab = activeTabBtn ? activeTabBtn.getAttribute('data-tab') : 'guide';
+  // 2. Persistent sub-tab display restoration (remembers advocate's selected sub-tab)
+  const activeTab = state.activeHelpTab || 'guide';
 
   const guideTab = document.getElementById('support-tab-guide');
   const ticketsTab = document.getElementById('support-tab-tickets');
+
+  document.querySelectorAll('.support-tab-btn').forEach(btn => {
+    if (btn.getAttribute('data-tab') === activeTab) {
+      btn.classList.add('active');
+      btn.classList.replace('btn-secondary', 'btn-primary');
+    } else {
+      btn.classList.remove('active');
+      btn.classList.replace('btn-primary', 'btn-secondary');
+    }
+  });
 
   if (activeTab === 'tickets') {
     if (guideTab) {
@@ -1904,6 +1919,7 @@ function initSupportTicketHandlers() {
       btn.setAttribute('data-bound', 'true');
       btn.addEventListener('click', () => {
         const targetTab = btn.getAttribute('data-tab');
+        state.activeHelpTab = targetTab;
         tabBtns.forEach(b => {
           b.classList.remove('active');
           b.classList.replace('btn-primary', 'btn-secondary');
@@ -1928,31 +1944,12 @@ function initSupportTicketHandlers() {
   const form = document.getElementById('support-ticket-form');
   if (form && !form.getAttribute('data-bound')) {
     form.setAttribute('data-bound', 'true');
-    const tabBtns = document.querySelectorAll('.support-tab-btn');
-    tabBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetTab = btn.getAttribute('data-tab');
-        tabBtns.forEach(b => {
-          b.classList.remove('active');
-          b.classList.replace('btn-primary', 'btn-secondary');
-        });
-        btn.classList.add('active');
-        btn.classList.replace('btn-secondary', 'btn-primary');
-
-        document.querySelectorAll('.support-tab-content').forEach(content => {
-          content.style.display = 'none';
-        });
-        const targetEl = document.getElementById(`support-tab-${targetTab}`);
-        if (targetEl) targetEl.style.display = 'block';
-        safeCreateIcons();
-      });
-    });
-
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const subject = document.getElementById('support-ticket-subject').value.trim();
       const category = document.getElementById('support-ticket-category').value;
       const description = document.getElementById('support-ticket-desc').value.trim();
+      const telemetryInfo = document.getElementById('telemetry-info-text') ? document.getElementById('telemetry-info-text').textContent : '';
 
       const errorEl = document.getElementById('support-ticket-error');
       const successEl = document.getElementById('support-ticket-success');
@@ -1966,7 +1963,7 @@ function initSupportTicketHandlers() {
         btn.innerHTML = '<i class="spinner" style="width: 14px; height: 14px; margin-right: 4px;"></i> Submitting...';
         btn.disabled = true;
 
-        await api.tickets.create({ subject, category, description });
+        await api.tickets.create({ subject, category, description, telemetry: telemetryInfo });
 
         btn.innerHTML = originalHtml;
         btn.disabled = false;
@@ -2007,10 +2004,16 @@ function initHelpSearch() {
     const cards = document.querySelectorAll('.help-searchable-card');
     cards.forEach(card => {
       const text = card.textContent.toLowerCase();
-      if (!query || text.includes(query)) {
-        card.style.display = '';
-      } else {
-        card.style.display = 'none';
+      const isMatch = !query || text.includes(query);
+      card.style.display = isMatch ? '' : 'none';
+
+      // Auto-expand closed accordions inside matching cards so search terms are 100% visible
+      if (query && isMatch) {
+        card.querySelectorAll('details.help-accordion').forEach(acc => {
+          if (acc.textContent.toLowerCase().includes(query)) {
+            acc.setAttribute('open', 'true');
+          }
+        });
       }
     });
   });
