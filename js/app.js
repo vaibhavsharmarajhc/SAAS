@@ -1778,11 +1778,23 @@ function initChangePasswordHandler() {
  * Support Tickets Manager & Loader
  */
 async function renderSupportPage() {
-  initSupportTicketHandlers();
-  initHelpSearch();
-  initHelpAccordions();
-  initHelpActionLaunchers();
+  try {
+    initSupportTicketHandlers();
+    initHelpSearch();
+    initHelpAccordions();
+    initHelpActionLaunchers();
+  } catch (initErr) {
+    console.warn("Help page sub-initialization warning:", initErr);
+  }
 
+  // 1. Reset card search display state & search input on view entry
+  const searchInput = document.getElementById('help-search-input');
+  if (searchInput) searchInput.value = '';
+  document.querySelectorAll('.help-searchable-card').forEach(card => {
+    card.style.display = '';
+  });
+
+  // 2. Fail-safe active tab display restoration
   const activeTabBtn = document.querySelector('.support-tab-btn.active');
   const activeTab = activeTabBtn ? activeTabBtn.getAttribute('data-tab') : 'guide';
 
@@ -1790,11 +1802,23 @@ async function renderSupportPage() {
   const ticketsTab = document.getElementById('support-tab-tickets');
 
   if (activeTab === 'tickets') {
-    if (guideTab) guideTab.style.display = 'none';
-    if (ticketsTab) ticketsTab.style.display = 'block';
+    if (guideTab) {
+      guideTab.style.display = 'none';
+      guideTab.classList.remove('active');
+    }
+    if (ticketsTab) {
+      ticketsTab.style.display = 'block';
+      ticketsTab.classList.add('active');
+    }
   } else {
-    if (guideTab) guideTab.style.display = 'block';
-    if (ticketsTab) ticketsTab.style.display = 'none';
+    if (guideTab) {
+      guideTab.style.display = 'block';
+      guideTab.classList.add('active');
+    }
+    if (ticketsTab) {
+      ticketsTab.style.display = 'none';
+      ticketsTab.classList.remove('active');
+    }
   }
 
   const listEl = document.getElementById('support-tickets-list');
@@ -1874,6 +1898,33 @@ async function renderSupportPage() {
 }
 
 function initSupportTicketHandlers() {
+  const tabBtns = document.querySelectorAll('.support-tab-btn');
+  tabBtns.forEach(btn => {
+    if (!btn.getAttribute('data-bound')) {
+      btn.setAttribute('data-bound', 'true');
+      btn.addEventListener('click', () => {
+        const targetTab = btn.getAttribute('data-tab');
+        tabBtns.forEach(b => {
+          b.classList.remove('active');
+          b.classList.replace('btn-primary', 'btn-secondary');
+        });
+        btn.classList.add('active');
+        btn.classList.replace('btn-secondary', 'btn-primary');
+
+        document.querySelectorAll('.support-tab-content').forEach(content => {
+          content.style.display = 'none';
+          content.classList.remove('active');
+        });
+        const targetEl = document.getElementById(`support-tab-${targetTab}`);
+        if (targetEl) {
+          targetEl.style.display = 'block';
+          targetEl.classList.add('active');
+        }
+        safeCreateIcons();
+      });
+    }
+  });
+
   const form = document.getElementById('support-ticket-form');
   if (form && !form.getAttribute('data-bound')) {
     form.setAttribute('data-bound', 'true');
