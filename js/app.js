@@ -132,13 +132,6 @@ const viewQuickActions = {
       clients.resetWizard();
     }
   },
-  'cases-page': {
-    text: 'Register Case',
-    icon: 'plus',
-    action: () => {
-      document.getElementById('btn-add-case').click();
-    }
-  },
   'diary-page': {
     text: 'Record Hearing',
     icon: 'calendar',
