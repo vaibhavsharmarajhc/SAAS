@@ -1681,6 +1681,10 @@ function initFeaturesTabs() {
       updatePreview(feature);
     });
   });
+
+  // Ensure initial active feature preview and icons are 100% rendered
+  updatePreview('cases');
+  safeCreateIcons();
 }
 
 function setupMobileOverviewPage() {

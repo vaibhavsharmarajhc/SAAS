@@ -18,9 +18,9 @@
   <!-- SEO & Styling Meta -->
   <meta name="description" content="Premium Case Diary, Billing, Client Onboarding, and Practice Management Suite for Track My Chambers.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.128">
-  <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=1.0.129">
+  <!-- Local Lucide Icons Vendor -->
+  <script src="/js/vendor/lucide.min.js" defer></script>
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <script>
@@ -32,6 +32,12 @@
           } else {
             lucide.createIcons();
           }
+        } else {
+          setTimeout(() => {
+            if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') {
+              lucide.createIcons();
+            }
+          }, 250);
         }
       } catch (e) {
         console.warn('Lucide icons safe call deferred:', e);
@@ -47,7 +53,7 @@
           if (window.caches) {
             caches.keys().then(keys => {
               keys.forEach(key => {
-                if (key !== 'trackmychambers-cache-v128') {
+                if (key !== 'trackmychambers-cache-v129') {
                   caches.delete(key);
                 }
               });
@@ -970,6 +976,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.128"></script>
+  <script type="module" src="js/app.js?v=1.0.129"></script>
 </body>
 </html>
