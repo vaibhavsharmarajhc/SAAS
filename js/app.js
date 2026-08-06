@@ -506,7 +506,16 @@ async function router() {
       window.scrollTo({ top: 0, behavior: 'instant' });
     } else if (path === '/about') {
       if (aboutPage) aboutPage.style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      if (marketingPage) marketingPage.style.display = 'block';
+      setTimeout(() => {
+        const targetSection = document.getElementById('about-page') || document.getElementById('about');
+        if (targetSection) {
+          const headerOffset = 70;
+          const elementPosition = targetSection.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          window.scrollTo({ top: Math.max(0, offsetPosition), behavior: 'smooth' });
+        }
+      }, 50);
     } else if (path === '/pricing') {
       if (pricingPage) pricingPage.style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'instant' });
