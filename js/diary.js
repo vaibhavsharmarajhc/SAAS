@@ -558,15 +558,19 @@ const diaryModule = {
   getHearingsForDate(dateStr) {
     const cases = db.getCases();
     const list = [];
+    const todayStr = new Date().toISOString().split('T')[0];
 
     cases.forEach(c => {
+      if (c.status !== 'Active') return;
+
       const pastHearings = c.hearings || [];
       const matchingHearing = pastHearings.find(h => h && h.date === dateStr);
-      const isUpcoming = (c.status === 'Active' && c.nextHearingDate === dateStr);
+      const isListedOnDate = (c.nextHearingDate === dateStr);
 
-      if (isUpcoming || matchingHearing) {
-        // Enforce strict de-duplication: each case appears AT MOST ONCE per calendar date
-        if (!list.some(item => item.id === c.id)) {
+      // On today or future dates: case is listed ONLY if its active nextHearingDate is on this date!
+      // Once an advocate logs today's hearing and moves nextHearingDate to a future date, it's no longer pending for today.
+      if (dateStr >= todayStr) {
+        if (isListedOnDate) {
           list.push({
             id: c.id,
             title: c.title,
@@ -577,7 +581,23 @@ const diaryModule = {
             status: c.status,
             stage: matchingHearing ? matchingHearing.stage : c.stage,
             notes: matchingHearing ? (matchingHearing.notes || 'Hearing proceedings recorded.') : 'Upcoming scheduled hearing.',
-            isUpcoming: isUpcoming && !matchingHearing
+            isUpcoming: true
+          });
+        }
+      } else {
+        // Historical date lookup (past calendar dates): show recorded hearing proceedings or historical listing
+        if (matchingHearing || isListedOnDate) {
+          list.push({
+            id: c.id,
+            title: c.title,
+            court: c.court,
+            caseNumber: c.caseNumber,
+            clientId: c.clientId,
+            caseType: c.caseType,
+            status: c.status,
+            stage: matchingHearing ? matchingHearing.stage : c.stage,
+            notes: matchingHearing ? (matchingHearing.notes || 'Hearing proceedings recorded.') : 'Past scheduled hearing.',
+            isUpcoming: false
           });
         }
       }
