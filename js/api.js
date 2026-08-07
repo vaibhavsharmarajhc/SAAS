@@ -241,6 +241,25 @@ const api = {
     async getMetrics() {
       return await fetchAPI('/api/admin/metrics');
     },
+    async getUsers() {
+      return await fetchAPI('/api/admin/users');
+    },
+    async setUserSuspended(userId, isSuspended) {
+      return await fetchAPI(`/api/admin/users/${userId}/suspend`, {
+        method: 'PUT',
+        body: { isSuspended }
+      });
+    },
+    async deleteUserAccountPermanent(userId) {
+      return await fetchAPI(`/api/admin/users/${userId}`, {
+        method: 'DELETE'
+      });
+    },
+    async impersonateUser(userId) {
+      return await fetchAPI(`/api/admin/users/${userId}/impersonate`, {
+        method: 'POST'
+      });
+    },
     async getTickets() {
       return await fetchAPI('/api/admin/tickets');
     },

@@ -29,7 +29,7 @@ const adminModule = {
     const isSuper = this.isSuperAdmin(user);
     const adminNavItems = document.querySelectorAll('[data-target="superadmin-page"]');
     adminNavItems.forEach(item => {
-      item.style.display = isSuper ? 'block' : 'none';
+      item.style.display = isSuper ? 'flex' : 'none';
     });
   },
 
@@ -50,11 +50,14 @@ const adminModule = {
 
     // 2. Asynchronously update with server metrics if available
     try {
-      const serverData = await api.admin.getMetrics();
-      if (serverData && serverData.users && serverData.users.length > 0) {
-        this.renderAdminConsole(container, serverData);
-        this.loadAdminSupportDesk();
-      }
+      const serverUsers = await api.admin.getUsers();
+      const serverMetrics = await api.admin.getMetrics();
+      const serverData = {
+        ...serverMetrics,
+        users: (Array.isArray(serverUsers) && serverUsers.length > 0) ? serverUsers : (serverMetrics.users || localData.users)
+      };
+      this.renderAdminConsole(container, serverData);
+      this.loadAdminSupportDesk();
     } catch (err) {
       console.warn("Admin API async background update fallback active:", err);
     }
