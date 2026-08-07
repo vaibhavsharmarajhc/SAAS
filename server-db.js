@@ -2023,6 +2023,33 @@ async function getImpersonatedAccountData(userId) {
   };
 }
 
+async function deleteHearing(tenantId, caseId, hearingId) {
+  const db = await getDb();
+  if (db) {
+    await db.collection('cases').updateOne(
+      { id: caseId, tenantId },
+      { $pull: { hearings: { id: hearingId } } }
+    );
+  } else {
+    const localDb = readDb();
+    const c = (localDb.cases || []).find(c => c.id === caseId);
+    if (c && c.hearings) {
+      c.hearings = c.hearings.filter(h => h.id !== hearingId);
+      writeDb(localDb);
+    }
+  }
+  return true;
+}
+
+async function getTransaction(tenantId, txId) {
+  const db = await getDb();
+  if (db) {
+    return await db.collection('transactions').findOne({ id: txId, tenantId });
+  }
+  const localDb = readDb();
+  return (localDb.transactions || []).find(tr => tr.id === txId && tr.tenantId === tenantId);
+}
+
 module.exports = {
   getDb,
   initDatabase,
