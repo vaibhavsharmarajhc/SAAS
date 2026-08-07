@@ -1966,6 +1966,63 @@ function isTokenBlacklisted(token) {
   return blacklistedTokens.has(token);
 }
 
+async function getAllUsersAdmin() {
+  const metrics = await getPlatformAdminMetrics();
+  return metrics.users || [];
+}
+
+async function getUserById(userId) {
+  const db = await getDb();
+  if (db) {
+    return await db.collection('tenants').findOne({ id: userId });
+  }
+  const localDb = readDb();
+  return (localDb.tenants || []).find(t => t.id === userId);
+}
+
+async function setUserSuspended(userId, isSuspended) {
+  const db = await getDb();
+  if (db) {
+    await db.collection('tenants').updateOne({ id: userId }, { $set: { isSuspended } });
+    return await db.collection('tenants').findOne({ id: userId });
+  }
+  const localDb = readDb();
+  const t = (localDb.tenants || []).find(t => t.id === userId);
+  if (t) {
+    t.isSuspended = isSuspended;
+    writeDb(localDb);
+  }
+  return t;
+}
+
+async function deleteUserAccountPermanent(userId) {
+  const db = await getDb();
+  if (db) {
+    await db.collection('tenants').deleteOne({ id: userId });
+    await db.collection('clients').deleteMany({ tenantId: userId });
+    await db.collection('cases').deleteMany({ tenantId: userId });
+    await db.collection('transactions').deleteMany({ tenantId: userId });
+    await db.collection('tasks').deleteMany({ tenantId: userId });
+  } else {
+    const localDb = readDb();
+    localDb.tenants = (localDb.tenants || []).filter(t => t.id !== userId);
+    localDb.clients = (localDb.clients || []).filter(c => c.tenantId !== userId);
+    localDb.cases = (localDb.cases || []).filter(c => c.tenantId !== userId);
+    localDb.transactions = (localDb.transactions || []).filter(tr => tr.tenantId !== userId);
+    localDb.tasks = (localDb.tasks || []).filter(tk => tk.tenantId !== userId);
+    writeDb(localDb);
+  }
+  return true;
+}
+
+async function getImpersonatedAccountData(userId) {
+  const targetUser = await getUserById(userId);
+  return {
+    user: targetUser,
+    message: "Impersonation session data ready"
+  };
+}
+
 module.exports = {
   getDb,
   initDatabase,
@@ -1990,7 +2047,9 @@ module.exports = {
   deleteCase,
   addHearing,
   updateHearing,
+  deleteHearing,
   getTransactions,
+  getTransaction,
   addTransaction,
   updateTransaction,
   deleteTransaction,
@@ -2010,6 +2069,11 @@ module.exports = {
   markAllNotificationsRead,
   clearNotifications,
   getPlatformAdminMetrics,
+  getAllUsersAdmin,
+  getUserById,
+  setUserSuspended,
+  deleteUserAccountPermanent,
+  getImpersonatedAccountData,
   getPublicClientPortalData,
   regenerateClientToken,
   addSupportTicket,

@@ -1464,7 +1464,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   initGlobalSearch();
   initFeaturesTabs();
   initChangePasswordHandler();
-  initSupportTicketHandlers();
  
   // Test hook to clear DB for visual empty state testing
   const urlParams = new URLSearchParams(window.location.search);
