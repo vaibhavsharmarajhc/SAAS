@@ -172,12 +172,28 @@ const viewQuickActions = {
  * Switch Active View Router (Async)
  */
 export async function switchView(targetViewId) {
-  const currentUser = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || '{}');
+  let currentUser = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser') || '{}');
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  if ((!currentUser || !currentUser.email) && token) {
+    try {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const payload = JSON.parse(atob(parts[1]));
+        if (payload && payload.email) {
+          currentUser = { email: payload.email, role: payload.role || 'lawyer' };
+        }
+      }
+    } catch (e) {}
+  }
+
   if (typeof adminModule !== 'undefined' && adminModule.updateAdminVisibility) {
     adminModule.updateAdminVisibility(currentUser);
   }
 
-  if (targetViewId === 'superadmin-page' && typeof adminModule !== 'undefined' && !adminModule.isSuperAdmin(currentUser)) {
+  const isSuper = (typeof adminModule !== 'undefined' && adminModule.isSuperAdmin(currentUser)) ||
+                  (currentUser && currentUser.email && currentUser.email.toLowerCase().trim() === 'vaibhavsharmarajhc@gmail.com');
+
+  if (targetViewId === 'superadmin-page' && !isSuper) {
     targetViewId = 'dashboard-page';
   }
 
