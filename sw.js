@@ -1,9 +1,9 @@
-const CACHE_NAME = 'trackmychambers-cache-v143';
+const CACHE_NAME = 'trackmychambers-cache-v144';
 const ASSETS = [
   '/dashboard',
   '/app.html',
-  '/css/styles.css?v=1.0.143',
-  '/js/app.js?v=1.0.143',
+  '/css/styles.css?v=1.0.144',
+  '/js/app.js?v=1.0.144',
   '/js/vendor/lucide.min.js',
   '/js/vendor/chart.min.js',
   '/js/workers/ledger.worker.js',
@@ -49,8 +49,10 @@ self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET' || e.request.url.includes('/api/') || e.request.url.includes('/portal')) {
     return;
   }
+
+  // Network-First Strategy for HTML, JS, and CSS to guarantee instant live updates
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request, { cache: 'no-cache' })
       .then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
           const responseClone = networkResponse.clone();

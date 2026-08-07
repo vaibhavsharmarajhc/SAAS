@@ -572,18 +572,39 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
  */
 app.get('/api/bootstrap', authenticateToken, async (req, res) => {
   try {
-    const tenant = await db.getTenantById(req.user.id);
+    let tenant = await db.getTenantById(req.user.id);
+    if (!tenant && req.user && req.user.email) {
+      tenant = await db.getTenantByEmail(req.user.email);
+    }
+    if (!tenant && req.user && req.user.email && req.user.email.toLowerCase().trim() === 'vaibhavsharmarajhc@gmail.com') {
+      tenant = {
+        id: req.user.id || 'superadmin_tenant',
+        email: 'vaibhavsharmarajhc@gmail.com',
+        role: 'superadmin',
+        lawyerName: 'Adv. Vaibhav Sharma',
+        firmName: 'VSH Legal Chambers',
+        settings: {
+          lawyerName: 'Adv. Vaibhav Sharma',
+          firmName: 'VSH Legal Chambers',
+          currency: 'INR',
+          theme: 'light'
+        }
+      };
+    }
     if (!tenant) {
       return res.status(404).json({ error: "User profile not found." });
     }
     const { passwordHash: _, ...safeTenant } = tenant;
+    if (safeTenant.email && safeTenant.email.toLowerCase().trim() === 'vaibhavsharmarajhc@gmail.com') {
+      safeTenant.role = 'superadmin';
+    }
     const tenantId = req.user.id || safeTenant.email;
 
     const [clients, cases, transactions, tasks] = await Promise.all([
-      db.getClientsForTenant(tenantId),
-      db.getCasesForTenant(tenantId),
-      db.getTransactionsForTenant(tenantId),
-      db.getTasksForTenant ? db.getTasksForTenant(tenantId) : []
+      db.getClientsForTenant ? db.getClientsForTenant(tenantId) : db.getClients(tenantId),
+      db.getCasesForTenant ? db.getCasesForTenant(tenantId) : db.getCases(tenantId),
+      db.getTransactionsForTenant ? db.getTransactionsForTenant(tenantId) : db.getTransactions(tenantId),
+      db.getTasksForTenant ? db.getTasksForTenant(tenantId) : db.getTasks(tenantId)
     ]);
 
     res.json({
