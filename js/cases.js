@@ -518,7 +518,8 @@ const casesModule = {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const caseId = document.getElementById('add-hearing-case-id').value;
-      const date = document.getElementById('add-hearing-date').value;
+      const rawHearingDate = document.getElementById('add-hearing-date').value;
+      const date = rawHearingDate && rawHearingDate.trim() !== '' ? rawHearingDate : null;
       const stageInput = document.getElementById('add-hearing-stage').value.trim();
       const isDisposed = outcomeInput ? outcomeInput.value === 'disposed' : false;
       
@@ -545,15 +546,24 @@ const casesModule = {
         }
       }
 
-      // Register Hearing
-      await db.addHearing(caseId, { 
-        date, 
-        stage: finalStage, 
-        nextHearingDate, 
-        listingType: listingMode, 
-        notBeforeDate, 
-        notes: finalNotes 
-      });
+      // Register Hearing (if date is provided or notes/outcome entered)
+      if (date || finalNotes || isDisposed) {
+        await db.addHearing(caseId, { 
+          date: date || new Date().toISOString().split('T')[0], 
+          stage: finalStage, 
+          nextHearingDate, 
+          listingType: listingMode, 
+          notBeforeDate, 
+          notes: finalNotes 
+        });
+      } else if (nextHearingDate) {
+        await db.updateCase(caseId, {
+          stage: finalStage,
+          nextHearingDate,
+          listingType: listingMode,
+          notBeforeDate
+        });
+      }
 
       if (isDisposed) {
         const disposalType = document.getElementById('add-hearing-disposal-type').value;

@@ -560,43 +560,27 @@ const diaryModule = {
     const list = [];
 
     cases.forEach(c => {
-      // 1. Check if nextHearingDate matches this date (active upcoming event)
-      if (c.status === 'Active' && c.nextHearingDate === dateStr) {
-        list.push({
-          id: c.id,
-          title: c.title,
-          court: c.court,
-          caseNumber: c.caseNumber,
-          clientId: c.clientId,
-          caseType: c.caseType,
-          status: c.status,
-          stage: c.stage,
-          notes: 'Upcoming scheduled hearing.',
-          isUpcoming: true
-        });
-      }
-
-      // 2. Check if any hearing in c.hearings matches this date (past recorded outcomes)
       const pastHearings = c.hearings || [];
-      pastHearings.forEach(h => {
-        if (h.date === dateStr) {
-          // Avoid duplicate entries
-          if (!list.some(item => item.id === c.id && !item.isUpcoming)) {
-            list.push({
-              id: c.id,
-              title: c.title,
-              court: c.court,
-              caseNumber: c.caseNumber,
-              clientId: c.clientId,
-              caseType: c.caseType,
-              status: c.status,
-              stage: h.stage,
-              notes: h.notes || '',
-              isUpcoming: false
-            });
-          }
+      const matchingHearing = pastHearings.find(h => h && h.date === dateStr);
+      const isUpcoming = (c.status === 'Active' && c.nextHearingDate === dateStr);
+
+      if (isUpcoming || matchingHearing) {
+        // Enforce strict de-duplication: each case appears AT MOST ONCE per calendar date
+        if (!list.some(item => item.id === c.id)) {
+          list.push({
+            id: c.id,
+            title: c.title,
+            court: c.court,
+            caseNumber: c.caseNumber,
+            clientId: c.clientId,
+            caseType: c.caseType,
+            status: c.status,
+            stage: matchingHearing ? matchingHearing.stage : c.stage,
+            notes: matchingHearing ? (matchingHearing.notes || 'Hearing proceedings recorded.') : 'Upcoming scheduled hearing.',
+            isUpcoming: isUpcoming && !matchingHearing
+          });
         }
-      });
+      }
     });
 
     return list;
