@@ -47,14 +47,28 @@ const adminModule = {
   },
 
   async render() {
-    const user = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (!this.isSuperAdmin(user)) {
-      window.location.replace('/dashboard');
-      return;
-    }
-
+    const user = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser') || '{}');
     const container = document.getElementById('superadmin-page-content') || document.getElementById('superadmin-page');
     if (!container) return;
+
+    if (!this.isSuperAdmin(user)) {
+      container.innerHTML = `
+        <div class="card" style="text-align: center; padding: 3rem 1.5rem; max-width: 520px; margin: 3rem auto; border: 1px solid rgba(239,68,68,0.3); background: var(--card-bg, #fff);">
+          <div style="width: 56px; height: 56px; background: rgba(239,68,68,0.1); color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto;">
+            <i data-lucide="shield-alert" style="width: 32px; height: 32px;"></i>
+          </div>
+          <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: var(--text-primary);">Super Admin Area Restricted</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5;">
+            This management console is exclusively reserved for platform administration (<strong>vaibhavsharmarajhc@gmail.com</strong>).
+          </p>
+          <button type="button" class="btn btn-primary" onclick="window.location.href='/dashboard'" style="display: inline-flex; align-items: center; gap: 6px; margin: 0 auto;">
+            <i data-lucide="arrow-left"></i> Return to Chamber Dashboard
+          </button>
+        </div>
+      `;
+      if (window.safeCreateIcons) window.safeCreateIcons(container);
+      return;
+    }
 
     // 1. Immediately render local metrics so console displays 100% instantly
     const localData = this.calculateLocalMetrics();
