@@ -1262,6 +1262,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const target = item.getAttribute('data-target');
       if (target) {
         window.history.pushState({}, '', '/' + target);
+        await router();
+      }
     });
   });
 
