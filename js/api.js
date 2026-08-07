@@ -4,9 +4,12 @@
  */
 
 async function fetchAPI(url, options = {}) {
-  // Set JSON headers by default
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  
+  // Set JSON & Auth headers by default
   options.headers = {
     'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     ...options.headers
   };
 

@@ -10,12 +10,25 @@ const SUPER_ADMIN_EMAIL = 'vaibhavsharmarajhc@gmail.com';
 
 const adminModule = {
   isSuperAdmin(user) {
-    if (!user || !user.email) {
+    let email = user && user.email ? user.email.toLowerCase().trim() : '';
+    if (!email) {
       try {
-        user = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || '{}');
+        const u = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser') || '{}');
+        email = u && u.email ? u.email.toLowerCase().trim() : '';
       } catch (e) {}
     }
-    const email = user && user.email ? user.email.toLowerCase().trim() : '';
+    if (!email) {
+      try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token) {
+          const parts = token.split('.');
+          if (parts.length === 3) {
+            const payload = JSON.parse(atob(parts[1]));
+            email = payload && payload.email ? payload.email.toLowerCase().trim() : '';
+          }
+        }
+      } catch (e) {}
+    }
     return email === SUPER_ADMIN_EMAIL.toLowerCase() || (user && user.role === 'superadmin');
   },
 
