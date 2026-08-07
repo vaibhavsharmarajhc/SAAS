@@ -1165,6 +1165,55 @@ app.get('/api/admin/metrics', authenticateToken, requireSuperAdmin, async (req, 
   }
 });
 
+app.get('/api/admin/users', authenticateToken, requireSuperAdmin, async (req, res) => {
+  try {
+    const users = await db.getAllUsersAdmin();
+    res.json(users);
+  } catch (err) {
+    console.error("Failed to fetch admin users:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/admin/users/:id/suspend', authenticateToken, requireSuperAdmin, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { isSuspended } = req.body;
+    const targetUser = await db.getUserById(userId);
+    if (targetUser && targetUser.email.toLowerCase().trim() === SUPER_ADMIN_EMAIL.toLowerCase()) {
+      return res.status(400).json({ error: "Cannot suspend Super Admin account." });
+    }
+    const updated = await db.setUserSuspended(userId, !!isSuspended);
+    res.json({ message: `Account ${isSuspended ? 'suspended' : 'reactivated'} successfully.`, user: updated });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.delete('/api/admin/users/:id', authenticateToken, requireSuperAdmin, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const targetUser = await db.getUserById(userId);
+    if (targetUser && targetUser.email.toLowerCase().trim() === SUPER_ADMIN_EMAIL.toLowerCase()) {
+      return res.status(400).json({ error: "Cannot delete Super Admin account." });
+    }
+    await db.deleteUserAccountPermanent(userId);
+    res.json({ message: "User account and associated records permanently deleted." });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/users/:id/impersonate', authenticateToken, requireSuperAdmin, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const impersonatedData = await db.getImpersonatedAccountData(userId);
+    res.json(impersonatedData);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 app.get('/api/admin/tickets', authenticateToken, requireSuperAdmin, async (req, res) => {
   try {
     const tickets = await db.getAllSupportTicketsAdmin();

@@ -190,6 +190,7 @@ const adminModule = {
                 <th>Work Tasks</th>
                 <th>Revenue Processed</th>
                 <th>Engagement Level</th>
+                <th>Account Management Actions</th>
               </tr>
             </thead>
             <tbody id="admin-users-table-body">
@@ -224,6 +225,8 @@ const adminModule = {
     container.innerHTML = html;
     if (window.lucide) window.lucide.createIcons();
 
+    this.attachUserActionListeners(container, users);
+
     // Attach search filter listener
     const searchInput = document.getElementById('admin-user-search');
     if (searchInput) {
@@ -237,14 +240,119 @@ const adminModule = {
         const tbody = document.getElementById('admin-users-table-body');
         if (tbody) {
           tbody.innerHTML = this.renderUserRows(filtered);
+          this.attachUserActionListeners(container, filtered);
         }
       });
     }
   },
 
+  attachUserActionListeners(container, users) {
+    if (!container) return;
+
+    // 1. Impersonate / View Account Listener
+    container.querySelectorAll('.btn-impersonate-user').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const userId = btn.getAttribute('data-user-id');
+        const email = btn.getAttribute('data-user-email');
+        const name = btn.getAttribute('data-user-name');
+        
+        const banner = document.getElementById('superadmin-impersonation-banner');
+        const nameSpan = document.getElementById('impersonated-account-name');
+        const emailSpan = document.getElementById('impersonated-account-email');
+
+        if (banner && nameSpan && emailSpan) {
+          nameSpan.textContent = name || 'Advocate Account';
+          emailSpan.textContent = email || '';
+          banner.style.display = 'flex';
+        }
+
+        // Store original admin session if not already stored
+        if (!localStorage.getItem('adminSessionBackup')) {
+          localStorage.setItem('adminSessionBackup', localStorage.getItem('currentUser') || '');
+        }
+
+        // Switch to impersonated view
+        if (typeof window.switchView === 'function') {
+          window.switchView('dashboard-page');
+        }
+      });
+    });
+
+    // 2. Suspend / Soft Delete Listener
+    container.querySelectorAll('.btn-suspend-user').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const userId = btn.getAttribute('data-user-id');
+        const email = btn.getAttribute('data-user-email');
+        const isSuspended = btn.getAttribute('data-suspended') === 'true';
+
+        if (email.toLowerCase().trim() === SUPER_ADMIN_EMAIL.toLowerCase()) {
+          alert("Action Protected: Super Admin account cannot be suspended.");
+          return;
+        }
+
+        const confirmMsg = isSuspended ? 
+          `Reactivate access for account (${email})?` : 
+          `Suspend account access for (${email})? The advocate will be blocked from logging in until reactivated.`;
+
+        if (confirm(confirmMsg)) {
+          try {
+            await api.admin.setUserSuspended(userId, !isSuspended);
+            alert(`Account ${!isSuspended ? 'suspended' : 'reactivated'} successfully.`);
+            this.render();
+          } catch (err) {
+            alert("Failed to update suspension status: " + err.message);
+          }
+        }
+      });
+    });
+
+    // 3. Permanent Hard Delete Listener
+    container.querySelectorAll('.btn-delete-user').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const userId = btn.getAttribute('data-user-id');
+        const email = btn.getAttribute('data-user-email');
+
+        if (email.toLowerCase().trim() === SUPER_ADMIN_EMAIL.toLowerCase()) {
+          alert("Action Protected: Super Admin account cannot be deleted.");
+          return;
+        }
+
+        const mode = prompt(
+          `ACCOUNT DELETION OPTIONS for (${email}):\n\n` +
+          `1. Type 'SUSPEND' to Soft-Delete (block login access while keeping audit logs).\n` +
+          `2. Type 'PURGE' to Hard-Delete (PERMANENTLY erase account and all cases/ledgers).\n\n` +
+          `Enter your choice ('SUSPEND' or 'PURGE'):`
+        );
+
+        if (!mode) return;
+
+        if (mode.trim().toUpperCase() === 'SUSPEND') {
+          try {
+            await api.admin.setUserSuspended(userId, true);
+            alert(`Account (${email}) suspended successfully.`);
+            this.render();
+          } catch (err) {
+            alert("Failed to suspend account: " + err.message);
+          }
+        } else if (mode.trim().toUpperCase() === 'PURGE') {
+          const finalConfirm = prompt(`CRITICAL CONFIRMATION:\nType 'DELETE PERMANENT' to permanently purge (${email}):`);
+          if (finalConfirm && finalConfirm.trim() === 'DELETE PERMANENT') {
+            try {
+              await api.admin.deleteUserAccountPermanent(userId);
+              alert(`Account (${email}) and associated data permanently purged.`);
+              this.render();
+            } catch (err) {
+              alert("Failed to delete account: " + err.message);
+            }
+          }
+        }
+      });
+    });
+  },
+
   renderUserRows(users) {
     if (!users || users.length === 0) {
-      return `<tr><td colspan="6" style="text-align:center; padding:2rem;" class="text-muted">No registered users match search filter.</td></tr>`;
+      return `<tr><td colspan="7" style="text-align:center; padding:2rem;" class="text-muted">No registered users match search filter.</td></tr>`;
     }
 
     return users.map(u => {
@@ -252,7 +360,11 @@ const adminModule = {
       let badgeColor = '#10b981';
       let statusText = '🔥 High Activity';
 
-      if (u.status === 'Moderate' || (u.casesCount > 2 && u.casesCount <= 10)) {
+      if (u.isSuspended) {
+        badgeBg = 'rgba(239, 68, 68, 0.15)';
+        badgeColor = '#ef4444';
+        statusText = '🚫 Suspended';
+      } else if (u.status === 'Moderate' || (u.casesCount > 2 && u.casesCount <= 10)) {
         badgeBg = 'rgba(217, 119, 6, 0.15)';
         badgeColor = '#d97706';
         statusText = '🟢 Active';
@@ -264,6 +376,23 @@ const adminModule = {
 
       const displayName = u.lawyerName || u.firmName || 'Legal Advocate';
       const firmLabel = u.firmName && u.firmName !== displayName ? `<div style="font-size:0.7rem; color:var(--text-muted);">${u.firmName}</div>` : '';
+      const isSuper = (u.email && u.email.toLowerCase().trim() === SUPER_ADMIN_EMAIL.toLowerCase());
+
+      const actionButtons = isSuper ? 
+        `<span style="font-size:0.75rem; color:var(--color-primary); font-weight:700;"><i data-lucide="shield"></i> Super Admin</span>` : 
+        `
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-secondary btn-impersonate-user" data-user-id="${u.id}" data-user-email="${u.email}" data-user-name="${displayName}" style="padding:0.2rem 0.5rem; font-size:0.72rem;">
+              <i data-lucide="eye" style="width:12px; height:12px;"></i> View Account
+            </button>
+            <button type="button" class="btn btn-secondary btn-suspend-user" data-user-id="${u.id}" data-user-email="${u.email}" data-suspended="${!!u.isSuspended}" style="padding:0.2rem 0.5rem; font-size:0.72rem; color: ${u.isSuspended ? '#10b981' : '#d97706'};">
+              <i data-lucide="user-x" style="width:12px; height:12px;"></i> ${u.isSuspended ? 'Reactivate' : 'Suspend'}
+            </button>
+            <button type="button" class="btn btn-secondary btn-delete-user" data-user-id="${u.id}" data-user-email="${u.email}" style="padding:0.2rem 0.5rem; font-size:0.72rem; color:var(--color-danger);">
+              <i data-lucide="trash-2" style="width:12px; height:12px;"></i> Delete
+            </button>
+          </div>
+        `;
 
       return `
         <tr>
@@ -279,6 +408,9 @@ const adminModule = {
             <span class="badge" style="background:${badgeBg}; color:${badgeColor}; font-weight:700; font-size:0.72rem; padding:0.25rem 0.6rem; border-radius:10px;">
               ${statusText}
             </span>
+          </td>
+          <td>
+            ${actionButtons}
           </td>
         </tr>
       `;

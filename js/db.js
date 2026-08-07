@@ -27,7 +27,7 @@ class LegalDB {
   }
 
   async loadAll(forceReload = false) {
-    if (this.cache.user && this.cache.clients.length > 0 && !forceReload) {
+    if (this.cache.user && !forceReload) {
       return true; // Instant 0ms memory cache return!
     }
 

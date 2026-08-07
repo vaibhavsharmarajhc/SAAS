@@ -68,6 +68,7 @@ import accounts from './accounts.js';
 import share from './share.js';
 import tasks from './tasks.js';
 import notificationsModule from './notifications.js';
+import adminModule from './admin.js';
 import portalModule from './portal.js';
 window.tasksModule = tasks;
 window.notificationsModule = notificationsModule;
@@ -75,6 +76,7 @@ window.casesModule = cases;
 window.accountsModule = accounts;
 window.clientsModule = clients;
 window.dashboardModule = dashboard;
+window.adminModule = adminModule;
 window.portalModule = portalModule;
 window.switchView = switchView;
 
@@ -170,6 +172,15 @@ const viewQuickActions = {
  * Switch Active View Router (Async)
  */
 export async function switchView(targetViewId) {
+  const currentUser = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || '{}');
+  if (typeof adminModule !== 'undefined' && adminModule.updateAdminVisibility) {
+    adminModule.updateAdminVisibility(currentUser);
+  }
+
+  if (targetViewId === 'superadmin-page' && typeof adminModule !== 'undefined' && !adminModule.isSuperAdmin(currentUser)) {
+    targetViewId = 'dashboard-page';
+  }
+
   state.activeView = targetViewId;
 
   // Auto-close mobile drawer sidebar
@@ -217,7 +228,8 @@ export async function switchView(targetViewId) {
                                 capitalizedTitle === 'Accounts' ? 'Accounts & Income Ledger' : 
                                 capitalizedTitle === 'Share' ? 'Client Intimation' : 
                                 capitalizedTitle === 'Tasks' ? 'Task Manager' : 
-                                capitalizedTitle === 'Support' ? 'Help & Support Center' : capitalizedTitle;
+                                capitalizedTitle === 'Support' ? 'Help & Support Center' :
+                                capitalizedTitle === 'Superadmin' ? 'Super Admin Console' : capitalizedTitle;
 
   if (targetViewId === 'tasks-page' && typeof window.tasksModule !== 'undefined') {
     window.tasksModule.render();
@@ -284,6 +296,9 @@ async function refreshPageView(viewId) {
       case 'settings-page':
         loadSettingsForm();
         break;
+      case 'superadmin-page':
+        if (typeof adminModule !== 'undefined' && adminModule.render) adminModule.render();
+        break;
       case 'portal-page':
         if (typeof portalModule !== 'undefined' && portalModule.render) portalModule.render();
         break;
@@ -292,10 +307,45 @@ async function refreshPageView(viewId) {
     console.warn("View render execution warning:", renderErr);
   }
 
-  // 2. Non-fatal background session check
+  // 2. Background session sync & re-render after data load
   try {
     if (!window.isTestAuth && typeof db.loadAll === 'function') {
-      await db.loadAll();
+      const loaded = await db.loadAll();
+      if (loaded) {
+        updateBrandingHeaders();
+        switch (viewId) {
+          case 'dashboard-page':
+          case 'overview-page':
+            if (typeof dashboard !== 'undefined' && dashboard.render) dashboard.render();
+            requestAnimationFrame(() => {
+              if (typeof dashboard !== 'undefined' && typeof dashboard.renderCharts === 'function') {
+                dashboard.renderCharts();
+              }
+            });
+            break;
+          case 'clients-page':
+            if (typeof clients !== 'undefined' && clients.render) clients.render();
+            break;
+          case 'cases-page':
+            if (typeof cases !== 'undefined' && cases.render) cases.render();
+            break;
+          case 'diary-page':
+            if (typeof diary !== 'undefined' && diary.render) diary.render();
+            break;
+          case 'accounts-page':
+            if (typeof accounts !== 'undefined' && accounts.render) accounts.render();
+            break;
+          case 'share-page':
+            if (typeof share !== 'undefined' && share.render) share.render();
+            break;
+          case 'settings-page':
+            loadSettingsForm();
+            break;
+          case 'portal-page':
+            if (typeof portalModule !== 'undefined' && portalModule.render) portalModule.render();
+            break;
+        }
+      }
     }
   } catch (authErr) {
     console.warn("Session check non-fatal fallback:", authErr);
@@ -624,6 +674,7 @@ async function router() {
           share.init();
           tasks.init();
           notificationsModule.init();
+          if (typeof adminModule !== 'undefined' && adminModule.init) adminModule.init();
           appInitialized = true;
         }
 
@@ -639,6 +690,7 @@ async function router() {
         else if (path.startsWith('/share-page') || path.startsWith('/share')) targetView = 'share-page';
         else if (path.startsWith('/tasks-page') || path.startsWith('/tasks')) targetView = 'tasks-page';
         else if (path.startsWith('/settings-page') || path.startsWith('/settings')) targetView = 'settings-page';
+        else if (path.startsWith('/superadmin-page') || path.startsWith('/superadmin')) targetView = 'superadmin-page';
         
         await switchView(targetView);
       }
@@ -1210,10 +1262,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       const target = item.getAttribute('data-target');
       if (target) {
         window.history.pushState({}, '', '/' + target);
-        await router();
-      }
     });
   });
+
+  // 3c. Setup exit impersonation button listener
+  const exitImpersonationBtn = document.getElementById('btn-exit-impersonation');
+  if (exitImpersonationBtn) {
+    exitImpersonationBtn.addEventListener('click', () => {
+      const banner = document.getElementById('superadmin-impersonation-banner');
+      if (banner) banner.style.display = 'none';
+      if (localStorage.getItem('adminSessionBackup')) {
+        localStorage.removeItem('adminSessionBackup');
+      }
+      window.history.pushState({}, '', '/superadmin-page');
+      router();
+    });
+  }
 
   // Global click interceptor for client-side routing (Features, About, Pricing, FAQs, Privacy, Terms)
   document.addEventListener('click', async (e) => {
@@ -1835,29 +1899,39 @@ window.addEventListener('popstate', () => {
   router();
 });
 
-// Global initialization call on DOM Ready
-document.addEventListener('DOMContentLoaded', () => {
+// Global initialization helper
+function startApp() {
   initAuthenticationHandlers();
+  router();
+}
 
-  // iOS Safari Touchmove Scroll Lock on Backdrop
-  const backdrop = document.getElementById('sidebar-backdrop');
-  if (backdrop) {
-    backdrop.addEventListener('touchmove', (e) => {
-      if (backdrop.classList.contains('active')) {
-        e.preventDefault();
-      }
-    }, { passive: false });
-  }
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    startApp();
 
-  // Throttled Window Resize Listener (60fps mobile keyboard transition)
-  let resizeTimeout;
-  window.addEventListener('resize', () => {
-    if (resizeTimeout) cancelAnimationFrame(resizeTimeout);
-    resizeTimeout = requestAnimationFrame(() => {
-      if (window.safeCreateIcons) window.safeCreateIcons();
-    });
-  }, { passive: true });
-});
+    // iOS Safari Touchmove Scroll Lock on Backdrop
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (backdrop) {
+      backdrop.addEventListener('touchmove', (e) => {
+        if (backdrop.classList.contains('active')) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+    }
+
+    // Throttled Window Resize Listener (60fps mobile keyboard transition)
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      if (resizeTimeout) cancelAnimationFrame(resizeTimeout);
+      resizeTimeout = requestAnimationFrame(() => {
+        if (window.safeCreateIcons) window.safeCreateIcons();
+      });
+    }, { passive: true });
+  });
+} else {
+  startApp();
+}
+
 setTimeout(() => {
   initAuthenticationHandlers();
 }, 200);
