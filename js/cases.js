@@ -437,11 +437,13 @@ const casesModule = {
     const btnFixed = document.getElementById('btn-mode-fixed');
     const btnRelative = document.getElementById('btn-mode-relative');
     const btnContinued = document.getElementById('btn-outcome-continued');
+    const btnTransferred = document.getElementById('btn-outcome-transferred');
     const btnDisposed = document.getElementById('btn-outcome-disposed');
     
     const fixedWrap = document.getElementById('hearing-fixed-date-wrap');
     const relativeWrap = document.getElementById('hearing-relative-date-wrap');
     const listingContainer = document.getElementById('next-listing-container');
+    const transferWrap = document.getElementById('hearing-transfer-wrap');
     const disposalWrap = document.getElementById('hearing-disposal-wrap');
     
     const modeInput = document.getElementById('add-hearing-listing-mode');
@@ -454,17 +456,33 @@ const casesModule = {
     if (btnContinued && btnDisposed) {
       btnContinued.addEventListener('click', () => {
         btnContinued.classList.add('active');
+        if (btnTransferred) btnTransferred.classList.remove('active');
         btnDisposed.classList.remove('active');
         if (outcomeInput) outcomeInput.value = 'continued';
         if (listingContainer) listingContainer.style.display = 'block';
+        if (transferWrap) transferWrap.style.display = 'none';
         if (disposalWrap) disposalWrap.style.display = 'none';
       });
+
+      if (btnTransferred) {
+        btnTransferred.addEventListener('click', () => {
+          btnTransferred.classList.add('active');
+          btnContinued.classList.remove('active');
+          btnDisposed.classList.remove('active');
+          if (outcomeInput) outcomeInput.value = 'transferred';
+          if (listingContainer) listingContainer.style.display = 'block';
+          if (transferWrap) transferWrap.style.display = 'block';
+          if (disposalWrap) disposalWrap.style.display = 'none';
+        });
+      }
 
       btnDisposed.addEventListener('click', () => {
         btnDisposed.classList.add('active');
         btnContinued.classList.remove('active');
+        if (btnTransferred) btnTransferred.classList.remove('active');
         if (outcomeInput) outcomeInput.value = 'disposed';
         if (listingContainer) listingContainer.style.display = 'none';
+        if (transferWrap) transferWrap.style.display = 'none';
         if (disposalWrap) disposalWrap.style.display = 'block';
       });
     }
@@ -522,12 +540,25 @@ const casesModule = {
       const date = rawHearingDate && rawHearingDate.trim() !== '' ? rawHearingDate : null;
       const stageInput = document.getElementById('add-hearing-stage').value.trim();
       const isDisposed = outcomeInput ? outcomeInput.value === 'disposed' : false;
+      const isTransferred = outcomeInput ? outcomeInput.value === 'transferred' : false;
       
       let nextHearingDate = null;
       let notBeforeDate = null;
       let listingMode = modeInput ? modeInput.value : 'fixed';
       let finalStage = stageInput;
       let finalNotes = document.getElementById('add-hearing-notes').value.trim();
+      let newCourt = null;
+
+      if (isTransferred) {
+        const courtInput = document.getElementById('add-hearing-new-court');
+        newCourt = courtInput ? courtInput.value.trim() : '';
+        if (!newCourt) {
+          alert("Please enter the New Transferred Court / Forum name.");
+          return;
+        }
+        finalStage = stageInput ? `Transferred to ${newCourt} (${stageInput})` : `Transferred to ${newCourt}`;
+        finalNotes = finalNotes ? `${finalNotes}\n[Transferred to Court: ${newCourt}]` : `[Transferred to Court: ${newCourt}]`;
+      }
 
       if (isDisposed) {
         const disposalType = document.getElementById('add-hearing-disposal-type').value;
@@ -547,7 +578,7 @@ const casesModule = {
       }
 
       // Register Hearing (if date is provided or notes/outcome entered)
-      if (date || finalNotes || isDisposed) {
+      if (date || finalNotes || isDisposed || isTransferred) {
         await db.addHearing(caseId, { 
           date: date || new Date().toISOString().split('T')[0], 
           stage: finalStage, 
@@ -565,7 +596,16 @@ const casesModule = {
         });
       }
 
-      if (isDisposed) {
+      if (isTransferred) {
+        await db.updateCase(caseId, {
+          court: newCourt,
+          stage: finalStage,
+          nextHearingDate,
+          listingType: listingMode,
+          notBeforeDate
+        });
+        alert(`Case proceedings recorded. File updated & transferred to: ${newCourt}.`);
+      } else if (isDisposed) {
         const disposalType = document.getElementById('add-hearing-disposal-type').value;
         const disposalRemarks = document.getElementById('add-hearing-disposal-remarks').value.trim();
         await db.updateCase(caseId, {
