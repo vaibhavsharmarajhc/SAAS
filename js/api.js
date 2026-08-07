@@ -348,6 +348,45 @@ const api = {
     async get(token) {
       return await fetchAPI(`/api/portal/${encodeURIComponent(token)}`);
     }
+  },
+  admin: {
+    async getMetrics() {
+      return await fetchAPI('/api/admin/metrics');
+    },
+    async getUsers() {
+      return await fetchAPI('/api/admin/users');
+    },
+    async suspendUser(userId, isSuspended) {
+      return await fetchAPI(`/api/admin/users/${userId}/suspend`, {
+        method: 'PUT',
+        body: { isSuspended }
+      });
+    },
+    async deleteUser(userId) {
+      return await fetchAPI(`/api/admin/users/${userId}`, {
+        method: 'DELETE'
+      });
+    },
+    async impersonateUser(userId) {
+      return await fetchAPI(`/api/admin/users/${userId}/impersonate`, {
+        method: 'POST'
+      });
+    },
+    async getTickets() {
+      return await fetchAPI('/api/admin/tickets');
+    },
+    async replyTicket(ticketId, message) {
+      return await fetchAPI(`/api/admin/tickets/${ticketId}/reply`, {
+        method: 'POST',
+        body: { message }
+      });
+    },
+    async updateTicketStatus(ticketId, status) {
+      return await fetchAPI(`/api/admin/tickets/${ticketId}/status`, {
+        method: 'PUT',
+        body: { status }
+      });
+    }
   }
 };
 

@@ -59,18 +59,18 @@ const adminModule = {
     // 1. Immediately render local metrics so console displays 100% instantly
     const localData = this.calculateLocalMetrics();
     this.renderAdminConsole(container, localData);
-    this.loadAdminSupportDesk();
+    try { this.loadAdminSupportDesk(); } catch (e) {}
 
     // 2. Asynchronously update with server metrics if available
     try {
-      const serverUsers = await api.admin.getUsers();
-      const serverMetrics = await api.admin.getMetrics();
+      const serverUsers = (api.admin && typeof api.admin.getUsers === 'function') ? await api.admin.getUsers() : [];
+      const serverMetrics = (api.admin && typeof api.admin.getMetrics === 'function') ? await api.admin.getMetrics() : {};
       const serverData = {
         ...serverMetrics,
         users: (Array.isArray(serverUsers) && serverUsers.length > 0) ? serverUsers : (serverMetrics.users || localData.users)
       };
       this.renderAdminConsole(container, serverData);
-      this.loadAdminSupportDesk();
+      try { this.loadAdminSupportDesk(); } catch (e) {}
     } catch (err) {
       console.warn("Admin API async background update fallback active:", err);
     }
