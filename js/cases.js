@@ -433,6 +433,50 @@ const casesModule = {
   setupHearingForm() {
     const form = document.getElementById('add-hearing-form');
     const modal = document.getElementById('add-hearing-modal');
+    if (!form || !modal) return;
+
+    // Dynamic DOM Injection Fallback (Guarantees option renders even if app.html is served from browser/PWA cache)
+    const outcomeToggleWrap = modal.querySelector('.form-group div[style*="display:flex"]');
+    if (outcomeToggleWrap && !document.getElementById('btn-outcome-transferred')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-secondary btn-sm flex-1 hearing-outcome-toggle';
+      btn.id = 'btn-outcome-transferred';
+      btn.style.cssText = 'font-size:0.8rem; padding:0.4rem; border-color:rgba(217,119,6,0.4); color:var(--color-warning);';
+      btn.innerHTML = '<i data-lucide="arrow-right-left"></i> Transferred to Another Court';
+      
+      const btnDisposed = document.getElementById('btn-outcome-disposed');
+      if (btnDisposed) {
+        outcomeToggleWrap.insertBefore(btn, btnDisposed);
+      } else {
+        outcomeToggleWrap.appendChild(btn);
+      }
+      if (window.safeCreateIcons) window.safeCreateIcons(btn);
+    }
+
+    if (!document.getElementById('hearing-transfer-wrap')) {
+      const wrap = document.createElement('div');
+      wrap.id = 'hearing-transfer-wrap';
+      wrap.style.cssText = 'display:none; background:rgba(217,119,6,0.08); padding:0.85rem; border-radius:var(--radius-sm); border:1px solid rgba(217,119,6,0.3); margin-bottom:1rem;';
+      wrap.innerHTML = `
+        <div class="form-group" style="margin-bottom:0.4rem;">
+          <label class="form-label" style="color:var(--color-warning); font-weight:600;"><i data-lucide="map-pin" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> New Transferred Court / Forum Name *</label>
+          <input type="text" class="form-control" id="add-hearing-new-court" placeholder="e.g. Court of ADJ-04, Saket District Courts / Commercial Bench 2">
+        </div>
+        <div style="font-size:0.75rem; color:var(--text-secondary);">
+          <i data-lucide="info" style="width:13px; height:13px; display:inline-block; vertical-align:middle; margin-right:3px;"></i> The case file's court forum will automatically update to this new court upon saving.
+        </div>
+      `;
+      const disposalWrap = document.getElementById('hearing-disposal-wrap');
+      if (disposalWrap && disposalWrap.parentNode) {
+        disposalWrap.parentNode.insertBefore(wrap, disposalWrap);
+      } else {
+        const modalBody = modal.querySelector('.modal-body');
+        if (modalBody) modalBody.appendChild(wrap);
+      }
+      if (window.safeCreateIcons) window.safeCreateIcons(wrap);
+    }
+
     const cancelBtn = document.getElementById('add-hearing-cancel');
     const btnFixed = document.getElementById('btn-mode-fixed');
     const btnRelative = document.getElementById('btn-mode-relative');
