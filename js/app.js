@@ -290,6 +290,47 @@ window.switchView = switchView;
 
 
 /**
+ * Helper to dispatch module render logic cleanly
+ */
+function dispatchViewRender(viewId) {
+  switch (viewId) {
+    case 'dashboard-page':
+    case 'overview-page':
+      if (typeof dashboard !== 'undefined' && dashboard.render) dashboard.render();
+      requestAnimationFrame(() => {
+        if (typeof dashboard !== 'undefined' && typeof dashboard.renderCharts === 'function') {
+          dashboard.renderCharts();
+        }
+      });
+      break;
+    case 'clients-page':
+      if (typeof clients !== 'undefined' && clients.render) clients.render();
+      break;
+    case 'cases-page':
+      if (typeof cases !== 'undefined' && cases.render) cases.render();
+      break;
+    case 'diary-page':
+      if (typeof diary !== 'undefined' && diary.render) diary.render();
+      break;
+    case 'accounts-page':
+      if (typeof accounts !== 'undefined' && accounts.render) accounts.render();
+      break;
+    case 'share-page':
+      if (typeof share !== 'undefined' && share.render) share.render();
+      break;
+    case 'settings-page':
+      loadSettingsForm();
+      break;
+    case 'superadmin-page':
+      if (typeof adminModule !== 'undefined' && adminModule.render) adminModule.render();
+      break;
+    case 'portal-page':
+      if (typeof portalModule !== 'undefined' && portalModule.render) portalModule.render();
+      break;
+  }
+}
+
+/**
  * Refresh current view data (syncs cache with server first)
  */
 async function refreshPageView(viewId) {
@@ -298,43 +339,9 @@ async function refreshPageView(viewId) {
     window.isTestAuth = true;
   }
 
-  // 1. Dispatch view render first so UI canvas displays instantly
+  // 1. Dispatch view render first so UI canvas displays instantly (0ms)
   try {
-    switch (viewId) {
-      case 'dashboard-page':
-      case 'overview-page':
-        if (typeof dashboard !== 'undefined' && dashboard.render) dashboard.render();
-        requestAnimationFrame(() => {
-          if (typeof dashboard !== 'undefined' && typeof dashboard.renderCharts === 'function') {
-            dashboard.renderCharts();
-          }
-        });
-        break;
-      case 'clients-page':
-        if (typeof clients !== 'undefined' && clients.render) clients.render();
-        break;
-      case 'cases-page':
-        if (typeof cases !== 'undefined' && cases.render) cases.render();
-        break;
-      case 'diary-page':
-        if (typeof diary !== 'undefined' && diary.render) diary.render();
-        break;
-      case 'accounts-page':
-        if (typeof accounts !== 'undefined' && accounts.render) accounts.render();
-        break;
-      case 'share-page':
-        if (typeof share !== 'undefined' && share.render) share.render();
-        break;
-      case 'settings-page':
-        loadSettingsForm();
-        break;
-      case 'superadmin-page':
-        if (typeof adminModule !== 'undefined' && adminModule.render) adminModule.render();
-        break;
-      case 'portal-page':
-        if (typeof portalModule !== 'undefined' && portalModule.render) portalModule.render();
-        break;
-    }
+    dispatchViewRender(viewId);
   } catch (renderErr) {
     console.warn("View render execution warning:", renderErr);
   }
@@ -345,45 +352,33 @@ async function refreshPageView(viewId) {
       const loaded = await db.loadAll();
       if (loaded) {
         updateBrandingHeaders();
-        switch (viewId) {
-          case 'dashboard-page':
-          case 'overview-page':
-            if (typeof dashboard !== 'undefined' && dashboard.render) dashboard.render();
-            requestAnimationFrame(() => {
-              if (typeof dashboard !== 'undefined' && typeof dashboard.renderCharts === 'function') {
-                dashboard.renderCharts();
-              }
-            });
-            break;
-          case 'clients-page':
-            if (typeof clients !== 'undefined' && clients.render) clients.render();
-            break;
-          case 'cases-page':
-            if (typeof cases !== 'undefined' && cases.render) cases.render();
-            break;
-          case 'diary-page':
-            if (typeof diary !== 'undefined' && diary.render) diary.render();
-            break;
-          case 'accounts-page':
-            if (typeof accounts !== 'undefined' && accounts.render) accounts.render();
-            break;
-          case 'share-page':
-            if (typeof share !== 'undefined' && share.render) share.render();
-            break;
-          case 'settings-page':
-            loadSettingsForm();
-            break;
-          case 'superadmin-page':
-            if (typeof adminModule !== 'undefined' && adminModule.render) adminModule.render();
-            break;
-          case 'portal-page':
-            if (typeof portalModule !== 'undefined' && portalModule.render) portalModule.render();
-            break;
-        }
+        dispatchViewRender(viewId);
       }
     }
   } catch (authErr) {
     console.warn("Session check non-fatal fallback:", authErr);
+  }
+}
+
+// Network status listeners for Courtroom PWA mode
+window.addEventListener('online', () => updateOnlineStatusPill(true));
+window.addEventListener('offline', () => updateOnlineStatusPill(false));
+
+function updateOnlineStatusPill(isOnline) {
+  const pill = document.querySelector('.security-badge-pill');
+  if (pill) {
+    if (isOnline) {
+      pill.style.background = 'rgba(16, 185, 129, 0.12)';
+      pill.style.color = '#059669';
+      pill.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+      pill.innerHTML = `<i data-lucide="shield-check" style="width:13px; height:13px; color:#059669;"></i> <span>256-Bit Encrypted Sandbox</span>`;
+    } else {
+      pill.style.background = 'rgba(217, 119, 6, 0.15)';
+      pill.style.color = '#d97706';
+      pill.style.borderColor = 'rgba(217, 119, 6, 0.4)';
+      pill.innerHTML = `<i data-lucide="wifi-off" style="width:13px; height:13px; color:#d97706;"></i> <span>Offline Courtroom Mode (IndexedDB)</span>`;
+    }
+    if (window.safeCreateIcons) window.safeCreateIcons(pill);
   }
 }
 
