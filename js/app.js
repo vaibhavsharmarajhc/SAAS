@@ -173,14 +173,25 @@ const viewQuickActions = {
  */
 export async function switchView(targetViewId) {
   let currentUser = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser') || '{}');
+  
+  const extractEmail = (obj) => {
+    if (!obj) return '';
+    if (typeof obj === 'string') return obj.toLowerCase().trim();
+    if (obj.email) return obj.email.toLowerCase().trim();
+    if (obj.user && obj.user.email) return obj.user.email.toLowerCase().trim();
+    return '';
+  };
+
+  let userEmail = extractEmail(currentUser);
   const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-  if ((!currentUser || !currentUser.email) && token) {
+  if (!userEmail && token) {
     try {
       const parts = token.split('.');
       if (parts.length === 3) {
         const payload = JSON.parse(atob(parts[1]));
-        if (payload && payload.email) {
-          currentUser = { email: payload.email, role: payload.role || 'lawyer' };
+        userEmail = extractEmail(payload);
+        if (userEmail) {
+          currentUser = { email: userEmail, role: payload.role || 'lawyer' };
         }
       }
     } catch (e) {}
@@ -191,7 +202,7 @@ export async function switchView(targetViewId) {
   }
 
   const isSuper = (typeof adminModule !== 'undefined' && adminModule.isSuperAdmin(currentUser)) ||
-                  (currentUser && currentUser.email && currentUser.email.toLowerCase().trim() === 'vaibhavsharmarajhc@gmail.com');
+                  userEmail === 'vaibhavsharmarajhc@gmail.com';
 
   if (targetViewId === 'superadmin-page' && !isSuper) {
     targetViewId = 'dashboard-page';

@@ -10,11 +10,19 @@ const SUPER_ADMIN_EMAIL = 'vaibhavsharmarajhc@gmail.com';
 
 const adminModule = {
   isSuperAdmin(user) {
-    let email = user && user.email ? user.email.toLowerCase().trim() : '';
+    const extractEmail = (obj) => {
+      if (!obj) return '';
+      if (typeof obj === 'string') return obj.toLowerCase().trim();
+      if (obj.email) return obj.email.toLowerCase().trim();
+      if (obj.user && obj.user.email) return obj.user.email.toLowerCase().trim();
+      return '';
+    };
+
+    let email = extractEmail(user);
     if (!email) {
       try {
         const u = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser') || '{}');
-        email = u && u.email ? u.email.toLowerCase().trim() : '';
+        email = extractEmail(u);
       } catch (e) {}
     }
     if (!email) {
@@ -24,12 +32,15 @@ const adminModule = {
           const parts = token.split('.');
           if (parts.length === 3) {
             const payload = JSON.parse(atob(parts[1]));
-            email = payload && payload.email ? payload.email.toLowerCase().trim() : '';
+            email = extractEmail(payload);
           }
         }
       } catch (e) {}
     }
-    return email === SUPER_ADMIN_EMAIL.toLowerCase() || (user && user.role === 'superadmin');
+
+    const isTargetEmail = email === SUPER_ADMIN_EMAIL.toLowerCase();
+    const isSuperRole = (user && (user.role === 'superadmin' || (user.user && user.user.role === 'superadmin')));
+    return isTargetEmail || isSuperRole;
   },
 
   init(user) {

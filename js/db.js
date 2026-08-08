@@ -84,7 +84,11 @@ class LegalDB {
   }
 
   getUser() {
-    return this.cache.user;
+    const u = this.cache.user;
+    if (u && u.user && typeof u.user === 'object') {
+      return { ...u.user, settings: u.user.settings || u.settings || {} };
+    }
+    return u;
   }
 
   // --- SETTINGS & CATEGORIES ---
