@@ -406,6 +406,10 @@ function loadSettingsForm() {
   document.getElementById('settings-lawyer-name').value = settings.lawyerName || 'Adv. Vaibhav Sharma';
   document.getElementById('settings-currency').value = settings.currency || 'INR';
   updateBrandingHeaders();
+
+  if (typeof adminModule !== 'undefined' && adminModule.updateAdminVisibility) {
+    adminModule.updateAdminVisibility();
+  }
 }
 
 export function updateBrandingHeaders() {
@@ -1473,6 +1477,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     reader.readAsText(file);
   });
+
+  const launchSuperAdminBtn = document.getElementById('btn-settings-launch-superadmin');
+  if (launchSuperAdminBtn) {
+    launchSuperAdminBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      window.history.pushState({}, '', '/superadmin-page');
+      await router();
+    });
+  }
 
   // 10. Init Auth Event Handlers & password eye toggles & global search & features switcher
   initAuthenticationHandlers();

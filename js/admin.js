@@ -40,10 +40,19 @@ const adminModule = {
 
   updateAdminVisibility(user) {
     const isSuper = this.isSuperAdmin(user);
-    const adminNavItems = document.querySelectorAll('[data-target="superadmin-page"]');
+    const adminNavItems = document.querySelectorAll('[data-target="superadmin-page"], .superadmin-nav-item');
     adminNavItems.forEach(item => {
-      item.style.display = isSuper ? 'flex' : 'none';
+      if (isSuper) {
+        item.style.setProperty('display', 'flex', 'important');
+      } else {
+        item.style.display = 'none';
+      }
     });
+
+    const settingsLauncher = document.getElementById('settings-superadmin-launcher-card');
+    if (settingsLauncher) {
+      settingsLauncher.style.display = isSuper ? 'block' : 'none';
+    }
   },
 
   async render() {
