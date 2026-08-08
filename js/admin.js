@@ -47,6 +47,31 @@ const adminModule = {
     console.log("AdminModule: Initializing Super Admin Console...");
     this.updateAdminVisibility(user);
     this.setupCategorySettingsManager();
+    this.setupExitImpersonationHandler();
+  },
+
+  setupExitImpersonationHandler() {
+    const exitBtn = document.getElementById('btn-exit-impersonation');
+    if (exitBtn && !exitBtn.getAttribute('data-bound')) {
+      exitBtn.setAttribute('data-bound', 'true');
+      exitBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const backup = localStorage.getItem('adminSessionBackup');
+        if (backup) {
+          localStorage.setItem('currentUser', backup);
+          localStorage.removeItem('adminSessionBackup');
+        }
+        const banner = document.getElementById('superadmin-impersonation-banner');
+        if (banner) banner.style.display = 'none';
+
+        const currentUser = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || '{}');
+        this.updateAdminVisibility(currentUser);
+
+        if (typeof window.switchView === 'function') {
+          window.switchView('superadmin-page');
+        }
+      });
+    }
   },
 
   updateAdminVisibility(user) {

@@ -210,6 +210,11 @@ export async function switchView(targetViewId) {
 
   state.activeView = targetViewId;
 
+  const targetElem = document.getElementById(targetViewId);
+  if (!targetElem) {
+    console.warn(`[Router Navigation Failsafe] Target view container '#${targetViewId}' was not found in the DOM.`);
+  }
+
   // Auto-close mobile drawer sidebar
   const sidebar = document.querySelector('.app-sidebar');
   const backdrop = document.getElementById('sidebar-backdrop');
