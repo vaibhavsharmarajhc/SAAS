@@ -168,12 +168,37 @@ const viewQuickActions = {
   }
 };
 
+// View title mappings for the app header
+const VIEW_TITLES = {
+  'dashboard-page': 'Dashboard',
+  'overview-page': 'Practice Overview',
+  'clients-page': 'Client Directory & Onboarding',
+  'cases-page': 'Case Registry',
+  'diary-page': 'Daily Hearings Diary',
+  'accounts-page': 'Accounts & Financials',
+  'share-page': 'Client Share Portal',
+  'tasks-page': 'Task Manager',
+  'settings-page': 'System Settings',
+  'superadmin-page': 'Super Admin Console'
+};
+
 /**
  * Switch Active View Router (Async)
  */
 export async function switchView(targetViewId) {
-  let currentUser = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser') || '{}');
-  
+  // 1. Resolve Current User safely across DB and Storage
+  let currentUser = {};
+  try {
+    if (typeof db !== 'undefined' && typeof db.getUser === 'function') {
+      currentUser = db.getUser() || {};
+    }
+    if (!currentUser.email) {
+      currentUser = JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser') || '{}');
+    }
+  } catch (e) {
+    currentUser = {};
+  }
+
   const extractEmail = (obj) => {
     if (!obj) return '';
     if (typeof obj === 'string') return obj.toLowerCase().trim();
@@ -184,6 +209,7 @@ export async function switchView(targetViewId) {
 
   let userEmail = extractEmail(currentUser);
   const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  
   if (!userEmail && token) {
     try {
       const parts = token.split('.');
@@ -191,28 +217,40 @@ export async function switchView(targetViewId) {
         const payload = JSON.parse(atob(parts[1]));
         userEmail = extractEmail(payload);
         if (userEmail) {
-          currentUser = { email: userEmail, role: payload.role || 'lawyer' };
+          currentUser = { ...currentUser, email: userEmail, role: payload.role || 'lawyer' };
         }
       }
     } catch (e) {}
   }
 
-  if (typeof adminModule !== 'undefined' && adminModule.updateAdminVisibility) {
+  // 2. Refresh Admin Nav Link Visibility
+  if (typeof adminModule !== 'undefined' && typeof adminModule.updateAdminVisibility === 'function') {
     adminModule.updateAdminVisibility(currentUser);
   }
 
-  const isSuper = (typeof adminModule !== 'undefined' && adminModule.isSuperAdmin(currentUser)) ||
-                  userEmail === 'vaibhavsharmarajhc@gmail.com';
+  // 3. Super Admin Route Guard
+  const isSuper = (typeof adminModule !== 'undefined' && typeof adminModule.isSuperAdmin === 'function') 
+    ? adminModule.isSuperAdmin(currentUser) 
+    : userEmail === 'vaibhavsharmarajhc@gmail.com';
 
   if (targetViewId === 'superadmin-page' && !isSuper) {
+    console.warn("[Router] Unauthorized attempt to access superadmin-page. Redirecting to dashboard.");
     targetViewId = 'dashboard-page';
   }
 
-  state.activeView = targetViewId;
-
-  const targetElem = document.getElementById(targetViewId);
+  // 4. Validate DOM Target (Fallback to dashboard if container missing)
+  let targetElem = document.getElementById(targetViewId);
   if (!targetElem) {
-    console.warn(`[Router Navigation Failsafe] Target view container '#${targetViewId}' was not found in the DOM.`);
+    console.warn(`[Router Navigation Failsafe] Target view container '#${targetViewId}' not found in DOM. Falling back to dashboard-page.`);
+    targetViewId = 'dashboard-page';
+    targetElem = document.getElementById(targetViewId);
+  }
+
+  if (typeof state !== 'undefined') {
+    state.activeView = targetViewId;
+  }
+  if (typeof window.state !== 'undefined') {
+    window.state.activeView = targetViewId;
   }
 
   // Auto-close mobile drawer sidebar
@@ -223,18 +261,18 @@ export async function switchView(targetViewId) {
     backdrop.classList.remove('active');
   }
 
-  // Toggle page visibility
+  // 5. Toggle Page Containers
   getPageContainers().forEach(container => {
     if (container.id === targetViewId) {
       container.classList.add('active');
-      container.style.display = 'block';
+      container.style.removeProperty('display');
     } else {
       container.classList.remove('active');
-      container.style.display = 'none';
+      container.style.removeProperty('display');
     }
   });
 
-  // Toggle active menu state (Sidebar & Mobile Bottom Nav)
+  // 6. Toggle Active Navigation Link in Sidebar
   getSidebarMenuItems().forEach(item => {
     if (item.getAttribute('data-target') === targetViewId) {
       item.classList.add('active');
@@ -252,16 +290,10 @@ export async function switchView(targetViewId) {
     }
   });
 
-  // Update header text based on page
-  const pageTitle = targetViewId.split('-')[0];
-  const capitalizedTitle = pageTitle.charAt(0).toUpperCase() + pageTitle.slice(1);
-  headerPageTitle.textContent = targetViewId === 'overview-page' ? 'Practice Overview' :
-                                capitalizedTitle === 'Clients' ? 'Clients Onboarding' : 
-                                capitalizedTitle === 'Accounts' ? 'Accounts & Income Ledger' : 
-                                capitalizedTitle === 'Share' ? 'Client Intimation' : 
-                                capitalizedTitle === 'Tasks' ? 'Task Manager' : 
-                                capitalizedTitle === 'Support' ? 'Help & Support Center' :
-                                capitalizedTitle === 'Superadmin' ? 'Super Admin Console' : capitalizedTitle;
+  // 7. Update Top Header Title
+  if (headerPageTitle && VIEW_TITLES[targetViewId]) {
+    headerPageTitle.textContent = VIEW_TITLES[targetViewId];
+  }
 
   if (targetViewId === 'tasks-page' && typeof window.tasksModule !== 'undefined') {
     window.tasksModule.render();
@@ -269,9 +301,10 @@ export async function switchView(targetViewId) {
 
   // Update Quick Action button
   const config = viewQuickActions[targetViewId];
-  if (config) {
+  if (config && headerQuickActionBtn) {
     headerQuickActionBtn.style.display = 'inline-flex';
-    headerQuickActionBtn.querySelector('span').textContent = config.text;
+    const textSpan = headerQuickActionBtn.querySelector('span');
+    if (textSpan) textSpan.textContent = config.text;
     let iconElement = headerQuickActionBtn.querySelector('i, svg');
     if (iconElement) {
       const newIcon = document.createElement('i');
@@ -279,12 +312,16 @@ export async function switchView(targetViewId) {
       iconElement.parentNode.replaceChild(newIcon, iconElement);
     }
     safeCreateIcons();
-  } else {
+  } else if (headerQuickActionBtn) {
     headerQuickActionBtn.style.display = 'none';
   }
 
-  // Trigger page-specific renders/refreshes
-  await refreshPageView(targetViewId);
+  // 8. Dispatch Rendering Phase
+  if (typeof refreshPageView === 'function') {
+    await refreshPageView(targetViewId);
+  } else {
+    dispatchViewRender(targetViewId);
+  }
 }
 window.switchView = switchView;
 
