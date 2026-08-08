@@ -67,46 +67,55 @@ const adminModule = {
   },
 
   async render() {
-    const user = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser') || '{}');
-    const container = document.getElementById('superadmin-page-content') || document.getElementById('superadmin-page');
-    if (!container) return;
-
-    if (!this.isSuperAdmin(user)) {
-      container.innerHTML = `
-        <div class="card" style="text-align: center; padding: 3rem 1.5rem; max-width: 520px; margin: 3rem auto; border: 1px solid rgba(239,68,68,0.3); background: var(--card-bg, #fff);">
-          <div style="width: 56px; height: 56px; background: rgba(239,68,68,0.1); color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto;">
-            <i data-lucide="shield-alert" style="width: 32px; height: 32px;"></i>
-          </div>
-          <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: var(--text-primary);">Super Admin Area Restricted</h3>
-          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5;">
-            This management console is exclusively reserved for platform administration (<strong>vaibhavsharmarajhc@gmail.com</strong>).
-          </p>
-          <button type="button" class="btn btn-primary" onclick="window.location.href='/dashboard'" style="display: inline-flex; align-items: center; gap: 6px; margin: 0 auto;">
-            <i data-lucide="arrow-left"></i> Return to Chamber Dashboard
-          </button>
-        </div>
-      `;
-      if (window.safeCreateIcons) window.safeCreateIcons(container);
-      return;
-    }
-
-    // 1. Immediately render local metrics so console displays 100% instantly
-    const localData = this.calculateLocalMetrics();
-    this.renderAdminConsole(container, localData);
-    try { this.loadAdminSupportDesk(); } catch (e) {}
-
-    // 2. Asynchronously update with server metrics if available
     try {
-      const serverUsers = (api.admin && typeof api.admin.getUsers === 'function') ? await api.admin.getUsers() : [];
-      const serverMetrics = (api.admin && typeof api.admin.getMetrics === 'function') ? await api.admin.getMetrics() : {};
-      const serverData = {
-        ...serverMetrics,
-        users: (Array.isArray(serverUsers) && serverUsers.length > 0) ? serverUsers : (serverMetrics.users || localData.users)
-      };
-      this.renderAdminConsole(container, serverData);
+      const user = db.getUser() || JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser') || '{}');
+      const container = document.getElementById('superadmin-page-content') || document.getElementById('superadmin-page');
+      if (!container) return;
+
+      if (!this.isSuperAdmin(user)) {
+        container.innerHTML = `
+          <div class="card" style="text-align: center; padding: 3rem 1.5rem; max-width: 520px; margin: 3rem auto; border: 1px solid rgba(239,68,68,0.3); background: var(--card-bg, #fff);">
+            <div style="width: 56px; height: 56px; background: rgba(239,68,68,0.1); color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto;">
+              <i data-lucide="shield-alert" style="width: 32px; height: 32px;"></i>
+            </div>
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: var(--text-primary);">Super Admin Area Restricted</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5;">
+              This management console is exclusively reserved for platform administration (<strong>vaibhavsharmarajhc@gmail.com</strong>).
+            </p>
+            <button type="button" class="btn btn-primary" onclick="window.location.href='/dashboard'" style="display: inline-flex; align-items: center; gap: 6px; margin: 0 auto;">
+              <i data-lucide="arrow-left"></i> Return to Chamber Dashboard
+            </button>
+          </div>
+        `;
+        if (window.safeCreateIcons) window.safeCreateIcons(container);
+        return;
+      }
+
+      // 1. Immediately render local metrics so console displays 100% instantly
+      const localData = this.calculateLocalMetrics();
+      this.renderAdminConsole(container, localData);
       try { this.loadAdminSupportDesk(); } catch (e) {}
-    } catch (err) {
-      console.warn("Admin API async background update fallback active:", err);
+
+      // 2. Asynchronously update with server metrics if available
+      try {
+        const serverUsers = (api.admin && typeof api.admin.getUsers === 'function') ? await api.admin.getUsers() : [];
+        const serverMetrics = (api.admin && typeof api.admin.getMetrics === 'function') ? await api.admin.getMetrics() : {};
+        const serverData = {
+          ...serverMetrics,
+          users: (Array.isArray(serverUsers) && serverUsers.length > 0) ? serverUsers : (serverMetrics.users || localData.users)
+        };
+        this.renderAdminConsole(container, serverData);
+        try { this.loadAdminSupportDesk(); } catch (e) {}
+      } catch (err) {
+        console.warn("Admin API async background update fallback active:", err);
+      }
+    } catch (topRenderErr) {
+      console.error("Top-level Super Admin Console render caught exception:", topRenderErr);
+      const container = document.getElementById('superadmin-page-content') || document.getElementById('superadmin-page');
+      if (container) {
+        const localFallbackData = this.calculateLocalMetrics();
+        try { this.renderAdminConsole(container, localFallbackData); } catch (fErr) {}
+      }
     }
   },
 
@@ -212,7 +221,7 @@ const adminModule = {
         <div class="card kpi-card">
           <div class="kpi-info">
             <span class="kpi-label">Processed Finances</span>
-            <span class="kpi-value">₹${totalRevenue.toLocaleString('en-IN')}</span>
+            <span class="kpi-value">₹${(Number(totalRevenue) || 0).toLocaleString('en-IN')}</span>
           </div>
           <div class="kpi-icon-wrapper success"><i data-lucide="wallet"></i></div>
         </div>
@@ -471,10 +480,10 @@ const adminModule = {
             <div style="font-weight: 700; color: var(--text-primary);">${displayName}</div>
             ${firmLabel}
           </td>
-          <td style="font-size:0.8rem; color:var(--text-secondary);">${u.email}</td>
+          <td style="font-size:0.8rem; color:var(--text-secondary);">${u.email || 'N/A'}</td>
           <td style="font-size:0.85rem; font-weight:600;">${u.casesCount || 0} Case(s)</td>
           <td style="font-size:0.85rem;">${u.tasksCount || 0} Task(s)</td>
-          <td style="font-size:0.85rem; font-weight:700; color:var(--color-success);">₹${(u.totalRevenue || 0).toLocaleString('en-IN')}</td>
+          <td style="font-size:0.85rem; font-weight:700; color:var(--color-success);">₹${(Number(u.totalRevenue) || 0).toLocaleString('en-IN')}</td>
           <td>
             <span class="badge" style="background:${badgeBg}; color:${badgeColor}; font-weight:700; font-size:0.72rem; padding:0.25rem 0.6rem; border-radius:10px;">
               ${statusText}
