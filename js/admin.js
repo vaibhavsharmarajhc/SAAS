@@ -252,14 +252,35 @@ const adminModule = {
       </div>
     `;
 
+    const existingSearch = document.getElementById('admin-user-search');
+    const previousQuery = existingSearch ? existingSearch.value : '';
+    const wasFocused = document.activeElement === existingSearch;
+
     container.innerHTML = html;
-    if (window.lucide) window.lucide.createIcons();
+    if (window.safeCreateIcons) window.safeCreateIcons(container);
+    else if (window.lucide) window.lucide.createIcons();
 
     this.attachUserActionListeners(container, users);
 
     // Attach search filter listener
     const searchInput = document.getElementById('admin-user-search');
     if (searchInput) {
+      if (previousQuery) {
+        searchInput.value = previousQuery;
+        const query = previousQuery.toLowerCase().trim();
+        const filtered = users.filter(u => 
+          (u.lawyerName && u.lawyerName.toLowerCase().includes(query)) ||
+          (u.firmName && u.firmName.toLowerCase().includes(query)) ||
+          (u.email && u.email.toLowerCase().includes(query))
+        );
+        const tbody = document.getElementById('admin-users-table-body');
+        if (tbody) {
+          tbody.innerHTML = this.renderUserRows(filtered);
+          this.attachUserActionListeners(container, filtered);
+        }
+      }
+      if (wasFocused) searchInput.focus();
+
       searchInput.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase().trim();
         const filtered = users.filter(u => 
