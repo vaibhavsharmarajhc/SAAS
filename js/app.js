@@ -357,6 +357,9 @@ async function refreshPageView(viewId) {
           case 'settings-page':
             loadSettingsForm();
             break;
+          case 'superadmin-page':
+            if (typeof adminModule !== 'undefined' && adminModule.render) adminModule.render();
+            break;
           case 'portal-page':
             if (typeof portalModule !== 'undefined' && portalModule.render) portalModule.render();
             break;
