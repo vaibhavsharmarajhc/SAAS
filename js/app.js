@@ -265,10 +265,10 @@ export async function switchView(targetViewId) {
   getPageContainers().forEach(container => {
     if (container.id === targetViewId) {
       container.classList.add('active');
-      container.style.removeProperty('display');
+      container.style.display = 'block';
     } else {
       container.classList.remove('active');
-      container.style.removeProperty('display');
+      container.style.display = 'none';
     }
   });
 
@@ -359,7 +359,11 @@ function dispatchViewRender(viewId) {
       loadSettingsForm();
       break;
     case 'superadmin-page':
-      if (typeof adminModule !== 'undefined' && adminModule.render) adminModule.render();
+      if (typeof adminModule !== 'undefined' && typeof adminModule.render === 'function') {
+        adminModule.render();
+      } else if (typeof window.adminModule !== 'undefined' && typeof window.adminModule.render === 'function') {
+        window.adminModule.render();
+      }
       break;
     case 'portal-page':
       if (typeof portalModule !== 'undefined' && portalModule.render) portalModule.render();

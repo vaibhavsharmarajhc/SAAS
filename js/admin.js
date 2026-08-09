@@ -524,7 +524,10 @@ const adminModule = {
     } catch (err) {
       container.innerHTML = `<div style="text-align:center; padding: 1.5rem; color: var(--color-danger);">Failed to load tickets: ${escapeHtml(err.message)}</div>`;
     }
-  }
 };
+
+if (typeof window !== 'undefined') {
+  window.adminModule = adminModule;
+}
 
 export default adminModule;
