@@ -1469,7 +1469,6 @@ app.use((req, res, next) => {
     p.startsWith('/share') ||
     p.startsWith('/tasks') ||
     p.startsWith('/settings') ||
-    p.startsWith('/superadmin') ||
     p.startsWith('/support') ||
     p.startsWith('/help') ||
     p.startsWith('/app') ||

@@ -178,8 +178,7 @@ const VIEW_TITLES = {
   'accounts-page': 'Accounts & Financials',
   'share-page': 'Client Share Portal',
   'tasks-page': 'Task Manager',
-  'settings-page': 'System Settings',
-  'superadmin-page': 'Super Admin Console'
+  'settings-page': 'System Settings'
 };
 
 /**
@@ -354,13 +353,6 @@ function dispatchViewRender(viewId) {
       break;
     case 'settings-page':
       loadSettingsForm();
-      break;
-    case 'superadmin-page':
-      if (typeof adminModule !== 'undefined' && typeof adminModule.render === 'function') {
-        adminModule.render();
-      } else if (typeof window.adminModule !== 'undefined' && typeof window.adminModule.render === 'function') {
-        window.adminModule.render();
-      }
       break;
     case 'portal-page':
       if (typeof portalModule !== 'undefined' && portalModule.render) portalModule.render();
@@ -771,7 +763,6 @@ async function router() {
         else if (path.startsWith('/share-page') || path.startsWith('/share')) targetView = 'share-page';
         else if (path.startsWith('/tasks-page') || path.startsWith('/tasks')) targetView = 'tasks-page';
         else if (path.startsWith('/settings-page') || path.startsWith('/settings')) targetView = 'settings-page';
-        else if (path.startsWith('/superadmin-page') || path.startsWith('/superadmin')) targetView = 'superadmin-page';
         
         await switchView(targetView);
       }
