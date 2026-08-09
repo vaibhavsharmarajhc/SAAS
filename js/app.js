@@ -68,7 +68,6 @@ import accounts from './accounts.js';
 import share from './share.js';
 import tasks from './tasks.js';
 import notificationsModule from './notifications.js';
-import adminModule from './admin.js';
 import portalModule from './portal.js';
 window.tasksModule = tasks;
 window.notificationsModule = notificationsModule;
@@ -76,7 +75,6 @@ window.casesModule = cases;
 window.accountsModule = accounts;
 window.clientsModule = clients;
 window.dashboardModule = dashboard;
-window.adminModule = adminModule;
 window.portalModule = portalModule;
 window.switchView = switchView;
 
@@ -222,17 +220,7 @@ export async function switchView(targetViewId) {
     } catch (e) {}
   }
 
-  // 2. Refresh Admin Nav Link Visibility
-  if (typeof adminModule !== 'undefined' && typeof adminModule.updateAdminVisibility === 'function') {
-    adminModule.updateAdminVisibility(currentUser);
-  }
-
-  // 3. Super Admin Route Visibility Check
-  if (typeof adminModule !== 'undefined' && typeof adminModule.updateAdminVisibility === 'function') {
-    adminModule.updateAdminVisibility(currentUser);
-  }
-
-  // 4. Validate DOM Target (Fallback to dashboard if container missing)
+  // 2. Validate DOM Target (Fallback to dashboard if container missing)
   let targetElem = document.getElementById(targetViewId);
   if (!targetElem) {
     console.warn(`[Router Navigation Failsafe] Target view container '#${targetViewId}' not found in DOM. Falling back to dashboard-page.`);
@@ -747,7 +735,6 @@ async function router() {
           share.init();
           tasks.init();
           notificationsModule.init();
-          if (typeof adminModule !== 'undefined' && adminModule.init) adminModule.init();
           appInitialized = true;
         }
 
@@ -1338,20 +1325,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   });
-
-  // 3c. Setup exit impersonation button listener
-  const exitImpersonationBtn = document.getElementById('btn-exit-impersonation');
-  if (exitImpersonationBtn) {
-    exitImpersonationBtn.addEventListener('click', () => {
-      const banner = document.getElementById('superadmin-impersonation-banner');
-      if (banner) banner.style.display = 'none';
-      if (localStorage.getItem('adminSessionBackup')) {
-        localStorage.removeItem('adminSessionBackup');
-      }
-      window.history.pushState({}, '', '/superadmin-page');
-      router();
-    });
-  }
 
   // Global click interceptor for client-side routing (Features, About, Pricing, FAQs, Privacy, Terms)
   document.addEventListener('click', async (e) => {
