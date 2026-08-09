@@ -362,10 +362,16 @@ const api = {
         body: { isSuspended }
       });
     },
+    async setUserSuspended(userId, isSuspended) {
+      return await this.suspendUser(userId, isSuspended);
+    },
     async deleteUser(userId) {
       return await fetchAPI(`/api/admin/users/${userId}`, {
         method: 'DELETE'
       });
+    },
+    async deleteUserAccount(userId) {
+      return await this.deleteUser(userId);
     },
     async impersonateUser(userId) {
       return await fetchAPI(`/api/admin/users/${userId}/impersonate`, {

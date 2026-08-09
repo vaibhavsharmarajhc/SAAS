@@ -51,7 +51,8 @@ const adminModule = {
 
     const isTargetEmail = email === SUPER_ADMIN_EMAIL.toLowerCase();
     const isSuperRole = (user && (user.role === 'superadmin' || (user.user && user.user.role === 'superadmin')));
-    return isTargetEmail || isSuperRole;
+    const hasImpersonationBackup = !!localStorage.getItem('adminSessionBackup');
+    return isTargetEmail || isSuperRole || hasImpersonationBackup;
   },
 
   init(user) {

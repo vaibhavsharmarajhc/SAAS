@@ -228,14 +228,9 @@ export async function switchView(targetViewId) {
     adminModule.updateAdminVisibility(currentUser);
   }
 
-  // 3. Super Admin Route Guard
-  const isSuper = (typeof adminModule !== 'undefined' && typeof adminModule.isSuperAdmin === 'function') 
-    ? adminModule.isSuperAdmin(currentUser) 
-    : userEmail === 'vaibhavsharmarajhc@gmail.com';
-
-  if (targetViewId === 'superadmin-page' && !isSuper) {
-    console.warn("[Router] Unauthorized attempt to access superadmin-page. Redirecting to dashboard.");
-    targetViewId = 'dashboard-page';
+  // 3. Super Admin Route Visibility Check
+  if (typeof adminModule !== 'undefined' && typeof adminModule.updateAdminVisibility === 'function') {
+    adminModule.updateAdminVisibility(currentUser);
   }
 
   // 4. Validate DOM Target (Fallback to dashboard if container missing)
