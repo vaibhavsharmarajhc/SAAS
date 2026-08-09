@@ -95,14 +95,14 @@ const state = {
 // DOM Elements (evaluated dynamically per router call)
 const getSidebarMenuItems = () => document.querySelectorAll('.sidebar-menu .menu-item');
 const getPageContainers = () => document.querySelectorAll('.page-container');
-const headerPageTitle = document.getElementById('header-page-title');
-const headerQuickActionBtn = document.getElementById('header-quick-action-btn');
-const themeToggleCheckbox = document.getElementById('theme-toggle-checkbox');
-const themeToggleText = document.getElementById('theme-toggle-text');
-const themeIconLight = document.getElementById('theme-icon-light');
-const themeIconDark = document.getElementById('theme-icon-dark');
-const sidebarBackupBtn = document.getElementById('sidebar-backup-btn');
-const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
+const getHeaderPageTitle = () => document.getElementById('header-page-title');
+const getHeaderQuickActionBtn = () => document.getElementById('header-quick-action-btn');
+const getThemeToggleCheckbox = () => document.getElementById('theme-toggle-checkbox');
+const getThemeToggleText = () => document.getElementById('theme-toggle-text');
+const getThemeIconLight = () => document.getElementById('theme-icon-light');
+const getThemeIconDark = () => document.getElementById('theme-icon-dark');
+const getSidebarBackupBtn = () => document.getElementById('sidebar-backup-btn');
+const getSidebarLogoutBtn = () => document.getElementById('sidebar-logout-btn');
 
 // View Configuration for Quick Actions
 const viewQuickActions = {
@@ -286,8 +286,9 @@ export async function switchView(targetViewId) {
   });
 
   // 7. Update Top Header Title
-  if (headerPageTitle && VIEW_TITLES[targetViewId]) {
-    headerPageTitle.textContent = VIEW_TITLES[targetViewId];
+  const titleElem = getHeaderPageTitle();
+  if (titleElem && VIEW_TITLES[targetViewId]) {
+    titleElem.textContent = VIEW_TITLES[targetViewId];
   }
 
   if (targetViewId === 'tasks-page' && typeof window.tasksModule !== 'undefined') {
@@ -295,20 +296,21 @@ export async function switchView(targetViewId) {
   }
 
   // Update Quick Action button
+  const quickActionBtn = getHeaderQuickActionBtn();
   const config = viewQuickActions[targetViewId];
-  if (config && headerQuickActionBtn) {
-    headerQuickActionBtn.style.display = 'inline-flex';
-    const textSpan = headerQuickActionBtn.querySelector('span');
+  if (config && quickActionBtn) {
+    quickActionBtn.style.display = 'inline-flex';
+    const textSpan = quickActionBtn.querySelector('span');
     if (textSpan) textSpan.textContent = config.text;
-    let iconElement = headerQuickActionBtn.querySelector('i, svg');
+    let iconElement = quickActionBtn.querySelector('i, svg');
     if (iconElement) {
       const newIcon = document.createElement('i');
       newIcon.setAttribute('data-lucide', config.icon);
       iconElement.parentNode.replaceChild(newIcon, iconElement);
     }
     safeCreateIcons();
-  } else if (headerQuickActionBtn) {
-    headerQuickActionBtn.style.display = 'none';
+  } else if (quickActionBtn) {
+    quickActionBtn.style.display = 'none';
   }
 
   // 8. Dispatch Rendering Phase
@@ -422,28 +424,37 @@ function updateOnlineStatusPill(isOnline) {
  * Handle theme switching toggles
  */
 function initTheme() {
-  const settings = db.getSettings();
+  const settings = (typeof db !== 'undefined' && typeof db.getSettings === 'function') ? db.getSettings() : {};
   const initialTheme = settings.theme || 'light';
   setTheme(initialTheme);
 
-  themeToggleCheckbox.checked = initialTheme === 'dark';
-  themeToggleCheckbox.addEventListener('change', async (e) => {
-    const newTheme = e.target.checked ? 'dark' : 'light';
-    setTheme(newTheme);
-    await db.updateSettings({ theme: newTheme });
-  });
+  const toggleCheckbox = getThemeToggleCheckbox();
+  if (toggleCheckbox) {
+    toggleCheckbox.checked = initialTheme === 'dark';
+    toggleCheckbox.addEventListener('change', async (e) => {
+      const newTheme = e.target.checked ? 'dark' : 'light';
+      setTheme(newTheme);
+      if (typeof db !== 'undefined' && typeof db.updateSettings === 'function') {
+        await db.updateSettings({ theme: newTheme });
+      }
+    });
+  }
 }
 
 function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
+  const toggleText = getThemeToggleText();
+  const iconLight = getThemeIconLight();
+  const iconDark = getThemeIconDark();
+
   if (theme === 'dark') {
-    themeToggleText.textContent = 'Dark Mode';
-    themeIconLight.style.display = 'none';
-    themeIconDark.style.display = 'inline-block';
+    if (toggleText) toggleText.textContent = 'Dark Mode';
+    if (iconLight) iconLight.style.display = 'none';
+    if (iconDark) iconDark.style.display = 'inline-block';
   } else {
-    themeToggleText.textContent = 'Light Mode';
-    themeIconLight.style.display = 'inline-block';
-    themeIconDark.style.display = 'none';
+    if (toggleText) toggleText.textContent = 'Light Mode';
+    if (iconLight) iconLight.style.display = 'inline-block';
+    if (iconDark) iconDark.style.display = 'none';
   }
 }
 
@@ -1363,12 +1374,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // 4. Setup quick action button click
-  headerQuickActionBtn.addEventListener('click', () => {
-    const config = viewQuickActions[state.activeView];
-    if (config && config.action) {
-      config.action();
-    }
-  });
+  if (headerQuickActionBtn) {
+    headerQuickActionBtn.addEventListener('click', () => {
+      const config = viewQuickActions[state.activeView];
+      if (config && config.action) {
+        config.action();
+      }
+    });
+  }
 
   // 4b. Setup mobile & desktop sidebar drawer toggle & close (Global Delegation)
   document.addEventListener('click', (e) => {
@@ -1404,9 +1417,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // 5. Sidebar data backup trigger
-  sidebarBackupBtn.addEventListener('click', () => {
-    db.exportBackup();
-  });
+  const backupBtn = getSidebarBackupBtn();
+  if (backupBtn) {
+    backupBtn.addEventListener('click', () => {
+      db.exportBackup();
+    });
+  }
+
+  // Sidebar logout trigger
+  const logoutBtn = getSidebarLogoutBtn();
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        if (typeof api !== 'undefined' && api.auth && typeof api.auth.logout === 'function') {
+          await api.auth.logout();
+        }
+      } catch (e) {}
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = '/login';
+    });
+  }
 
   // Sidebar refresh trigger
   const sidebarRefreshBtn = document.getElementById('sidebar-refresh-btn');
@@ -1434,16 +1465,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // 6. Dashboard links
-  document.getElementById('dashboard-view-diary-link').addEventListener('click', async (e) => {
-    e.preventDefault();
-    window.history.pushState({}, '', '/diary-page');
-    await router();
-  });
-  document.getElementById('dashboard-view-accounts-link').addEventListener('click', async (e) => {
-    e.preventDefault();
-    window.history.pushState({}, '', '/accounts-page');
-    await router();
-  });
+  const viewDiaryLink = document.getElementById('dashboard-view-diary-link');
+  if (viewDiaryLink) {
+    viewDiaryLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      window.history.pushState({}, '', '/diary-page');
+      await router();
+    });
+  }
+
+  const viewAccountsLink = document.getElementById('dashboard-view-accounts-link');
+  if (viewAccountsLink) {
+    viewAccountsLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      window.history.pushState({}, '', '/accounts-page');
+      await router();
+    });
+  }
 
   const emptyOnboardBtn = document.getElementById('dashboard-empty-onboard-btn');
   if (emptyOnboardBtn) {
@@ -1456,16 +1494,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // 7. Settings form save
-  document.getElementById('settings-profile-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const firmName = document.getElementById('settings-firm-name').value;
-    const lawyerName = document.getElementById('settings-lawyer-name').value;
-    const currency = document.getElementById('settings-currency').value;
-    
-    await db.updateSettings({ firmName, lawyerName, currency });
-    updateBrandingHeaders();
-    alert("Practice settings updated successfully.");
-  });
+  const profileForm = document.getElementById('settings-profile-form');
+  if (profileForm) {
+    profileForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const firmName = document.getElementById('settings-firm-name')?.value;
+      const lawyerName = document.getElementById('settings-lawyer-name')?.value;
+      const currency = document.getElementById('settings-currency')?.value;
+      
+      await db.updateSettings({ firmName, lawyerName, currency });
+      updateBrandingHeaders();
+      alert("Practice settings updated successfully.");
+    });
+  }
 
   // 8. Reset database button with guardrail
   const resetConfirmInput = document.getElementById('settings-reset-confirm-input');
@@ -1496,37 +1537,41 @@ document.addEventListener('DOMContentLoaded', async () => {
   const backupImportBtn = document.getElementById('settings-backup-import-btn');
   const backupExportBtn = document.getElementById('settings-backup-export-btn');
 
-  backupExportBtn.addEventListener('click', () => {
-    db.exportBackup();
-  });
+  if (backupExportBtn) {
+    backupExportBtn.addEventListener('click', () => {
+      db.exportBackup();
+    });
+  }
 
-  backupFileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      backupFilenameSpan.textContent = file.name;
-      backupImportBtn.disabled = false;
-    } else {
-      backupFilenameSpan.textContent = "No file selected";
-      backupImportBtn.disabled = true;
-    }
-  });
-
-  backupImportBtn.addEventListener('click', () => {
-    const file = backupFileInput.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-      const result = await db.importBackup(e.target.result);
-      if (result.success) {
-        alert("Database restored successfully!");
-        location.reload();
+  if (backupFileInput && backupFilenameSpan && backupImportBtn) {
+    backupFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        backupFilenameSpan.textContent = file.name;
+        backupImportBtn.disabled = false;
       } else {
-        alert("Error restoring backup: " + result.error);
+        backupFilenameSpan.textContent = "No file selected";
+        backupImportBtn.disabled = true;
       }
-    };
-    reader.readAsText(file);
-  });
+    });
+
+    backupImportBtn.addEventListener('click', () => {
+      const file = backupFileInput.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const result = await db.importBackup(e.target.result);
+        if (result.success) {
+          alert("Database restored successfully!");
+          location.reload();
+        } else {
+          alert("Error restoring backup: " + result.error);
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
 
   const launchSuperAdminBtn = document.getElementById('btn-settings-launch-superadmin');
   if (launchSuperAdminBtn) {
