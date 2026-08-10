@@ -18,7 +18,7 @@
   <!-- SEO & Styling Meta -->
   <meta name="description" content="Premium Case Diary, Billing, Client Onboarding, and Practice Management Suite for Track My Chambers.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.165">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.166">
   <!-- Local Lucide Icons Vendor -->
   <script src="/js/vendor/lucide.min.js" defer></script>
   <!-- Chart.js CDN -->
@@ -832,6 +832,16 @@
               <a href="#" id="auth-switch-to-forgot" style="font-size: 0.75rem; color: var(--text-secondary); text-decoration: none;">Forgot Password?</a>
             </div>
           </div>
+          <div class="auth-options-group" style="display: flex; justify-content: space-between; align-items: center; margin: 0.75rem 0 0.5rem 0; font-size: 0.8rem; padding: 0 0.2rem;">
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-secondary); user-select: none;">
+              <input type="checkbox" id="auth-login-remember-me" checked style="accent-color: var(--color-primary); width: 15px; height: 15px; cursor: pointer;">
+              <span>Remember Me</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-secondary); user-select: none;">
+              <input type="checkbox" id="auth-login-keep-signed-in" checked style="accent-color: var(--color-primary); width: 15px; height: 15px; cursor: pointer;">
+              <span>Keep Me Signed In</span>
+            </label>
+          </div>
           <div id="auth-login-error" style="color: var(--color-danger); font-size: 0.8rem; margin-top: 0.5rem; display: none; align-items: center; gap: 4px;"></div>
         </div>
         <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 0.75rem;">
@@ -967,6 +977,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.165"></script>
+  <script type="module" src="js/app.js?v=1.0.166"></script>
 </body>
 </html>

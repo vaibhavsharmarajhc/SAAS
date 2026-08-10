@@ -554,6 +554,23 @@ function showAuthView(viewName) {
     else if (viewName === 'forgot') modalTitle.textContent = 'Forgot Password';
     else if (viewName === 'reset') modalTitle.textContent = 'Reset Password';
   }
+
+  if (viewName === 'login') {
+    const rememberedEmail = localStorage.getItem('vsh_remembered_email');
+    const loginEmailInput = document.getElementById('auth-login-email');
+    const rememberCheckbox = document.getElementById('auth-login-remember-me');
+    const keepSignedInCheckbox = document.getElementById('auth-login-keep-signed-in');
+
+    if (rememberedEmail && loginEmailInput) {
+      loginEmailInput.value = rememberedEmail;
+    }
+    if (rememberCheckbox) {
+      rememberCheckbox.checked = true;
+    }
+    if (keepSignedInCheckbox) {
+      keepSignedInCheckbox.checked = true;
+    }
+  }
 }
 
 let appInitialized = false;
@@ -908,7 +925,17 @@ function initAuthenticationHandlers() {
       submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Signing In...`;
       safeCreateIcons();
 
-      const resData = await api.auth.login(loginEmail.value, loginPass.value);
+      const rememberMe = document.getElementById('auth-login-remember-me')?.checked ?? true;
+      const keepSignedIn = document.getElementById('auth-login-keep-signed-in')?.checked ?? true;
+      const emailValue = loginEmail.value.trim();
+
+      if (rememberMe) {
+        localStorage.setItem('vsh_remembered_email', emailValue);
+      } else {
+        localStorage.removeItem('vsh_remembered_email');
+      }
+
+      const resData = await api.auth.login(emailValue, loginPass.value, keepSignedIn);
       loginForm.reset();
       
       if (resData) {

@@ -418,7 +418,7 @@ app.post('/api/auth/signup', async (req, res) => {
  * Log In (Session Creation)
  */
 app.post('/api/auth/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, keepSignedIn = true } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: "Email and password are required." });
   }
@@ -435,16 +435,22 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
-    // Create session token
-    const token = jwt.sign({ id: tenant.id, email: tenant.email }, JWT_SECRET, { expiresIn: '30d' });
+    // Evaluate session persistence (Keep Me Signed In)
+    const isPersistent = Boolean(keepSignedIn);
+    const tokenExpiry = isPersistent ? '30d' : '1d';
+    const token = jwt.sign({ id: tenant.id, email: tenant.email }, JWT_SECRET, { expiresIn: tokenExpiry });
 
     // Set HttpOnly cookie
-    res.cookie('session_token', token, {
+    const cookieOptions = {
       httpOnly: true,
       sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
-    });
+      secure: process.env.NODE_ENV === 'production'
+    };
+    if (isPersistent) {
+      cookieOptions.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+    }
+
+    res.cookie('session_token', token, cookieOptions);
 
     const { passwordHash: _, ...safeTenant } = tenant;
     const [clients, cases, transactions] = await Promise.all([

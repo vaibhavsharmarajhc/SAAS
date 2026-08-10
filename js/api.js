@@ -41,10 +41,10 @@ async function fetchAPI(url, options = {}) {
 
 const api = {
   auth: {
-    async login(email, password) {
+    async login(email, password, keepSignedIn = true) {
       return await fetchAPI('/api/auth/login', {
         method: 'POST',
-        body: { email, password }
+        body: { email, password, keepSignedIn }
       });
     },
 
