@@ -346,13 +346,13 @@ const casesModule = {
           badgeBg = 'rgba(234, 179, 8, 0.12)';
           badgeBorder = 'rgba(234, 179, 8, 0.35)';
           badgeLabel = '👁️ Cause List Watch:';
-          badgeText = `Eligible for Listing (Not Before ${notBefore})`;
+          badgeText = `Eligible for Listing (Not Before ${window.formatDDMMYYYY(notBefore)})`;
           badgeTextColor = '#b45309';
         } else if (notBefore) {
           badgeBg = 'rgba(59, 130, 246, 0.08)';
           badgeBorder = 'rgba(59, 130, 246, 0.25)';
           badgeLabel = 'Not Before:';
-          badgeText = notBefore;
+          badgeText = window.formatDDMMYYYY(notBefore);
           badgeTextColor = 'var(--color-primary)';
         }
       } else {
@@ -361,7 +361,7 @@ const casesModule = {
           badgeBg = 'rgba(16, 185, 129, 0.08)';
           badgeBorder = 'rgba(16, 185, 129, 0.25)';
           badgeLabel = 'Confirmed Listed:';
-          badgeText = nextDate;
+          badgeText = window.formatDDMMYYYY(nextDate);
           badgeTextColor = 'var(--color-success)';
         }
       }
@@ -929,7 +929,7 @@ const casesModule = {
           <!-- timeline dot pointer -->
           <div style="width: 10px; height: 10px; border-radius:50%; background-color:#f59e0b; border: 2px solid var(--bg-sidebar); position: absolute; left: -6px; top: 4px;"></div>
           <div style="font-size:0.75rem; color:#f59e0b; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.15rem;">Upcoming Scheduled</div>
-          <div style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">${cs.nextHearingDate}</div>
+          <div style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">${window.formatDDMMYYYY(cs.nextHearingDate)}</div>
           <div style="font-size:0.9rem; font-weight:600; color:var(--text-primary); margin-top:0.15rem;">Stage: ${cs.stage}</div>
         </div>
       `;
@@ -944,7 +944,7 @@ const casesModule = {
             <!-- timeline dot pointer -->
             <div style="width: 10px; height: 10px; border-radius:50%; background-color:var(--color-primary); border: 2px solid var(--bg-sidebar); position: absolute; left: -6px; top: 4px;"></div>
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <div style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">${h.date}</div>
+              <div style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">${window.formatDDMMYYYY(h.date)}</div>
               <button class="btn btn-secondary btn-edit-hearing" data-hearing-id="${h.id}" data-case-id="${cs.id}" style="padding: 2px 6px; font-size: 0.65rem; border-radius: var(--radius-xs); line-height: 1;" title="Edit Hearing Details">
                 <i data-lucide="pencil" style="width:10px; height:10px;"></i> Edit
               </button>

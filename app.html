@@ -17,7 +17,7 @@
   <title>Track My Chambers - Practice Workspace</title>
   <meta name="description" content="Advocate Chambers Practice Management Workspace.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.166">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.167">
   <!-- Local Vendor Bundles (Zero External CDNs) -->
   <script src="/js/vendor/lucide.min.js" defer></script>
   <script src="/js/vendor/chart.min.js" defer></script>
@@ -1875,12 +1875,12 @@
         <div class="modal-body" style="padding: 1rem 0;">
           <div class="form-group">
             <label class="form-label">Email Address *</label>
-            <input type="email" class="form-control" id="auth-login-email" required placeholder="name@firm.com">
+            <input type="email" class="form-control" id="auth-login-email" name="username" autocomplete="username email" required placeholder="name@firm.com">
           </div>
           <div class="form-group">
             <label class="form-label">Password *</label>
             <div class="password-input-container">
-              <input type="password" class="form-control" id="auth-login-password" required placeholder="••••••••" style="padding-right: 2.5rem;">
+              <input type="password" class="form-control" id="auth-login-password" name="password" autocomplete="current-password" required placeholder="••••••••" style="padding-right: 2.5rem;">
               <button type="button" class="password-toggle-btn" data-toggle-target="auth-login-password">
                 <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
               </button>
@@ -2091,6 +2091,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 5rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.166"></script>
+  <script type="module" src="js/app.js?v=1.0.167"></script>
 </body>
 </html>

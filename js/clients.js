@@ -227,7 +227,7 @@ const clientsModule = {
           <div style="font-size:0.8rem;">${c.email}</div>
           <div style="font-size:0.75rem; color:var(--text-muted);">${c.phone}</div>
         </td>
-        <td>${c.onboardingDate}</td>
+        <td>${window.formatDDMMYYYY(c.onboardingDate)}</td>
         <td style="${balanceStyle}">₹${balance.outstanding.toLocaleString('en-IN')}</td>
         <td>
           <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:nowrap;">
@@ -253,6 +253,13 @@ const clientsModule = {
     const client = db.getClient(id);
     if (!client) return;
 
+    let token = client.accessToken;
+    if (!token) {
+      token = 'pt_' + Math.random().toString(36).substring(2, 11);
+      client.accessToken = token;
+      db.updateClient(id, { accessToken: token });
+    }
+
     const modal = document.getElementById('portal-share-modal');
     const nameEl = document.getElementById('portal-share-client-name');
     const copyBtn = document.getElementById('portal-share-copy-btn');
@@ -262,8 +269,7 @@ const clientsModule = {
     if (nameEl) nameEl.textContent = window.sanitizeText ? window.sanitizeText(client.name) : (client.name || 'Client');
 
     const baseUrl = window.location.origin;
-    const token = client.accessToken || client.id || 'demo';
-    const portalUrl = `${baseUrl}/portal?token=${token}`;
+    const portalUrl = `${baseUrl}/portal?token=${encodeURIComponent(token)}`;
 
     const handleCopy = async () => {
       let copied = false;
@@ -448,7 +454,7 @@ const clientsModule = {
             <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem;">
               Court: ${cs.court} | Stage: ${cs.stage}
             </div>
-            ${cs.nextHearingDate ? `<div style="font-size:0.75rem; color:var(--color-primary); margin-top:0.25rem;">Next Hearing: ${cs.nextHearingDate}</div>` : ''}
+            ${cs.nextHearingDate ? `<div style="font-size:0.75rem; color:var(--color-primary); margin-top:0.25rem;">Next Hearing: ${window.formatDDMMYYYY(cs.nextHearingDate)}</div>` : ''}
           </div>
         `;
       });
@@ -464,7 +470,7 @@ const clientsModule = {
                           t.type === 'Received' ? 'color: var(--color-success);' : 'color: var(--color-danger);';
         txsMarkup += `
           <tr>
-            <td>${t.date}</td>
+            <td>${window.formatDDMMYYYY(t.date)}</td>
             <td>${t.description}</td>
             <td style="${typeStyle} font-weight:600;">${t.type}</td>
             <td>₹${t.amount.toLocaleString('en-IN')}</td>
@@ -481,7 +487,7 @@ const clientsModule = {
             <div><span>Email:</span> <strong>${client.email || 'N/A'}</strong></div>
             <div><span>Phone:</span> <strong>${client.phone || 'N/A'}</strong></div>
             <div><span>Address:</span> <strong>${client.address || 'N/A'}</strong></div>
-            <div><span>Onboarded:</span> <strong>${client.onboardingDate}</strong></div>
+            <div><span>Onboarded:</span> <strong>${window.formatDDMMYYYY(client.onboardingDate)}</strong></div>
             <div><span>Client ID:</span> <strong>${client.id}</strong></div>
           </div>
         </div>

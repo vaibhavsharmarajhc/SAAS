@@ -90,6 +90,43 @@ const state = {
   activeView: 'dashboard-page',
 };
 
+// Global Date Formatter Helper (DD/MM/YYYY)
+window.formatDDMMYYYY = function(dateInput) {
+  if (!dateInput || dateInput === 'Not Scheduled' || dateInput === 'N/A') return dateInput || '';
+  if (typeof dateInput === 'string' && dateInput.includes('Not Before')) {
+    return dateInput.replace(/\d{4}-\d{2}-\d{2}/g, match => window.formatDDMMYYYY(match));
+  }
+  let d;
+  if (dateInput instanceof Date) {
+    d = dateInput;
+  } else if (typeof dateInput === 'string') {
+    const trimmed = dateInput.trim();
+    if (trimmed.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+      return trimmed;
+    }
+    if (trimmed.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const [y, m, day] = trimmed.split('-');
+      return `${day.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+    }
+    if (trimmed.includes('T')) {
+      d = new Date(trimmed);
+    } else {
+      d = new Date(trimmed);
+    }
+  } else if (typeof dateInput === 'number') {
+    d = new Date(dateInput);
+  } else {
+    return String(dateInput);
+  }
+
+  if (!d || isNaN(d.getTime())) return String(dateInput);
+
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
 // DOM Elements (evaluated dynamically per router call)
 const getSidebarMenuItems = () => document.querySelectorAll('.sidebar-menu .menu-item');
 const getPageContainers = () => document.querySelectorAll('.page-container');
@@ -557,12 +594,17 @@ function showAuthView(viewName) {
 
   if (viewName === 'login') {
     const rememberedEmail = localStorage.getItem('vsh_remembered_email');
+    const rememberedPass = localStorage.getItem('vsh_remembered_pass');
     const loginEmailInput = document.getElementById('auth-login-email');
+    const loginPassInput = document.getElementById('auth-login-password');
     const rememberCheckbox = document.getElementById('auth-login-remember-me');
     const keepSignedInCheckbox = document.getElementById('auth-login-keep-signed-in');
 
     if (rememberedEmail && loginEmailInput) {
       loginEmailInput.value = rememberedEmail;
+    }
+    if (rememberedPass && loginPassInput) {
+      loginPassInput.value = rememberedPass;
     }
     if (rememberCheckbox) {
       rememberCheckbox.checked = true;
@@ -931,8 +973,12 @@ function initAuthenticationHandlers() {
 
       if (rememberMe) {
         localStorage.setItem('vsh_remembered_email', emailValue);
+        if (loginPass.value) {
+          localStorage.setItem('vsh_remembered_pass', loginPass.value);
+        }
       } else {
         localStorage.removeItem('vsh_remembered_email');
+        localStorage.removeItem('vsh_remembered_pass');
       }
 
       const resData = await api.auth.login(emailValue, loginPass.value, keepSignedIn);

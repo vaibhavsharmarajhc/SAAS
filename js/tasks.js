@@ -755,7 +755,7 @@ const tasksModule = {
     };
     const pri = priMap[t.priority] || priMap['P4'];
 
-    const formattedDate = t.dueDate ? new Date(t.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+    const formattedDate = t.dueDate ? window.formatDDMMYYYY(t.dueDate) : '';
     const initials = t.assigneeName ? t.assigneeName.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : 'ME';
     const commentsCount = t.comments ? t.comments.length : 0;
 
@@ -897,7 +897,7 @@ const tasksModule = {
     // Due date format
     const dueEl = document.getElementById('task-detail-due');
     if (task.dueDate) {
-      dueEl.textContent = new Date(task.dueDate).toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' });
+      dueEl.textContent = window.formatDDMMYYYY(task.dueDate);
       dueEl.style.color = '#f87171';
     } else {
       dueEl.textContent = 'No date scheduled';
@@ -973,7 +973,7 @@ const tasksModule = {
       const isMe = c.senderEmail.toLowerCase() === currentEmail.toLowerCase();
       const initials = c.senderName ? c.senderName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'TM';
       const time = new Date(c.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-      const date = new Date(c.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const date = window.formatDDMMYYYY(c.timestamp);
 
       html += `
         <div style="display: flex; gap: 8px; align-items: flex-start; margin-bottom: 0.25rem; ${isMe ? 'flex-direction: row-reverse;' : ''}">
@@ -1142,7 +1142,7 @@ const tasksModule = {
       } else {
         col.list.forEach(t => {
           const initials = t.assigneeName ? t.assigneeName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'ME';
-          const formattedDate = t.dueDate ? new Date(t.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+          const formattedDate = t.dueDate ? window.formatDDMMYYYY(t.dueDate) : '';
           const priorityBorder = t.priority === 'P1' ? '#ef4444' : t.priority === 'P2' ? '#f97316' : t.priority === 'P3' ? '#3b82f6' : 'var(--border-color)';
 
           html += `

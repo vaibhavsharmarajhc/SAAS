@@ -150,10 +150,16 @@ const portalModule = {
 
     const formatSafeDate = (dStr) => {
       if (!dStr) return 'TBD / Pending Fixation';
+      if (typeof window.formatDDMMYYYY === 'function') {
+        return window.formatDDMMYYYY(dStr);
+      }
       try {
         const d = new Date(dStr);
         if (isNaN(d.getTime())) return String(dStr);
-        return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}/${month}/${year}`;
       } catch (e) {
         return String(dStr);
       }

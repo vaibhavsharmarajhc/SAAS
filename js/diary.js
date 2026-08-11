@@ -134,7 +134,7 @@ const diaryModule = {
       label.textContent = `${startOfWeek.toLocaleDateString('en-US', formatOption)} - ${endOfWeek.toLocaleDateString('en-US', formatOption)}, ${date.getFullYear()}`;
       this.renderWeekView(content, date);
     } else if (view === 'day') {
-      label.textContent = date.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' });
+      label.textContent = window.formatDDMMYYYY(date);
       this.renderDayView(content, date);
     } else if (view === 'year') {
       label.textContent = `${date.getFullYear()}`;
@@ -505,7 +505,7 @@ const diaryModule = {
 
   showDayDetails(dateStr) {
     const date = new Date(dateStr);
-    const formattedTitle = date.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' });
+    const formattedTitle = window.formatDDMMYYYY(dateStr);
     
     document.getElementById('day-details-title').textContent = `Diary: ${formattedTitle}`;
 

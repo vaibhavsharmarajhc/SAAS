@@ -105,7 +105,7 @@ const shareModule = {
     const nextDate = document.getElementById('share-next-date').value;
     const feeVal = parseFloat(document.getElementById('share-fee-confirm').value) || 0;
 
-    const formattedDate = nextDate ? new Date(nextDate).toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' }) : 'Not Scheduled';
+    const formattedDate = nextDate ? window.formatDDMMYYYY(nextDate) : 'Not Scheduled';
 
     // 1. Render Digital Card visualizer preview
     const previewContainer = document.getElementById('share-card-body-render');

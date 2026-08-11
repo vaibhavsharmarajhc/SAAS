@@ -111,7 +111,7 @@ const accountsModule = {
       const creditColorStyle = t.type === 'WrittenOff' ? 'color: var(--text-secondary); text-decoration: line-through;' : 'color: var(--color-success);';
 
       row.innerHTML = `
-        <td>${t.date}</td>
+        <td>${window.formatDDMMYYYY(t.date)}</td>
         <td>
           <div style="font-weight:600; color:var(--text-primary);">${client ? client.name : 'Unknown'}</div>
           ${linkedCase ? `<div style="font-size:0.75rem; color:var(--color-primary); cursor:pointer; text-decoration:underline;" onclick="viewCaseDetails('${t.caseId}')">${linkedCase.title}</div>` : `<div style="font-size:0.75rem; color:var(--text-muted);">Standalone account</div>`}
@@ -533,7 +533,7 @@ const accountsModule = {
           <div style="text-align:right;">
             <div style="font-size:0.8rem; font-weight:700; color:#0f172a; text-transform:uppercase; letter-spacing:0.05em;">${titleText}</div>
             <div style="font-size:0.75rem; color:#64748b; margin-top:0.25rem;">Ref ID: ${tx.id}</div>
-            <div style="font-size:0.75rem; color:#64748b;">Date: ${tx.date}</div>
+            <div style="font-size:0.75rem; color:#64748b;">Date: ${window.formatDDMMYYYY(tx.date)}</div>
           </div>
         </div>
 
