@@ -1207,9 +1207,9 @@ app.get('/sw.js', (req, res) => {
 });
 
 // Protected Admin Usage Metrics Endpoint (Exclusively for vaibhavsharmarajhc@gmail.com)
-app.get('/api/admin/metrics', authMiddleware, async (req, res) => {
+app.get('/api/admin/metrics', authenticateToken, async (req, res) => {
   try {
-    const userEmail = (req.tenant.email || '').trim().toLowerCase();
+    const userEmail = (req.user?.email || req.user?.username || '').trim().toLowerCase();
     const adminEmail = (process.env.ADMIN_EMAIL || 'vaibhavsharmarajhc@gmail.com').trim().toLowerCase();
 
     if (userEmail !== adminEmail && userEmail !== 'vaibhavsharmarajhc@gmail.com') {
