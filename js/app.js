@@ -543,8 +543,8 @@ export function initModals() {
   
   overlays.forEach(overlay => {
     overlay.addEventListener('click', (e) => {
-      // Don't allow closing auth-modal by clicking backdrop
-      if (overlay.id === 'auth-modal') return;
+      // Don't allow closing auth-page by clicking backdrop
+      if (overlay.id === 'auth-modal' || overlay.id === 'auth-page') return;
 
       if (e.target === overlay) {
         overlay.classList.remove('active');
@@ -552,20 +552,44 @@ export function initModals() {
     });
 
     const closeBtn = overlay.querySelector('.modal-close');
-    if (closeBtn && overlay.id !== 'auth-modal') {
+    if (closeBtn && overlay.id !== 'auth-modal' && overlay.id !== 'auth-page') {
       closeBtn.addEventListener('click', () => {
         overlay.classList.remove('active');
       });
     }
 
     const cancelBtn = overlay.querySelector('button[id$="-cancel"], button[id$="-close-btn"]');
-    if (cancelBtn && overlay.id !== 'auth-modal') {
+    if (cancelBtn && overlay.id !== 'auth-modal' && overlay.id !== 'auth-page') {
       cancelBtn.addEventListener('click', () => {
         overlay.classList.remove('active');
       });
     }
   });
 }
+
+window.openAuthModal = function(viewName = 'login') {
+  const targetView = (viewName === 'signup' || viewName === 'register') ? 'signup' : 'login';
+  const targetPath = targetView === 'signup' ? '/register' : '/login';
+  
+  try {
+    window.history.pushState({}, '', targetPath);
+  } catch (e) {}
+
+  const authPage = document.getElementById('auth-page');
+  const marketingPage = document.getElementById('marketing-page');
+  
+  if (marketingPage) marketingPage.style.display = 'block';
+  if (authPage) {
+    authPage.style.display = 'flex';
+    authPage.classList.add('active');
+    showAuthView(targetView);
+    updateDbStatusBadge();
+    setTimeout(() => {
+      const emailInput = document.getElementById(targetView === 'login' ? 'auth-login-email' : 'auth-signup-email');
+      if (emailInput) emailInput.focus();
+    }, 50);
+  }
+};
 
 async function updateDbStatusBadge() {
   const badge = document.getElementById('auth-db-status-badge');
