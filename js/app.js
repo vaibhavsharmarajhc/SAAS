@@ -691,6 +691,7 @@ async function router() {
 
     if (path === '/' || path === '/index.html') {
       if (marketingPage) marketingPage.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } else if (path === '/privacy') {
       if (privacyPage) privacyPage.style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'instant' });
