@@ -1419,6 +1419,7 @@ async function initApp() {
   });
 
   // 4. Setup quick action button click
+  const headerQuickActionBtn = getHeaderQuickActionBtn();
   if (headerQuickActionBtn) {
     headerQuickActionBtn.addEventListener('click', () => {
       const config = viewQuickActions[state.activeView];
