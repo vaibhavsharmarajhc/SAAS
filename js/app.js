@@ -661,7 +661,10 @@ async function router() {
   // Hide everything first
   if (marketingNav) marketingNav.style.display = 'none';
   if (marketingPage) marketingPage.style.display = 'none';
-  if (authPage) authPage.style.display = 'none';
+  if (authPage) {
+    authPage.style.display = 'none';
+    authPage.classList.remove('active');
+  }
   if (dashboardApp) dashboardApp.style.display = 'none';
   if (privacyPage) privacyPage.style.display = 'none';
   if (termsPage) termsPage.style.display = 'none';
@@ -726,6 +729,7 @@ async function router() {
       if (marketingPage) marketingPage.style.display = 'block'; // Keep background page intact under modal
       if (authPage) {
         authPage.style.display = 'flex';
+        authPage.classList.add('active');
         const targetView = (path === '/login') ? 'login' : 'signup';
         showAuthView(targetView);
         updateDbStatusBadge();

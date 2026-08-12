@@ -854,6 +854,13 @@ textarea.form-control {
   pointer-events: auto;
 }
 
+#auth-page.active {
+  display: flex !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 10000 !important;
+}
+
 .modal-overlay {
   will-change: opacity;
 }
