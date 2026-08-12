@@ -1373,11 +1373,11 @@ function initGlobalSearch() {
 }
 
 /**
- * App Initializer
+ * App Initializer - Failsafe ES Module Bootloader
  */
-document.addEventListener('DOMContentLoaded', async () => {
+async function initApp() {
   // 1. Initialize Icons
-  lucide.createIcons();
+  safeCreateIcons();
 
   // 2. Initialize common modal click behaviors
   initModals();
@@ -1412,17 +1412,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         await router();
       }
     });
-  });
-
-  // Global click interceptor for client-side routing (Features, About, Pricing, FAQs, Privacy, Terms)
-  document.addEventListener('click', async (e) => {
-    const link = e.target.closest('a[data-link]');
-    if (link) {
-      e.preventDefault();
-      const targetPath = link.getAttribute('data-link');
-      window.history.pushState({}, '', targetPath);
-      await router();
-    }
   });
 
   // 4. Setup quick action button click
@@ -1476,21 +1465,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Sidebar logout trigger
-  const logoutBtn = getSidebarLogoutBtn();
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-      try {
-        if (typeof api !== 'undefined' && api.auth && typeof api.auth.logout === 'function') {
-          await api.auth.logout();
-        }
-      } catch (e) {}
-      localStorage.clear();
-      sessionStorage.clear();
-      window.location.href = '/login';
-    });
-  }
-
   // Sidebar refresh trigger
   const sidebarRefreshBtn = document.getElementById('sidebar-refresh-btn');
   if (sidebarRefreshBtn) {
@@ -1500,15 +1474,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       sidebarRefreshBtn.disabled = true;
 
       try {
-        const authOk = await db.loadAll(true);
-        if (authOk) {
-          await switchView(state.activeView);
-          updateBrandingHeaders();
-        } else {
-          location.reload();
-        }
+        await db.loadAll(true);
+        const activeView = state.activeView || 'dashboard-page';
+        await switchView(activeView);
       } catch (err) {
-        console.error("Refresh failed:", err);
+        console.error("Manual refresh error:", err);
       } finally {
         if (icon) icon.classList.remove('spin-animation');
         sidebarRefreshBtn.disabled = false;
@@ -1516,7 +1486,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 6. Dashboard links
+  // 6. Dashboard quick links
+  const viewCasesLink = document.getElementById('dashboard-view-cases-link');
+  if (viewCasesLink) {
+    viewCasesLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      window.history.pushState({}, '', '/cases-page');
+      await router();
+    });
+  }
+
   const viewDiaryLink = document.getElementById('dashboard-view-diary-link');
   if (viewDiaryLink) {
     viewDiaryLink.addEventListener('click', async (e) => {
@@ -1574,49 +1553,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     resetDatabaseBtn.addEventListener('click', async () => {
-      if (resetConfirmInput.value !== 'DELETE') return;
-      if (confirm("Are you absolutely sure you want to restore the practice manager database? All custom cases and client logs will be permanently deleted!")) {
-        await db.resetDB();
-        alert("Database reset to empty state.");
-        location.reload();
+      if (resetConfirmInput.value === 'DELETE') {
+        const resetDone = await db.resetDB();
+        if (resetDone) {
+          alert("Database reset completed successfully. Re-seeding demo data.");
+          window.location.reload();
+        }
       }
     });
   }
 
-  // 9. Backup Import Actions
-  const backupFileInput = document.getElementById('settings-backup-file-input');
-  const backupFilenameSpan = document.getElementById('selected-backup-filename');
-  const backupImportBtn = document.getElementById('settings-backup-import-btn');
-  const backupExportBtn = document.getElementById('settings-backup-export-btn');
-
-  if (backupExportBtn) {
-    backupExportBtn.addEventListener('click', () => {
+  // 9. Export & Import Database Backup (Settings Page)
+  const exportBackupBtn = document.getElementById('btn-settings-export-backup');
+  if (exportBackupBtn) {
+    exportBackupBtn.addEventListener('click', () => {
       db.exportBackup();
     });
   }
 
-  if (backupFileInput && backupFilenameSpan && backupImportBtn) {
-    backupFileInput.addEventListener('change', (e) => {
+  const importBackupInput = document.getElementById('settings-import-backup-input');
+  if (importBackupInput) {
+    importBackupInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
-      if (file) {
-        backupFilenameSpan.textContent = file.name;
-        backupImportBtn.disabled = false;
-      } else {
-        backupFilenameSpan.textContent = "No file selected";
-        backupImportBtn.disabled = true;
-      }
-    });
-
-    backupImportBtn.addEventListener('click', () => {
-      const file = backupFileInput.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = async function(e) {
-        const result = await db.importBackup(e.target.result);
+      reader.onload = async (event) => {
+        const content = event.target.result;
+        const result = await db.importBackup(content);
         if (result.success) {
-          alert("Database restored successfully!");
-          location.reload();
+          alert("Database backup restored successfully! Reloading workspace.");
+          window.location.reload();
         } else {
           alert("Error restoring backup: " + result.error);
         }
@@ -1653,7 +1620,48 @@ document.addEventListener('DOMContentLoaded', async () => {
  
   // 11. Run router to handle initial page load route
   await router();
+}
+
+// Global click interceptor registered immediately at top-level scope (100% reliable)
+document.addEventListener('click', async (e) => {
+  const link = e.target.closest('a[data-link]');
+  if (link) {
+    e.preventDefault();
+    const targetPath = link.getAttribute('data-link');
+    window.history.pushState({}, '', targetPath);
+    await router();
+    return;
+  }
+
+  // Dismiss auth modal when clicking background overlay
+  if (e.target && e.target.id === 'auth-page') {
+    window.history.pushState({}, '', '/');
+    await router();
+  }
 });
+
+// Global popstate history listener registered immediately at top-level scope
+window.addEventListener('popstate', async () => {
+  await router();
+});
+
+// Global Escape key listener to dismiss modals cleanly
+document.addEventListener('keydown', async (e) => {
+  if (e.key === 'Escape') {
+    const authPage = document.getElementById('auth-page');
+    if (authPage && authPage.style.display !== 'none' && authPage.style.display !== '') {
+      window.history.pushState({}, '', '/');
+      await router();
+    }
+  }
+});
+
+// Safe Boot Check: Execute initApp immediately if DOM is ready, or wait for DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 
 /**
  * Interactive Features Tab Switcher
