@@ -629,7 +629,6 @@ async function router() {
   const termsPage = document.getElementById('terms-page');
   const featuresPage = document.getElementById('features-page');
   const aboutPage = document.getElementById('about-page');
-  const pricingPage = document.getElementById('pricing-page-standalone');
 
   // Hide everything first
   if (marketingNav) marketingNav.style.display = 'none';
@@ -640,10 +639,9 @@ async function router() {
   if (termsPage) termsPage.style.display = 'none';
   if (featuresPage) featuresPage.style.display = 'none';
   if (aboutPage) aboutPage.style.display = 'none';
-  if (pricingPage) pricingPage.style.display = 'none';
   document.body.classList.remove('app-active');
 
-  const publicRoutes = ['/', '/index.html', '/privacy', '/terms', '/login', '/register', '/features', '/about', '/pricing'];
+  const publicRoutes = ['/', '/index.html', '/privacy', '/terms', '/login', '/register', '/features', '/about'];
   const isPublicRoute = publicRoutes.includes(path);
 
   // If on index.html (!dashboardApp) and trying to access an app route, redirect to app.html via browser location
@@ -688,18 +686,6 @@ async function router() {
       if (marketingPage) marketingPage.style.display = 'block';
       setTimeout(() => {
         const targetSection = document.getElementById('about-page') || document.getElementById('about');
-        if (targetSection) {
-          const headerOffset = 70;
-          const elementPosition = targetSection.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-          window.scrollTo({ top: Math.max(0, offsetPosition), behavior: 'smooth' });
-        }
-      }, 50);
-    } else if (path === '/pricing') {
-      if (pricingPage) pricingPage.style.display = 'block';
-      if (marketingPage) marketingPage.style.display = 'block';
-      setTimeout(() => {
-        const targetSection = document.getElementById('pricing') || document.getElementById('pricing-page-standalone');
         if (targetSection) {
           const headerOffset = 70;
           const elementPosition = targetSection.getBoundingClientRect().top;
