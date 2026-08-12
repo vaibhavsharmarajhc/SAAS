@@ -929,7 +929,7 @@ function initAuthenticationHandlers() {
 
   // Check URL params for logout notice
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.has('logout')) {
+  if (loginError && urlParams.has('logout')) {
     loginError.style.background = 'rgba(16, 185, 129, 0.15)';
     loginError.style.borderColor = 'rgba(16, 185, 129, 0.3)';
     loginError.style.color = '#34d399';
@@ -939,288 +939,365 @@ function initAuthenticationHandlers() {
   }
 
   // Toggle views using URL states
-  switchToSignup.addEventListener('click', (e) => {
-    e.preventDefault();
-    window.history.pushState({}, '', '/register');
-    router();
-  });
+  if (switchToSignup) {
+    switchToSignup.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.history.pushState({}, '', '/register');
+      router();
+    });
+  }
 
-  switchToLogin.addEventListener('click', (e) => {
-    e.preventDefault();
-    window.history.pushState({}, '', '/login');
-    router();
-  });
-
-  switchToForgot.addEventListener('click', (e) => {
-    e.preventDefault();
-    showAuthView('forgot');
-  });
-
-  backToLoginLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
+  if (switchToLogin) {
+    switchToLogin.addEventListener('click', (e) => {
       e.preventDefault();
       window.history.pushState({}, '', '/login');
       router();
     });
-  });
+  }
 
-  forgotGoResetBtn.addEventListener('click', () => {
-    showAuthView('reset');
-    resetEmail.value = forgotEmail.value;
-  });
+  if (switchToForgot) {
+    switchToForgot.addEventListener('click', (e) => {
+      e.preventDefault();
+      showAuthView('forgot');
+    });
+  }
+
+  if (backToLoginLinks) {
+    backToLoginLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.history.pushState({}, '', '/login');
+        router();
+      });
+    });
+  }
+
+  if (forgotGoResetBtn) {
+    forgotGoResetBtn.addEventListener('click', () => {
+      showAuthView('reset');
+      if (resetEmail && forgotEmail) resetEmail.value = forgotEmail.value;
+    });
+  }
 
   // Form submits
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    loginError.style.display = 'none';
-    loginError.innerHTML = '';
-    loginError.style.background = '';
-    loginEmail.classList.remove('auth-input-error');
-    loginPass.classList.remove('auth-input-error');
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (loginError) {
+        loginError.style.display = 'none';
+        loginError.innerHTML = '';
+        loginError.style.background = '';
+      }
+      if (loginEmail) loginEmail.classList.remove('auth-input-error');
+      if (loginPass) loginPass.classList.remove('auth-input-error');
 
-    const submitBtn = loginForm.querySelector('button[type="submit"]');
-    const originalBtnHtml = submitBtn.innerHTML;
+      const submitBtn = loginForm.querySelector('button[type="submit"]');
+      const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
 
-    try {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Signing In...`;
-      safeCreateIcons();
-
-      const rememberMe = document.getElementById('auth-login-remember-me')?.checked ?? true;
-      const keepSignedIn = document.getElementById('auth-login-keep-signed-in')?.checked ?? true;
-      const emailValue = loginEmail.value.trim();
-
-      if (rememberMe) {
-        localStorage.setItem('vsh_remembered_email', emailValue);
-        if (loginPass.value) {
-          localStorage.setItem('vsh_remembered_pass', loginPass.value);
+      try {
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Signing In...`;
         }
-      } else {
-        localStorage.removeItem('vsh_remembered_email');
-        localStorage.removeItem('vsh_remembered_pass');
-      }
+        safeCreateIcons();
 
-      const resData = await api.auth.login(emailValue, loginPass.value, keepSignedIn);
-      loginForm.reset();
-      
-      if (resData) {
-        try {
-          sessionStorage.setItem('bootstrap_preload', JSON.stringify(resData));
-        } catch (e) {}
-      }
-      
-      window.location.replace('/dashboard');
-    } catch (err) {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalBtnHtml;
-      
-      loginEmail.classList.add('auth-input-error');
-      loginPass.classList.add('auth-input-error');
-      
-      loginError.style.background = '';
-      loginError.style.borderColor = '';
-      loginError.style.color = 'var(--color-danger)';
-      loginError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Invalid credentials."}`;
-      loginError.style.display = 'flex';
-      safeCreateIcons();
-    }
-  });
+        const rememberMe = document.getElementById('auth-login-remember-me')?.checked ?? true;
+        const keepSignedIn = document.getElementById('auth-login-keep-signed-in')?.checked ?? true;
+        const emailValue = loginEmail ? loginEmail.value.trim() : '';
+        const passValue = loginPass ? loginPass.value : '';
 
-  // Signup form submit: Send OTP
-  signupForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    signupError.style.display = 'none';
-    signupError.innerHTML = '';
-    
-    const inputs = signupForm.querySelectorAll('.form-control');
-    inputs.forEach(i => i.classList.remove('auth-input-error'));
+        if (rememberMe) {
+          localStorage.setItem('vsh_remembered_email', emailValue);
+          if (passValue) {
+            localStorage.setItem('vsh_remembered_pass', passValue);
+          }
+        } else {
+          localStorage.removeItem('vsh_remembered_email');
+          localStorage.removeItem('vsh_remembered_pass');
+        }
 
-    const submitBtn = signupForm.querySelector('button[type="submit"]');
-    const originalBtnHtml = submitBtn.innerHTML;
-
-    try {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Sending Verification OTP...`;
-      safeCreateIcons();
-
-      pendingSignupState = {
-        email: signupEmail.value.trim(),
-        password: signupPass.value,
-        firmName: signupFirm.value.trim(),
-        lawyerName: signupLawyer.value.trim()
-      };
-
-      const res = await api.auth.sendSignupOTP(
-        pendingSignupState.email,
-        pendingSignupState.password,
-        pendingSignupState.firmName,
-        pendingSignupState.lawyerName
-      );
-
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalBtnHtml;
-
-      showAuthView('otp');
-      startOtpTimer(900); // 15 mins
-
-      if (res && res.code) {
-        otpBanner.innerHTML = `
-          <strong>Testing Fallback Mode:</strong> Resend email dispatch notice: ${res.emailError || 'Testing environment'}.<br>
-          For testing, your 6-digit OTP code is: <strong style="font-size: 1.1rem; color: var(--color-primary);">${res.code}</strong>
-        `;
-        otpBanner.style.display = 'block';
-      } else {
-        otpBanner.style.display = 'none';
-      }
-    } catch (err) {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalBtnHtml;
-      
-      inputs.forEach(i => i.classList.add('auth-input-error'));
-      signupError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Registration failed."}`;
-      signupError.style.display = 'flex';
-      safeCreateIcons();
-    }
-  });
-
-  // Verify Signup OTP Form Submit
-  signupOtpForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    otpError.style.display = 'none';
-    otpError.innerHTML = '';
-
-    const submitBtn = signupOtpForm.querySelector('button[type="submit"]');
-    const originalBtnHtml = submitBtn.innerHTML;
-
-    try {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Verifying OTP...`;
-      safeCreateIcons();
-
-      if (!pendingSignupState || !pendingSignupState.email) {
-        throw new Error("Registration session lost. Please fill out the signup form again.");
-      }
-
-      await api.auth.verifySignupOTP(pendingSignupState.email, otpInput.value);
-
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalBtnHtml;
-      signupForm.reset();
-      signupOtpForm.reset();
-      
-      window.history.pushState({}, '', '/dashboard');
-      await router();
-    } catch (err) {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalBtnHtml;
-      otpError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Verification failed."}`;
-      otpError.style.display = 'flex';
-      safeCreateIcons();
-    }
-  });
-
-  // Resend OTP button
-  resendOtpBtn.addEventListener('click', async () => {
-    if (!pendingSignupState || !pendingSignupState.email) return;
-    try {
-      resendOtpBtn.disabled = true;
-      resendOtpBtn.textContent = 'Sending...';
-
-      const res = await api.auth.sendSignupOTP(
-        pendingSignupState.email,
-        pendingSignupState.password,
-        pendingSignupState.firmName,
-        pendingSignupState.lawyerName
-      );
-
-      resendOtpBtn.disabled = false;
-      resendOtpBtn.textContent = 'Resend OTP';
-      startOtpTimer(900);
-
-      if (res && res.code) {
-        otpBanner.innerHTML = `
-          <strong>Testing Fallback Mode:</strong> Fresh OTP generated: <strong style="font-size: 1.1rem; color: var(--color-primary);">${res.code}</strong>
-        `;
-        otpBanner.style.display = 'block';
-      }
-    } catch (err) {
-      resendOtpBtn.disabled = false;
-      resendOtpBtn.textContent = 'Resend OTP';
-      alert("Failed to resend OTP: " + err.message);
-    }
-  });
-
-  forgotForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    forgotError.style.display = 'none';
-    forgotError.innerHTML = '';
-    forgotEmail.classList.remove('auth-input-error');
-    forgotSuccessBanner.style.display = 'none';
-
-    const submitBtn = forgotForm.querySelector('button[type="submit"]');
-    const originalBtnHtml = submitBtn.innerHTML;
-
-    try {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Sending Code...`;
-      safeCreateIcons();
-
-      const res = await api.auth.forgotPassword(forgotEmail.value);
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalBtnHtml;
-
-      if (res && res.success) {
-        forgotSuccessBanner.innerHTML = `
-          <strong style="color: var(--color-success); display: flex; align-items: center; gap: 4px; margin-bottom: 0.25rem;">
-            <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> ${res.code ? 'Recovery Code Generated' : 'Recovery Code Sent'}
-          </strong>
-          ${res.code ? 'Email dispatch notice: ' + (res.emailError || 'Resend testing mode') + '<br>Check your inbox or use the recovery code below:' : 'A 6-digit recovery code has been sent to your email address. Please check your inbox (and spam folder).'}
-          ${res.code ? `<div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed rgba(255,255,255,0.08);">Local Testing Code: <strong style="font-size: 1.1rem; color: var(--color-primary);">${res.code}</strong></div>` : ''}
-        `;
-        forgotSuccessBanner.style.display = 'block';
-        forgotSubmitBtn.style.display = 'none';
-        forgotGoResetBtn.style.display = 'block';
+        const resData = await api.auth.login(emailValue, passValue, keepSignedIn);
+        loginForm.reset();
+        
+        if (resData) {
+          try {
+            sessionStorage.setItem('bootstrap_preload', JSON.stringify(resData));
+          } catch (e) {}
+        }
+        
+        window.location.replace('/dashboard');
+      } catch (err) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+        
+        if (loginEmail) loginEmail.classList.add('auth-input-error');
+        if (loginPass) loginPass.classList.add('auth-input-error');
+        
+        if (loginError) {
+          loginError.style.background = '';
+          loginError.style.borderColor = '';
+          loginError.style.color = 'var(--color-danger)';
+          loginError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Invalid credentials."}`;
+          loginError.style.display = 'flex';
+        }
         safeCreateIcons();
       }
-    } catch (err) {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalBtnHtml;
-      forgotEmail.classList.add('auth-input-error');
-      forgotError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Request failed."}`;
-      forgotError.style.display = 'flex';
-      safeCreateIcons();
-    }
-  });
+    });
+  }
 
-  resetForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    resetError.style.display = 'none';
-    resetError.innerHTML = '';
+  // Signup form submit: Send OTP
+  if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (signupError) {
+        signupError.style.display = 'none';
+        signupError.innerHTML = '';
+      }
+      
+      const inputs = signupForm.querySelectorAll('.form-control');
+      inputs.forEach(i => i.classList.remove('auth-input-error'));
 
-    const inputs = resetForm.querySelectorAll('.form-control');
-    inputs.forEach(i => i.classList.remove('auth-input-error'));
+      const submitBtn = signupForm.querySelector('button[type="submit"]');
+      const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
 
-    const submitBtn = resetForm.querySelector('button[type="submit"]');
-    const originalBtnHtml = submitBtn.innerHTML;
+      try {
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Sending Verification OTP...`;
+        }
+        safeCreateIcons();
 
-    try {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Updating Password...`;
-      safeCreateIcons();
+        pendingSignupState = {
+          email: signupEmail ? signupEmail.value.trim() : '',
+          password: signupPass ? signupPass.value : '',
+          firmName: signupFirm ? signupFirm.value.trim() : '',
+          lawyerName: signupLawyer ? signupLawyer.value.trim() : ''
+        };
 
-      await api.auth.resetPassword(resetEmail.value, resetCode.value, resetPass.value);
-      alert("Password updated successfully! Please login with your new credentials.");
-      window.history.pushState({}, '', '/login');
-      router();
-    } catch (err) {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalBtnHtml;
-      inputs.forEach(i => i.classList.add('auth-input-error'));
-      resetError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Reset failed. Verify email and code."}`;
-      resetError.style.display = 'flex';
-      safeCreateIcons();
-    }
-  });
+        const res = await api.auth.sendSignupOTP(
+          pendingSignupState.email,
+          pendingSignupState.password,
+          pendingSignupState.firmName,
+          pendingSignupState.lawyerName
+        );
+
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+
+        showAuthView('otp');
+        startOtpTimer(900); // 15 mins
+
+        if (otpBanner) {
+          if (res && res.code) {
+            otpBanner.innerHTML = `
+              <strong>Testing Fallback Mode:</strong> Resend email dispatch notice: ${res.emailError || 'Testing environment'}.<br>
+              For testing, your 6-digit OTP code is: <strong style="font-size: 1.1rem; color: var(--color-primary);">${res.code}</strong>
+            `;
+            otpBanner.style.display = 'block';
+          } else {
+            otpBanner.style.display = 'none';
+          }
+        }
+      } catch (err) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+        
+        inputs.forEach(i => i.classList.add('auth-input-error'));
+        if (signupError) {
+          signupError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Registration failed."}`;
+          signupError.style.display = 'flex';
+        }
+        safeCreateIcons();
+      }
+    });
+  }
+
+  // Verify Signup OTP Form Submit
+  if (signupOtpForm) {
+    signupOtpForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (otpError) {
+        otpError.style.display = 'none';
+        otpError.innerHTML = '';
+      }
+
+      const submitBtn = signupOtpForm.querySelector('button[type="submit"]');
+      const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+
+      try {
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Verifying OTP...`;
+        }
+        safeCreateIcons();
+
+        if (!pendingSignupState || !pendingSignupState.email) {
+          throw new Error("Registration session lost. Please fill out the signup form again.");
+        }
+
+        const otpVal = otpInput ? otpInput.value : '';
+        await api.auth.verifySignupOTP(pendingSignupState.email, otpVal);
+
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+        if (signupForm) signupForm.reset();
+        if (signupOtpForm) signupOtpForm.reset();
+        
+        window.history.pushState({}, '', '/dashboard');
+        await router();
+      } catch (err) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+        if (otpError) {
+          otpError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Verification failed."}`;
+          otpError.style.display = 'flex';
+        }
+        safeCreateIcons();
+      }
+    });
+  }
+
+  // Resend OTP button
+  if (resendOtpBtn) {
+    resendOtpBtn.addEventListener('click', async () => {
+      if (!pendingSignupState || !pendingSignupState.email) return;
+      try {
+        resendOtpBtn.disabled = true;
+        resendOtpBtn.textContent = 'Sending...';
+
+        const res = await api.auth.sendSignupOTP(
+          pendingSignupState.email,
+          pendingSignupState.password,
+          pendingSignupState.firmName,
+          pendingSignupState.lawyerName
+        );
+
+        resendOtpBtn.disabled = false;
+        resendOtpBtn.textContent = 'Resend OTP';
+        startOtpTimer(900);
+
+        if (otpBanner && res && res.code) {
+          otpBanner.innerHTML = `
+            <strong>Testing Fallback Mode:</strong> Fresh OTP generated: <strong style="font-size: 1.1rem; color: var(--color-primary);">${res.code}</strong>
+          `;
+          otpBanner.style.display = 'block';
+        }
+      } catch (err) {
+        resendOtpBtn.disabled = false;
+        resendOtpBtn.textContent = 'Resend OTP';
+        alert("Failed to resend OTP: " + err.message);
+      }
+    });
+  }
+
+  if (forgotForm) {
+    forgotForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (forgotError) {
+        forgotError.style.display = 'none';
+        forgotError.innerHTML = '';
+      }
+      if (forgotEmail) forgotEmail.classList.remove('auth-input-error');
+      if (forgotSuccessBanner) forgotSuccessBanner.style.display = 'none';
+
+      const submitBtn = forgotForm.querySelector('button[type="submit"]');
+      const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+
+      try {
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Sending Code...`;
+        }
+        safeCreateIcons();
+
+        const emailVal = forgotEmail ? forgotEmail.value : '';
+        const res = await api.auth.forgotPassword(emailVal);
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+
+        if (res && res.success && forgotSuccessBanner) {
+          forgotSuccessBanner.innerHTML = `
+            <strong style="color: var(--color-success); display: flex; align-items: center; gap: 4px; margin-bottom: 0.25rem;">
+              <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> ${res.code ? 'Recovery Code Generated' : 'Recovery Code Sent'}
+            </strong>
+            ${res.code ? 'Email dispatch notice: ' + (res.emailError || 'Resend testing mode') + '<br>Check your inbox or use the recovery code below:' : 'A 6-digit recovery code has been sent to your email address. Please check your inbox (and spam folder).'}
+            ${res.code ? `<div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed rgba(255,255,255,0.08);">Local Testing Code: <strong style="font-size: 1.1rem; color: var(--color-primary);">${res.code}</strong></div>` : ''}
+          `;
+          forgotSuccessBanner.style.display = 'block';
+          if (forgotSubmitBtn) forgotSubmitBtn.style.display = 'none';
+          if (forgotGoResetBtn) forgotGoResetBtn.style.display = 'block';
+          safeCreateIcons();
+        }
+      } catch (err) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+        if (forgotEmail) forgotEmail.classList.add('auth-input-error');
+        if (forgotError) {
+          forgotError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Request failed."}`;
+          forgotError.style.display = 'flex';
+        }
+        safeCreateIcons();
+      }
+    });
+  }
+
+  if (resetForm) {
+    resetForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (resetError) {
+        resetError.style.display = 'none';
+        resetError.innerHTML = '';
+      }
+
+      const inputs = resetForm.querySelectorAll('.form-control');
+      inputs.forEach(i => i.classList.remove('auth-input-error'));
+
+      const submitBtn = resetForm.querySelector('button[type="submit"]');
+      const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+
+      try {
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i> Updating Password...`;
+        }
+        safeCreateIcons();
+
+        const emailVal = resetEmail ? resetEmail.value : '';
+        const codeVal = resetCode ? resetCode.value : '';
+        const passVal = resetPass ? resetPass.value : '';
+
+        await api.auth.resetPassword(emailVal, codeVal, passVal);
+        alert("Password updated successfully! Please login with your new credentials.");
+        window.history.pushState({}, '', '/login');
+        await router();
+      } catch (err) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+        inputs.forEach(i => i.classList.add('auth-input-error'));
+        if (resetError) {
+          resetError.innerHTML = `<i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${err.message || "Reset failed. Verify email and code."}`;
+          resetError.style.display = 'flex';
+        }
+        safeCreateIcons();
+      }
+    });
+  }
 
   // Logout trigger
   const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
