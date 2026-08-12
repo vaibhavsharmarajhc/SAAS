@@ -1714,12 +1714,6 @@ document.addEventListener('click', async (e) => {
     await router();
     return;
   }
-
-  // Dismiss auth modal when clicking background overlay
-  if (e.target && e.target.id === 'auth-page') {
-    window.history.pushState({}, '', '/');
-    await router();
-  }
 });
 
 // Global popstate history listener registered immediately at top-level scope
