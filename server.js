@@ -1206,6 +1206,24 @@ app.get('/sw.js', (req, res) => {
   res.sendFile(path.join(__dirname, 'sw.js'));
 });
 
+// Protected Admin Usage Metrics Endpoint (Exclusively for vaibhavsharmarajhc@gmail.com)
+app.get('/api/admin/metrics', authMiddleware, async (req, res) => {
+  try {
+    const userEmail = (req.tenant.email || '').trim().toLowerCase();
+    const adminEmail = (process.env.ADMIN_EMAIL || 'vaibhavsharmarajhc@gmail.com').trim().toLowerCase();
+
+    if (userEmail !== adminEmail && userEmail !== 'vaibhavsharmarajhc@gmail.com') {
+      return res.status(403).json({ error: 'Access denied. Authorized administrator credentials required.' });
+    }
+
+    const metrics = await db.getPlatformAdminMetrics();
+    res.json(metrics);
+  } catch (err) {
+    console.error("Admin metrics fetch error:", err);
+    res.status(500).json({ error: "Failed to fetch platform metrics." });
+  }
+});
+
 // Standalone Pre-Rendered Pure HTML Client Portal Route (Zero JS dependency)
 app.get(['/portal', '/portal/:token'], async (req, res) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');

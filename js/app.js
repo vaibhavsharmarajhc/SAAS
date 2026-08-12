@@ -68,6 +68,7 @@ import accounts from './accounts.js';
 import share from './share.js';
 import tasks from './tasks.js';
 import notificationsModule from './notifications.js';
+import adminModule from './admin.js';
 import portalModule from './portal.js';
 window.tasksModule = tasks;
 window.notificationsModule = notificationsModule;
@@ -213,7 +214,8 @@ const VIEW_TITLES = {
   'accounts-page': 'Accounts & Financials',
   'share-page': 'Client Share Portal',
   'tasks-page': 'Task Manager',
-  'settings-page': 'System Settings'
+  'settings-page': 'System Settings',
+  'admin-metrics-page': 'Admin Usage & Metrics'
 };
 
 /**
@@ -379,6 +381,9 @@ function dispatchViewRender(viewId) {
     case 'settings-page':
       loadSettingsForm();
       break;
+    case 'admin-metrics-page':
+      if (typeof adminModule !== 'undefined' && adminModule.render) adminModule.render();
+      break;
     case 'portal-page':
       if (typeof portalModule !== 'undefined' && portalModule.render) portalModule.render();
       break;
@@ -506,6 +511,29 @@ export function updateBrandingHeaders() {
       .join('')
       .slice(0, 2);
     avatar.textContent = initials || 'VS';
+  }
+
+  // Admin menu visibility check (vaibhavsharmarajhc@gmail.com)
+  const adminMenuItem = document.getElementById('sidebar-menu-admin');
+  if (adminMenuItem) {
+    let userEmail = '';
+    try {
+      if (typeof db !== 'undefined' && typeof db.getUser === 'function') {
+        const u = db.getUser();
+        if (u && u.email) userEmail = u.email;
+      }
+      if (!userEmail) {
+        const storedUser = JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser') || '{}');
+        userEmail = storedUser.email || storedUser.user?.email || '';
+      }
+    } catch (e) {}
+
+    const cleanEmail = (userEmail || '').trim().toLowerCase();
+    if (cleanEmail === 'vaibhavsharmarajhc@gmail.com') {
+      adminMenuItem.style.display = 'block';
+    } else {
+      adminMenuItem.style.display = 'none';
+    }
   }
 }
 

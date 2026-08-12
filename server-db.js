@@ -1966,9 +1966,87 @@ function isTokenBlacklisted(token) {
   return blacklistedTokens.has(token);
 }
 
+async function getPlatformAdminMetrics() {
+  const db = await getDb();
+  let tenants = [];
+  let cases = [];
+  let clients = [];
+  let transactions = [];
+  let tasks = [];
+
+  if (db) {
+    const rawTenants = await db.collection('tenants').find({}).toArray();
+    const rawCases = await db.collection('cases').find({}).toArray();
+    const rawClients = await db.collection('clients').find({}).toArray();
+    const rawTxs = await db.collection('transactions').find({}).toArray();
+    const rawTasks = await db.collection('tasks').find({}).toArray();
+
+    tenants = mapIds(rawTenants);
+    cases = mapIds(rawCases);
+    clients = mapIds(rawClients);
+    transactions = mapIds(rawTxs);
+    tasks = mapIds(rawTasks);
+  } else {
+    const localDb = readDb();
+    tenants = localDb.tenants || [];
+    cases = localDb.cases || [];
+    clients = localDb.clients || [];
+    transactions = localDb.transactions || [];
+    tasks = localDb.tasks || [];
+  }
+
+  // Single-pass O(N) map indexing for per-tenant activity counts
+  const caseCountMap = new Map();
+  const clientCountMap = new Map();
+  const txCountMap = new Map();
+  const taskCountMap = new Map();
+
+  cases.forEach(c => {
+    if (c.tenantId) caseCountMap.set(c.tenantId, (caseCountMap.get(c.tenantId) || 0) + 1);
+  });
+  clients.forEach(c => {
+    if (c.tenantId) clientCountMap.set(c.tenantId, (clientCountMap.get(c.tenantId) || 0) + 1);
+  });
+  transactions.forEach(t => {
+    if (t.tenantId) txCountMap.set(t.tenantId, (txCountMap.get(t.tenantId) || 0) + 1);
+  });
+  tasks.forEach(t => {
+    if (t.tenantId) taskCountMap.set(t.tenantId, (taskCountMap.get(t.tenantId) || 0) + 1);
+  });
+
+  const chambers = tenants.map(t => {
+    const { passwordHash: _, resetCode: __, ...safeTenant } = t;
+    return {
+      id: t.id,
+      email: t.email || 'N/A',
+      lawyerName: t.settings?.lawyerName || t.lawyerName || 'Advocate',
+      firmName: t.settings?.firmName || t.firmName || 'Chambers Practice',
+      phone: t.phone || t.settings?.phone || 'N/A',
+      createdAt: t.createdAt || t.onboardingDate || '2026-01-01',
+      casesCount: caseCountMap.get(t.id) || 0,
+      clientsCount: clientCountMap.get(t.id) || 0,
+      transactionsCount: txCountMap.get(t.id) || 0,
+      tasksCount: taskCountMap.get(t.id) || 0,
+      isSuspended: Boolean(t.isSuspended)
+    };
+  });
+
+  // Sort newest registered chambers first
+  chambers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  return {
+    totalChambers: tenants.length,
+    totalCases: cases.length,
+    totalClients: clients.length,
+    totalTransactions: transactions.length,
+    totalTasks: tasks.length,
+    chambers
+  };
+}
+
 async function getAllUsersAdmin() {
   const metrics = await getPlatformAdminMetrics();
-  return metrics.users || [];
+  return metrics.chambers || [];
 }
 
 async function getUserById(userId) {
