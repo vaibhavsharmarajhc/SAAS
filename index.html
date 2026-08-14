@@ -18,7 +18,7 @@
   <!-- SEO & Styling Meta -->
   <meta name="description" content="Premium Case Diary, Billing, Client Onboarding, and Practice Management Suite for Track My Chambers.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.183">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.185">
   <!-- Local Lucide Icons Vendor -->
   <script src="/js/vendor/lucide.min.js" defer></script>
   <!-- Chart.js CDN -->
@@ -48,7 +48,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.0.184', { scope: '/' }).then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.185', { scope: '/' }).then(reg => {
           reg.update();
           reg.onupdatefound = () => {
             const installingWorker = reg.installing;
@@ -692,6 +692,7 @@
               <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.25rem; font-weight: 600;">Operational Leverage through Delegation</h4>
               <p style="margin: 0; font-size: 0.95rem;">Instead of storing case updates in a physical diary, Chambers puts everything in a secure cloud workspace. Advocates can easily delegate diary entries, listings, and invoicing work to junior associates, allowing the firm to scale and handle larger case volumes effortlessly.</p>
             </div>
+          </div>
         </div>
       </div>
     </div>
@@ -871,6 +872,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.184"></script>
+  <script type="module" src="js/app.js?v=1.0.185"></script>
 </body>
 </html>
