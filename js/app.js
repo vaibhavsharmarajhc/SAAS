@@ -1041,6 +1041,14 @@ function initAuthenticationHandlers() {
         }
 
         const resData = await api.auth.login(emailValue, passValue, keepSignedIn);
+        if (resData && resData.token) {
+          const storage = keepSignedIn ? localStorage : sessionStorage;
+          storage.setItem('token', resData.token);
+          if (resData.user) {
+            storage.setItem('currentUser', JSON.stringify(resData.user));
+          }
+        }
+        
         loginForm.reset();
         
         if (resData) {

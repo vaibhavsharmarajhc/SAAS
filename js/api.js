@@ -42,10 +42,18 @@ async function fetchAPI(url, options = {}) {
 const api = {
   auth: {
     async login(email, password, keepSignedIn = true) {
-      return await fetchAPI('/api/auth/login', {
+      const data = await fetchAPI('/api/auth/login', {
         method: 'POST',
         body: { email, password, keepSignedIn }
       });
+      if (data && data.token) {
+        const storage = keepSignedIn ? localStorage : sessionStorage;
+        storage.setItem('token', data.token);
+        if (data.user) {
+          storage.setItem('currentUser', JSON.stringify(data.user));
+        }
+      }
+      return data;
     },
 
     async signup(email, password, firmName, lawyerName) {
@@ -63,10 +71,17 @@ const api = {
     },
 
     async verifySignupOTP(email, otp) {
-      return await fetchAPI('/api/auth/verify-signup-otp', {
+      const data = await fetchAPI('/api/auth/verify-signup-otp', {
         method: 'POST',
         body: { email, otp }
       });
+      if (data && data.token) {
+        localStorage.setItem('token', data.token);
+        if (data.user) {
+          localStorage.setItem('currentUser', JSON.stringify(data.user));
+        }
+      }
+      return data;
     },
 
     async logout() {
