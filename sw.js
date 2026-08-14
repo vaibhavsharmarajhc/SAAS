@@ -1,9 +1,9 @@
-const CACHE_NAME = 'trackmychambers-cache-v181';
+const CACHE_NAME = 'trackmychambers-cache-v182';
 const ASSETS = [
   '/dashboard',
   '/app.html',
-  '/css/styles.css?v=1.0.181',
-  '/js/app.js?v=1.0.181',
+  '/css/styles.css?v=1.0.182',
+  '/js/app.js?v=1.0.182',
   '/js/vendor/lucide.min.js',
   '/js/vendor/chart.min.js',
   '/js/workers/ledger.worker.js',
@@ -50,7 +50,7 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Network-First Strategy for HTML, JS, and CSS to guarantee instant live updates
+  // Network-First Strategy for HTML, JS, and CSS with failsafe Response fallback
   e.respondWith(
     fetch(e.request, { cache: 'no-cache' })
       .then((networkResponse) => {
@@ -62,8 +62,20 @@ self.addEventListener('fetch', (e) => {
         }
         return networkResponse;
       })
-      .catch(() => {
-        return caches.match(e.request);
+      .catch(async () => {
+        const cachedResponse = await caches.match(e.request);
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        if (e.request.mode === 'navigate') {
+          const cachedApp = await caches.match('/app.html') || await caches.match('/dashboard');
+          if (cachedApp) return cachedApp;
+        }
+        return new Response('Network request failed.', {
+          status: 503,
+          statusText: 'Service Unavailable',
+          headers: { 'Content-Type': 'text/plain' }
+        });
       })
   );
 });
