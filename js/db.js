@@ -42,6 +42,9 @@ class LegalDB {
           this.cache.clients = preloadData.clients || [];
           this.cache.cases = preloadData.cases || [];
           this.cache.transactions = preloadData.transactions || [];
+          if (preloadData.token) {
+            localStorage.setItem('token', preloadData.token);
+          }
           return true;
         }
       }

@@ -88,7 +88,11 @@ db.initDatabase();
  * Authentication Middleware
  */
 async function authenticateToken(req, res, next) {
-  const token = req.cookies.session_token;
+  let token = req.cookies.session_token;
+  if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
   if (!token) {
     return res.status(401).json({ error: "Access denied. No session token provided." });
   }
@@ -370,7 +374,7 @@ app.post('/api/auth/verify-signup-otp', async (req, res) => {
     // Send Welcome Email asynchronously
     sendWelcomeEmail(tenant.email, tenant.firmName, tenant.lawyerName).catch(e => console.error(e));
 
-    res.json({ success: true, user: tenant });
+    res.json({ success: true, token, user: tenant });
   } catch (err) {
     console.error("Verify signup OTP error:", err);
     res.status(500).json({ error: "Failed to finalize registration." });
@@ -407,7 +411,7 @@ app.post('/api/auth/signup', async (req, res) => {
     // Send Welcome Email asynchronously
     sendWelcomeEmail(email, firmName || "Track My Chambers", lawyerName || "Advocate");
 
-    res.status(201).json({ user: tenant });
+    res.status(201).json({ success: true, token, user: tenant });
   } catch (err) {
     console.error("Signup error:", err);
     res.status(500).json({ error: err.message || "Failed to register account." });
@@ -460,6 +464,8 @@ app.post('/api/auth/login', async (req, res) => {
     ]);
 
     res.json({
+      success: true,
+      token,
       user: safeTenant,
       clients,
       cases,
