@@ -363,11 +363,6 @@ const api = {
     async get(token) {
       return await fetchAPI(`/api/portal/${encodeURIComponent(token)}`);
     }
-  },
-  admin: {
-    async getMetrics() {
-      return await fetchAPI('/api/admin/metrics');
-    }
   }
 };
 

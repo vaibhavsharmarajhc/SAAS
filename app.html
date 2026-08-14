@@ -17,7 +17,7 @@
   <title>Track My Chambers - Practice Workspace</title>
   <meta name="description" content="Advocate Chambers Practice Management Workspace.">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.179">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.180">
   <!-- Local Vendor Bundles (Zero External CDNs) -->
   <script src="/js/vendor/lucide.min.js" defer></script>
   <script src="/js/vendor/chart.min.js" defer></script>
@@ -102,9 +102,6 @@
         </li>
         <li class="menu-item" data-target="settings-page">
           <a href="#"><i data-lucide="settings"></i> System Settings</a>
-        </li>
-        <li class="menu-item" id="sidebar-menu-admin" data-target="admin-metrics-page" style="display: none;">
-          <a href="#" style="color: #fbbf24;"><i data-lucide="shield-alert" style="color: #fbbf24;"></i> Admin Metrics</a>
         </li>
       </ul>
 
@@ -1125,54 +1122,6 @@
         </div>
       </div>
 
-      <!-- Admin Usage & Metrics Dashboard Container (Authorized for vaibhavsharmarajhc@gmail.com) -->
-      <div id="admin-metrics-page" class="page-container">
-        <div class="card" style="margin-bottom: 1.5rem; background: rgba(17, 24, 39, 0.75); border: 1px solid rgba(251, 191, 36, 0.3);">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div>
-              <span class="section-tag" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); padding: 2px 10px; border-radius: 12px; font-weight: 700; font-size: 0.75rem;">SUPERADMIN CONTROL PANEL</span>
-              <h2 style="font-family: 'Playfair Display', serif; font-size: 1.6rem; color: #fff; margin: 0.25rem 0 0 0;">Platform Usage & Registered Chambers Dashboard</h2>
-            </div>
-            <button class="btn btn-primary" id="btn-admin-export-csv" style="background: #d97706; border-color: #d97706; color: #fff; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">
-              <i data-lucide="download" style="width: 15px; height: 15px;"></i> Export Usage CSV
-            </button>
-          </div>
-        </div>
-
-        <!-- Search Bar Toolbar -->
-        <div class="card" style="margin-bottom: 1.5rem; padding: 1.25rem;">
-          <div class="search-filter-bar" style="margin-bottom: 0; align-items: center;">
-            <div style="position: relative; flex: 1;">
-              <input type="text" class="form-control" id="admin-search-input" placeholder="Search by email, advocate name, firm name, or phone number..." style="padding-left: 2.2rem;">
-              <i data-lucide="search" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--text-muted);"></i>
-            </div>
-          </div>
-        </div>
-
-        <!-- Registered Chambers Directory Table -->
-        <div class="card">
-          <div class="section-header" id="admin-summary-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
-            <span style="font-weight: 700; color: var(--text-primary); font-size: 1.1rem;">Registered Chambers Directory</span>
-          </div>
-          <div class="table-responsive">
-            <table class="table-custom">
-              <thead>
-                <tr>
-                  <th>Advocate & Chamber Name</th>
-                  <th>Registered Email & Contact</th>
-                  <th>Registration Date</th>
-                  <th>Activity Metrics</th>
-                  <th>Account Status</th>
-                </tr>
-              </thead>
-              <tbody id="admin-chambers-table-body">
-                <!-- Javascript rendered -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
       <!-- Public Client Case Access Portal Container -->
       <div id="portal-page" class="page-container">
           <div id="portal-page-content">
@@ -2143,6 +2092,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 5rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.179"></script>
+  <script type="module" src="js/app.js?v=1.0.180"></script>
 </body>
 </html>

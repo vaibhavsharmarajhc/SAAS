@@ -1706,15 +1706,6 @@ async function initApp() {
     });
   }
 
-  const launchSuperAdminBtn = document.getElementById('btn-settings-launch-superadmin');
-  if (launchSuperAdminBtn) {
-    launchSuperAdminBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      window.history.pushState({}, '', '/superadmin-page');
-      await router();
-    });
-  }
-
   // 10. Init Auth Event Handlers & password eye toggles & global search & features switcher
   initAuthenticationHandlers();
   initPasswordToggleHandlers();
