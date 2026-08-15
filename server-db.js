@@ -2102,88 +2102,435 @@ async function getPlatformAdminMetrics() {
   };
 }
 
-async function getAllUsersAdmin() {
-  const metrics = await getPlatformAdminMetrics();
-  return metrics.chambers || [];
-}
-
-async function getUserById(userId) {
+/**
+ * Add an audit log entry into native MongoDB collection 'audit_logs'
+ */
+async function addAuditLog(entry = {}) {
   const db = await getDb();
-  if (db) {
-    return await db.collection('tenants').findOne({ id: userId });
-  }
-  const localDb = readDb();
-  return (localDb.tenants || []).find(t => t.id === userId);
-}
-
-async function setUserSuspended(userId, isSuspended) {
-  const db = await getDb();
-  if (db) {
-    await db.collection('tenants').updateOne({ id: userId }, { $set: { isSuspended } });
-    return await db.collection('tenants').findOne({ id: userId });
-  }
-  const localDb = readDb();
-  const t = (localDb.tenants || []).find(t => t.id === userId);
-  if (t) {
-    t.isSuspended = isSuspended;
-    writeDb(localDb);
-  }
-  return t;
-}
-
-async function deleteUserAccountPermanent(userId) {
-  const db = await getDb();
-  if (db) {
-    await db.collection('tenants').deleteOne({ id: userId });
-    await db.collection('clients').deleteMany({ tenantId: userId });
-    await db.collection('cases').deleteMany({ tenantId: userId });
-    await db.collection('transactions').deleteMany({ tenantId: userId });
-    await db.collection('tasks').deleteMany({ tenantId: userId });
-  } else {
-    const localDb = readDb();
-    localDb.tenants = (localDb.tenants || []).filter(t => t.id !== userId);
-    localDb.clients = (localDb.clients || []).filter(c => c.tenantId !== userId);
-    localDb.cases = (localDb.cases || []).filter(c => c.tenantId !== userId);
-    localDb.transactions = (localDb.transactions || []).filter(tr => tr.tenantId !== userId);
-    localDb.tasks = (localDb.tasks || []).filter(tk => tk.tenantId !== userId);
-    writeDb(localDb);
-  }
-  return true;
-}
-
-async function getImpersonatedAccountData(userId) {
-  const targetUser = await getUserById(userId);
-  return {
-    user: targetUser,
-    message: "Impersonation session data ready"
+  const logDoc = {
+    id: 'audit_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+    timestamp: new Date().toISOString(),
+    adminEmail: entry.adminEmail || 'system',
+    adminId: entry.adminId || 'system',
+    actionType: entry.actionType || 'UNKNOWN_ACTION',
+    targetTenantId: entry.targetTenantId || 'N/A',
+    targetEmail: entry.targetEmail || 'N/A',
+    reason: entry.reason || 'No reason specified',
+    ipAddress: entry.ipAddress || '127.0.0.1',
+    metadata: entry.metadata || {}
   };
-}
 
-async function deleteHearing(tenantId, caseId, hearingId) {
-  const db = await getDb();
   if (db) {
-    await db.collection('cases').updateOne(
-      { id: caseId, tenantId },
-      { $pull: { hearings: { id: hearingId } } }
-    );
+    await db.collection('audit_logs').insertOne(logDoc);
   } else {
     const localDb = readDb();
-    const c = (localDb.cases || []).find(c => c.id === caseId);
-    if (c && c.hearings) {
-      c.hearings = c.hearings.filter(h => h.id !== hearingId);
+    if (!localDb.auditLogs) localDb.auditLogs = [];
+    localDb.auditLogs.unshift(logDoc);
+    writeDb(localDb);
+  }
+  return logDoc;
+}
+
+/**
+ * Retrieve queryable audit logs from MongoDB collection
+ */
+async function getAuditLogs(options = {}) {
+  const db = await getDb();
+  const limit = options.limit || 200;
+  let logs = [];
+
+  if (db) {
+    const query = {};
+    if (options.actionType) query.actionType = options.actionType;
+    if (options.targetTenantId) query.targetTenantId = options.targetTenantId;
+
+    const rawLogs = await db.collection('audit_logs').find(query).sort({ timestamp: -1 }).limit(limit).toArray();
+    logs = mapIds(rawLogs);
+  } else {
+    const localDb = readDb();
+    logs = localDb.auditLogs || [];
+    if (options.actionType) logs = logs.filter(l => l.actionType === options.actionType);
+    if (options.targetTenantId) logs = logs.filter(l => l.targetTenantId === options.targetTenantId);
+    logs = logs.slice(0, limit);
+  }
+  return logs;
+}
+
+/**
+ * Increment tenant sessionVersion counter to revoke all active JWT tokens instantly
+ */
+async function incrementSessionVersion(tenantId) {
+  const db = await getDb();
+  if (db) {
+    await db.collection('tenants').updateOne(
+      { id: tenantId },
+      { $inc: { sessionVersion: 1 } }
+    );
+    return (await db.collection('tenants').findOne({ id: tenantId }))?.sessionVersion || 1;
+  }
+  const localDb = readDb();
+  const t = (localDb.tenants || []).find(x => x.id === tenantId);
+  if (t) {
+    t.sessionVersion = (t.sessionVersion || 1) + 1;
+    writeDb(localDb);
+    return t.sessionVersion;
+  }
+  return 1;
+}
+
+/**
+ * Suspend Chamber Account (Reversible)
+ */
+async function suspendTenant(tenantId, reason, adminEmail) {
+  const db = await getDb();
+  const tenant = await getTenantById(tenantId);
+  if (!tenant) throw new Error("Chamber tenant not found.");
+
+  const updates = {
+    isSuspended: true,
+    status: 'suspended',
+    suspendedAt: new Date().toISOString(),
+    suspendedReason: reason
+  };
+
+  if (db) {
+    await db.collection('tenants').updateOne({ id: tenantId }, { $set: updates, $inc: { sessionVersion: 1 } });
+  } else {
+    const localDb = readDb();
+    const t = (localDb.tenants || []).find(x => x.id === tenantId);
+    if (t) {
+      Object.assign(t, updates);
+      t.sessionVersion = (t.sessionVersion || 1) + 1;
       writeDb(localDb);
     }
   }
+
+  await addAuditLog({
+    adminEmail,
+    actionType: 'SUSPEND_ACCOUNT',
+    targetTenantId: tenantId,
+    targetEmail: tenant.email,
+    reason
+  });
+
   return true;
 }
 
-async function getTransaction(tenantId, txId) {
+/**
+ * Reactivate Chamber Account
+ */
+async function reactivateTenant(tenantId, reason, adminEmail) {
+  const db = await getDb();
+  const tenant = await getTenantById(tenantId);
+  if (!tenant) throw new Error("Chamber tenant not found.");
+
+  const updates = {
+    isSuspended: false,
+    status: 'active',
+    reactivatedAt: new Date().toISOString(),
+    deletionScheduledAt: null
+  };
+
+  if (db) {
+    await db.collection('tenants').updateOne({ id: tenantId }, { $set: updates, $inc: { sessionVersion: 1 } });
+  } else {
+    const localDb = readDb();
+    const t = (localDb.tenants || []).find(x => x.id === tenantId);
+    if (t) {
+      Object.assign(t, updates);
+      t.sessionVersion = (t.sessionVersion || 1) + 1;
+      writeDb(localDb);
+    }
+  }
+
+  await addAuditLog({
+    adminEmail,
+    actionType: 'REACTIVATE_ACCOUNT',
+    targetTenantId: tenantId,
+    targetEmail: tenant.email,
+    reason: reason || 'Chamber reactivated by Super Admin'
+  });
+
+  return true;
+}
+
+/**
+ * Soft Delete Chamber Account (30-day grace period with automated JSON export)
+ */
+async function softDeleteTenant(tenantId, reason, adminEmail) {
+  const db = await getDb();
+  const tenant = await getTenantById(tenantId);
+  if (!tenant) throw new Error("Chamber tenant not found.");
+
+  const scheduledDate = new Date();
+  scheduledDate.setDate(scheduledDate.getDate() + 30);
+  const deletionScheduledAt = scheduledDate.toISOString();
+
+  // 1. Generate full JSON data export for grace period portability
+  const fs = require('fs');
+  const path = require('path');
+  const exportDir = path.join(__dirname, 'exports', 'pending_deletions');
+  if (!fs.existsSync(exportDir)) {
+    fs.mkdirSync(exportDir, { recursive: true });
+  }
+
+  let cases = [], clients = [], transactions = [], tasks = [], colleagues = [], notifications = [];
+  if (db) {
+    cases = await db.collection('cases').find({ tenantId }).toArray();
+    clients = await db.collection('clients').find({ tenantId }).toArray();
+    transactions = await db.collection('transactions').find({ tenantId }).toArray();
+    tasks = await db.collection('tasks').find({ tenantId }).toArray();
+    colleagues = await db.collection('colleagues').find({ tenantId }).toArray();
+    notifications = await db.collection('notifications').find({ tenantId }).toArray();
+  } else {
+    const localDb = readDb();
+    cases = (localDb.cases || []).filter(c => c.tenantId === tenantId);
+    clients = (localDb.clients || []).filter(c => c.tenantId === tenantId);
+    transactions = (localDb.transactions || []).filter(t => t.tenantId === tenantId);
+    tasks = (localDb.tasks || []).filter(t => t.tenantId === tenantId);
+    colleagues = (localDb.colleagues || []).filter(c => c.tenantId === tenantId);
+    notifications = (localDb.notifications || []).filter(n => n.tenantId === tenantId);
+  }
+
+  const exportFilename = `backup_${tenantId}_${Date.now()}.json`;
+  const exportPath = path.join(exportDir, exportFilename);
+  const exportData = {
+    tenant,
+    cases,
+    clients,
+    transactions,
+    tasks,
+    colleagues,
+    notifications,
+    exportedAt: new Date().toISOString(),
+    softDeletedBy: adminEmail
+  };
+
+  fs.writeFileSync(exportPath, JSON.stringify(exportData, null, 2));
+
+  // 2. Update tenant status to pending_deletion & revoke active JWT sessions
+  const updates = {
+    isSuspended: true,
+    status: 'pending_deletion',
+    deletionScheduledAt,
+    deletionExportFile: exportFilename
+  };
+
+  if (db) {
+    await db.collection('tenants').updateOne({ id: tenantId }, { $set: updates, $inc: { sessionVersion: 1 } });
+  } else {
+    const localDb = readDb();
+    const t = (localDb.tenants || []).find(x => x.id === tenantId);
+    if (t) {
+      Object.assign(t, updates);
+      t.sessionVersion = (t.sessionVersion || 1) + 1;
+      writeDb(localDb);
+    }
+  }
+
+  await addAuditLog({
+    adminEmail,
+    actionType: 'SOFT_DELETE_ACCOUNT',
+    targetTenantId: tenantId,
+    targetEmail: tenant.email,
+    reason,
+    metadata: { deletionScheduledAt, exportFilename }
+  });
+
+  return { deletionScheduledAt, exportFilename };
+}
+
+/**
+ * Cancel Soft Delete (Restore account during 30-day grace period)
+ */
+async function cancelSoftDeleteTenant(tenantId, reason, adminEmail) {
+  return await reactivateTenant(tenantId, reason || 'Cancelled scheduled deletion', adminEmail);
+}
+
+/**
+ * Hard Delete Chamber Account (Immediate & Unrecoverable 8-Collection Purge)
+ * Purges: tenants, cases (with embedded hearings), clients, transactions, colleagues, tasks, tickets, notifications
+ */
+async function hardDeleteTenant(tenantId, reason, adminEmail) {
+  const db = await getDb();
+  const tenant = await getTenantById(tenantId);
+  const targetEmail = tenant ? tenant.email : tenantId;
+
+  // Log audit entry BEFORE executing permanent purge
+  await addAuditLog({
+    adminEmail,
+    actionType: 'HARD_DELETE_ACCOUNT_PERMANENT',
+    targetTenantId: tenantId,
+    targetEmail,
+    reason: reason || 'Hard delete executed by Super Admin'
+  });
+
+  if (db) {
+    await db.collection('tenants').deleteOne({ id: tenantId });
+    await db.collection('cases').deleteMany({ tenantId }); // Embedded hearings purged automatically
+    await db.collection('clients').deleteMany({ tenantId });
+    await db.collection('transactions').deleteMany({ tenantId });
+    await db.collection('colleagues').deleteMany({ tenantId });
+    await db.collection('tasks').deleteMany({ tenantId });
+    await db.collection('tickets').deleteMany({ tenantId });
+    await db.collection('notifications').deleteMany({ tenantId });
+  } else {
+    const localDb = readDb();
+    localDb.tenants = (localDb.tenants || []).filter(t => t.id !== tenantId);
+    localDb.cases = (localDb.cases || []).filter(c => c.tenantId !== tenantId);
+    localDb.clients = (localDb.clients || []).filter(c => c.tenantId !== tenantId);
+    localDb.transactions = (localDb.transactions || []).filter(t => t.tenantId !== tenantId);
+    localDb.colleagues = (localDb.colleagues || []).filter(c => c.tenantId !== tenantId);
+    localDb.tasks = (localDb.tasks || []).filter(t => t.tenantId !== tenantId);
+    localDb.tickets = (localDb.tickets || []).filter(t => t.tenantId !== tenantId);
+    localDb.notifications = (localDb.notifications || []).filter(n => n.tenantId !== tenantId);
+    writeDb(localDb);
+  }
+
+  return true;
+}
+
+/**
+ * Force Logout All Active Sessions for a Chamber (Bumps sessionVersion)
+ */
+async function forceLogoutTenant(tenantId, reason, adminEmail) {
+  const tenant = await getTenantById(tenantId);
+  if (!tenant) throw new Error("Chamber tenant not found.");
+
+  const newVersion = await incrementSessionVersion(tenantId);
+
+  await addAuditLog({
+    adminEmail,
+    actionType: 'FORCE_LOGOUT',
+    targetTenantId: tenantId,
+    targetEmail: tenant.email,
+    reason: reason || 'Force logout all sessions by Super Admin'
+  });
+
+  return newVersion;
+}
+
+/**
+ * Force Password Reset on Next Login
+ */
+async function forcePasswordResetTenant(tenantId, reason, adminEmail) {
+  const db = await getDb();
+  const tenant = await getTenantById(tenantId);
+  if (!tenant) throw new Error("Chamber tenant not found.");
+
+  if (db) {
+    await db.collection('tenants').updateOne({ id: tenantId }, { $set: { requirePasswordReset: true }, $inc: { sessionVersion: 1 } });
+  } else {
+    const localDb = readDb();
+    const t = (localDb.tenants || []).find(x => x.id === tenantId);
+    if (t) {
+      t.requirePasswordReset = true;
+      t.sessionVersion = (t.sessionVersion || 1) + 1;
+      writeDb(localDb);
+    }
+  }
+
+  await addAuditLog({
+    adminEmail,
+    actionType: 'FORCE_PASSWORD_RESET',
+    targetTenantId: tenantId,
+    targetEmail: tenant.email,
+    reason: reason || 'Flagged for password reset on next login'
+  });
+
+  return true;
+}
+
+/**
+ * Update Admin Notes on Chamber
+ */
+async function updateTenantAdminNotes(tenantId, adminNotes, adminEmail) {
   const db = await getDb();
   if (db) {
-    return await db.collection('transactions').findOne({ id: txId, tenantId });
+    await db.collection('tenants').updateOne({ id: tenantId }, { $set: { adminNotes } });
+  } else {
+    const localDb = readDb();
+    const t = (localDb.tenants || []).find(x => x.id === tenantId);
+    if (t) {
+      t.adminNotes = adminNotes;
+      writeDb(localDb);
+    }
   }
-  const localDb = readDb();
-  return (localDb.transactions || []).find(tr => tr.id === txId && tr.tenantId === tenantId);
+
+  await addAuditLog({
+    adminEmail,
+    actionType: 'UPDATE_ADMIN_NOTES',
+    targetTenantId: tenantId,
+    reason: 'Updated chamber internal notes'
+  });
+
+  return true;
+}
+
+/**
+ * Bulk Suspend Chambers (Mandatory Reason Required)
+ */
+async function bulkSuspendTenants(tenantIds, reason, adminEmail) {
+  if (!reason || typeof reason !== 'string' || !reason.trim()) {
+    throw new Error("A non-empty reason is mandatory for bulk suspend operations.");
+  }
+  if (!Array.isArray(tenantIds) || tenantIds.length === 0) {
+    throw new Error("No chamber IDs provided for bulk suspend.");
+  }
+
+  for (const tid of tenantIds) {
+    try {
+      await suspendTenant(tid, reason.trim(), adminEmail);
+    } catch (e) {
+      console.warn(`Bulk suspend warning for ${tid}:`, e);
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Periodic Maintenance Job: Purges expired pending_deletion accounts (30 days) and clean exports (90 days)
+ */
+async function checkAndPurgeExpiredAccounts() {
+  try {
+    const db = await getDb();
+    const now = new Date();
+    const fs = require('fs');
+    const path = require('path');
+
+    let tenants = [];
+    if (db) {
+      tenants = await db.collection('tenants').find({ status: 'pending_deletion' }).toArray();
+    } else {
+      const localDb = readDb();
+      tenants = (localDb.tenants || []).filter(t => t.status === 'pending_deletion');
+    }
+
+    for (const t of tenants) {
+      if (t.deletionScheduledAt && new Date(t.deletionScheduledAt) <= now) {
+        console.log(`[PURGE JOB] Permanently purging expired soft-deleted account: ${t.email} (${t.id})`);
+        await hardDeleteTenant(t.id, 'Automatic 30-day grace period expired', 'SYSTEM_CRON');
+      }
+    }
+
+    // Clean up soft-delete export files older than 90 days
+    const exportDir = path.join(__dirname, 'exports', 'pending_deletions');
+    if (fs.existsSync(exportDir)) {
+      const files = fs.readdirSync(exportDir);
+      const ninetyDaysAgo = Date.now() - (90 * 24 * 60 * 60 * 1000);
+      files.forEach(f => {
+        const fp = path.join(exportDir, f);
+        const stat = fs.statSync(fp);
+        if (stat.mtimeMs < ninetyDaysAgo) {
+          fs.unlinkSync(fp);
+          console.log(`[PURGE JOB] Cleaned up expired 90-day soft-delete export: ${f}`);
+        }
+      });
+    }
+  } catch (err) {
+    console.error("Error in checkAndPurgeExpiredAccounts background job:", err);
+  }
 }
 
 module.exports = {
@@ -2193,6 +2540,21 @@ module.exports = {
   getTenantById,
   getTenantByIdWithHash,
   updateTenantPassword,
+  getPlatformAdminMetrics,
+  addAuditLog,
+  getAuditLogs,
+  incrementSessionVersion,
+  suspendTenant,
+  reactivateTenant,
+  softDeleteTenant,
+  cancelSoftDeleteTenant,
+  hardDeleteTenant,
+  forceLogoutTenant,
+  forcePasswordResetTenant,
+  updateTenantAdminNotes,
+  bulkSuspendTenants,
+  checkAndPurgeExpiredAccounts
+};
   setTenantResetCode,
   resetTenantPassword,
   createTenant,
@@ -2248,5 +2610,18 @@ module.exports = {
   getPendingRegistration,
   deletePendingRegistration,
   blacklistToken,
-  isTokenBlacklisted
+  isTokenBlacklisted,
+  addAuditLog,
+  getAuditLogs,
+  incrementSessionVersion,
+  suspendTenant,
+  reactivateTenant,
+  softDeleteTenant,
+  cancelSoftDeleteTenant,
+  hardDeleteTenant,
+  forceLogoutTenant,
+  forcePasswordResetTenant,
+  updateTenantAdminNotes,
+  bulkSuspendTenants,
+  checkAndPurgeExpiredAccounts
 };

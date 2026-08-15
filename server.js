@@ -105,6 +105,22 @@ async function authenticateToken(req, res, next) {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
+
+    // Session Revocation & Suspension check
+    if (decoded.id) {
+      const tenant = await db.getTenantById(decoded.id);
+      if (tenant) {
+        if (tenant.isSuspended || tenant.status === 'pending_deletion') {
+          res.clearCookie('session_token');
+          return res.status(403).json({ error: "Account access suspended or pending deletion." });
+        }
+        if (decoded.sessionVersion && tenant.sessionVersion && tenant.sessionVersion > decoded.sessionVersion) {
+          res.clearCookie('session_token');
+          return res.status(401).json({ error: "Session revoked by Super Admin. Please log in again." });
+        }
+      }
+    }
+
     next();
   } catch (err) {
     res.clearCookie('session_token');
@@ -439,10 +455,19 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
+    // Check if account is suspended or pending deletion
+    if (tenant.isSuspended || tenant.status === 'pending_deletion' || tenant.status === 'suspended') {
+      return res.status(403).json({ error: "Your chamber account is suspended or pending deletion. Please contact Super Admin support." });
+    }
+
     // Evaluate session persistence (Keep Me Signed In)
     const isPersistent = Boolean(keepSignedIn);
     const tokenExpiry = isPersistent ? '30d' : '1d';
-    const token = jwt.sign({ id: tenant.id, email: tenant.email }, JWT_SECRET, { expiresIn: tokenExpiry });
+    const token = jwt.sign(
+      { id: tenant.id, email: tenant.email, sessionVersion: tenant.sessionVersion || 1 },
+      JWT_SECRET,
+      { expiresIn: tokenExpiry }
+    );
 
     // Set HttpOnly cookie
     const cookieOptions = {
@@ -466,6 +491,7 @@ app.post('/api/auth/login', async (req, res) => {
     res.json({
       success: true,
       token,
+      requirePasswordReset: Boolean(tenant.requirePasswordReset),
       user: safeTenant,
       clients,
       cases,
@@ -1327,23 +1353,274 @@ app.get(['/portal', '/portal/:token'], async (req, res) => {
   res.send(fullHtml);
 });
 
-// Super Admin Platform Metrics Endpoint (Protected by JWT + Server Authorization)
+// In-memory rate limiter for hard-delete admin password attempts (scoped to admin session)
+const hardDeleteFailedAttempts = {};
+
+// Helper: Shared dual-layer authorization verification
+function verifyAdminPermissions(req, res) {
+  const allowedAdmins = (process.env.SUPER_ADMIN_EMAILS || 'vaibhavsharmarajhc@gmail.com')
+    .split(',')
+    .map(e => e.trim().toLowerCase());
+  const userEmail = (req.user && req.user.email) ? req.user.email.toLowerCase().trim() : '';
+
+  if (!userEmail || !allowedAdmins.includes(userEmail)) {
+    res.status(403).json({ error: "Access denied. Super Admin privileges required." });
+    return false;
+  }
+  return true;
+}
+
+// 1. Lightweight Super Admin Authorization Check Endpoint
+app.get('/api/admin/check', authenticateToken, async (req, res) => {
+  if (!verifyAdminPermissions(req, res)) return;
+  res.json({ success: true, isAdmin: true, email: req.user.email });
+});
+
+// 2. Super Admin Platform Metrics Endpoint
 app.get('/api/admin/metrics', authenticateToken, async (req, res) => {
   try {
-    const allowedAdmins = (process.env.SUPER_ADMIN_EMAILS || 'vaibhavsharmarajhc@gmail.com')
-      .split(',')
-      .map(e => e.trim().toLowerCase());
-    const userEmail = (req.user && req.user.email) ? req.user.email.toLowerCase().trim() : '';
-
-    if (!userEmail || !allowedAdmins.includes(userEmail)) {
-      return res.status(403).json({ error: "Access denied. Super Admin privileges required." });
-    }
-
+    if (!verifyAdminPermissions(req, res)) return;
     const metrics = await db.getPlatformAdminMetrics();
     res.json({ success: true, metrics });
   } catch (err) {
     console.error("Super Admin metrics endpoint error:", err);
     res.status(500).json({ error: "Failed to retrieve platform metrics." });
+  }
+});
+
+// 3. Super Admin Account Action Endpoint (Suspend, Soft Delete, Hard Delete, Force Logout, Password Reset, Bulk Suspend)
+app.post('/api/admin/account-action', authenticateToken, async (req, res) => {
+  try {
+    if (!verifyAdminPermissions(req, res)) return;
+
+    const { action, targetTenantId, tenantIds, reason, adminPassword, notes } = req.body;
+    const adminEmail = req.user.email;
+
+    if (!action) {
+      return res.status(400).json({ error: "Action type is required." });
+    }
+
+    // A. Suspend Account (Reversible)
+    if (action === 'suspend') {
+      if (!targetTenantId || !reason) return res.status(400).json({ error: "Target chamber and mandatory reason required." });
+      await db.suspendTenant(targetTenantId, reason.trim(), adminEmail);
+      return res.json({ success: true, message: "Chamber account suspended successfully." });
+    }
+
+    // B. Reactivate Account
+    if (action === 'reactivate') {
+      if (!targetTenantId) return res.status(400).json({ error: "Target chamber required." });
+      await db.reactivateTenant(targetTenantId, reason || 'Reactivated by Super Admin', adminEmail);
+      return res.json({ success: true, message: "Chamber account reactivated successfully." });
+    }
+
+    // C. Soft Delete Account (30-day grace period with automated JSON export)
+    if (action === 'soft_delete') {
+      if (!targetTenantId || !reason) return res.status(400).json({ error: "Target chamber and mandatory reason required." });
+      const result = await db.softDeleteTenant(targetTenantId, reason.trim(), adminEmail);
+      return res.json({ success: true, message: "Account scheduled for deletion in 30 days.", ...result });
+    }
+
+    // D. Cancel Soft Delete (Restore within 30 days)
+    if (action === 'cancel_soft_delete') {
+      if (!targetTenantId) return res.status(400).json({ error: "Target chamber required." });
+      await db.cancelSoftDeleteTenant(targetTenantId, reason || 'Cancelled soft delete', adminEmail);
+      return res.json({ success: true, message: "Scheduled deletion cancelled. Chamber reactivated." });
+    }
+
+    // E. Immediate Hard Delete (Danger Zone — requires server-side async bcrypt admin password check + rate limiting)
+    if (action === 'hard_delete') {
+      if (!targetTenantId || !reason || !adminPassword) {
+        return res.status(400).json({ error: "Target chamber, mandatory reason, and admin password re-entry required." });
+      }
+
+      // Check hard-delete rate limiting (max 5 failed attempts per 15 mins per admin)
+      const now = Date.now();
+      const attempts = hardDeleteFailedAttempts[adminEmail] || { count: 0, resetAt: now + 15 * 60 * 1000 };
+      if (now > attempts.resetAt) {
+        attempts.count = 0;
+        attempts.resetAt = now + 15 * 60 * 1000;
+      }
+      if (attempts.count >= 5) {
+        return res.status(429).json({ error: "Too many failed admin password attempts. Hard delete locked for 15 minutes." });
+      }
+
+      // Verify admin's password async against their own stored password hash
+      const adminTenant = await db.getTenantByEmail(adminEmail);
+      if (!adminTenant || !adminTenant.passwordHash) {
+        return res.status(403).json({ error: "Admin credential verification failed." });
+      }
+
+      const isPasswordValid = await bcrypt.compare(adminPassword, adminTenant.passwordHash);
+      if (!isPasswordValid) {
+        attempts.count++;
+        hardDeleteFailedAttempts[adminEmail] = attempts;
+        return res.status(401).json({ error: "Invalid admin password. Action rejected." });
+      }
+
+      // Reset failed count on successful verification
+      hardDeleteFailedAttempts[adminEmail] = { count: 0, resetAt: now + 15 * 60 * 1000 };
+
+      // Execute 8-collection permanent hard delete
+      await db.hardDeleteTenant(targetTenantId, reason.trim(), adminEmail);
+      return res.json({ success: true, message: "Chamber account permanently purged from database." });
+    }
+
+    // F. Force Logout (Revoke all active sessions via sessionVersion bump)
+    if (action === 'force_logout') {
+      if (!targetTenantId) return res.status(400).json({ error: "Target chamber required." });
+      await db.forceLogoutTenant(targetTenantId, reason || 'Force logout', adminEmail);
+      return res.json({ success: true, message: "All active sessions revoked for target chamber." });
+    }
+
+    // G. Force Password Reset on Next Login
+    if (action === 'force_password_reset') {
+      if (!targetTenantId) return res.status(400).json({ error: "Target chamber required." });
+      await db.forcePasswordResetTenant(targetTenantId, reason || 'Force password reset', adminEmail);
+      return res.json({ success: true, message: "Chamber flagged for mandatory password reset on next login." });
+    }
+
+    // H. Update Admin Notes
+    if (action === 'update_notes') {
+      if (!targetTenantId) return res.status(400).json({ error: "Target chamber required." });
+      await db.updateTenantAdminNotes(targetTenantId, notes || '', adminEmail);
+      return res.json({ success: true, message: "Admin notes updated." });
+    }
+
+    // I. Bulk Suspend ONLY (Mandatory reason required)
+    if (action === 'bulk_suspend') {
+      if (!tenantIds || !Array.isArray(tenantIds) || tenantIds.length === 0 || !reason) {
+        return res.status(400).json({ error: "Target chamber IDs array and mandatory reason required." });
+      }
+      await db.bulkSuspendTenants(tenantIds, reason.trim(), adminEmail);
+      return res.json({ success: true, message: `Successfully suspended ${tenantIds.length} chambers.` });
+    }
+
+    return res.status(400).json({ error: "Unknown action type." });
+  } catch (err) {
+    console.error("Super Admin account action error:", err);
+    res.status(500).json({ error: err.message || "Failed to execute admin action." });
+  }
+});
+
+// 4. Impersonation ("Login as Chamber") Start Endpoint
+app.post('/api/admin/impersonate', authenticateToken, async (req, res) => {
+  try {
+    if (!verifyAdminPermissions(req, res)) return;
+
+    const { targetTenantId } = req.body;
+    const adminEmail = req.user.email;
+    if (!targetTenantId) return res.status(400).json({ error: "Target chamber ID required." });
+
+    const targetTenant = await db.getTenantById(targetTenantId);
+    if (!targetTenant) return res.status(404).json({ error: "Target chamber not found." });
+
+    // Generate special impersonation token containing impersonatorEmail
+    const token = jwt.sign(
+      {
+        id: targetTenant.id,
+        email: targetTenant.email,
+        impersonatorEmail: adminEmail,
+        sessionVersion: targetTenant.sessionVersion || 1
+      },
+      JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    await db.addAuditLog({
+      adminEmail,
+      actionType: 'START_IMPERSONATION',
+      targetTenantId: targetTenant.id,
+      targetEmail: targetTenant.email,
+      reason: 'Super Admin started impersonation session'
+    });
+
+    const { passwordHash: _, ...safeTenant } = targetTenant;
+    res.json({
+      success: true,
+      token,
+      impersonatedUser: safeTenant,
+      impersonatorEmail: adminEmail
+    });
+  } catch (err) {
+    console.error("Impersonation error:", err);
+    res.status(500).json({ error: "Failed to initiate impersonation session." });
+  }
+});
+
+// 5. Impersonation Heartbeat Endpoint (60s signal updating lastActiveAt)
+app.post('/api/admin/impersonate-heartbeat', authenticateToken, async (req, res) => {
+  try {
+    if (!verifyAdminPermissions(req, res)) return;
+    const { targetTenantId } = req.body;
+    res.json({ success: true, timestamp: new Date().toISOString() });
+  } catch (err) {
+    res.status(500).json({ error: "Heartbeat failed." });
+  }
+});
+
+// 6. Exit Impersonation Endpoint
+app.post('/api/admin/exit-impersonation', authenticateToken, async (req, res) => {
+  try {
+    const impersonatorEmail = req.user.impersonatorEmail || req.user.email;
+    await db.addAuditLog({
+      adminEmail: impersonatorEmail,
+      actionType: 'EXIT_IMPERSONATION',
+      targetTenantId: req.user.id,
+      targetEmail: req.user.email,
+      reason: 'Super Admin exited impersonation session'
+    });
+
+    // Re-issue clean admin token for the founder
+    const adminTenant = await db.getTenantByEmail(impersonatorEmail);
+    if (!adminTenant) return res.status(404).json({ error: "Admin tenant account not found." });
+
+    const adminToken = jwt.sign(
+      { id: adminTenant.id, email: adminTenant.email, sessionVersion: adminTenant.sessionVersion || 1 },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
+    const { passwordHash: _, ...safeAdmin } = adminTenant;
+    res.json({
+      success: true,
+      token: adminToken,
+      adminUser: safeAdmin
+    });
+  } catch (err) {
+    console.error("Exit impersonation error:", err);
+    res.status(500).json({ error: "Failed to exit impersonation." });
+  }
+});
+
+// 7. Audit Trail Query Endpoint
+app.get('/api/admin/audit-logs', authenticateToken, async (req, res) => {
+  try {
+    if (!verifyAdminPermissions(req, res)) return;
+    const logs = await db.getAuditLogs(req.query);
+    res.json({ success: true, logs });
+  } catch (err) {
+    console.error("Audit logs query error:", err);
+    res.status(500).json({ error: "Failed to fetch audit logs." });
+  }
+});
+
+// 8. Soft-Delete Export File Download (Dual-Layer Protected)
+app.get('/api/admin/download-export/:filename', authenticateToken, async (req, res) => {
+  try {
+    if (!verifyAdminPermissions(req, res)) return;
+
+    const filename = path.basename(req.params.filename);
+    const exportPath = path.join(__dirname, 'exports', 'pending_deletions', filename);
+
+    if (!fs.existsSync(exportPath)) {
+      return res.status(404).json({ error: "Soft-delete export file not found." });
+    }
+
+    res.download(exportPath, filename);
+  } catch (err) {
+    console.error("Download export error:", err);
+    res.status(500).json({ error: "Failed to download export file." });
   }
 });
 
@@ -1391,4 +1668,12 @@ app.listen(PORT, () => {
   console.log(`  Track My Chambers Multi-Tenant SaaS server running at http://localhost:${PORT}`);
   console.log(`  Start developer watch server with npm run dev`);
   console.log(`==========================================================`);
+
+  // Background Purge Maintenance Job (Runs every 6 hours)
+  if (db && db.checkAndPurgeExpiredAccounts) {
+    db.checkAndPurgeExpiredAccounts();
+    setInterval(() => {
+      db.checkAndPurgeExpiredAccounts();
+    }, 6 * 60 * 60 * 1000);
+  }
 });

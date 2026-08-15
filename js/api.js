@@ -365,8 +365,38 @@ const api = {
     }
   },
   admin: {
+    async check() {
+      return await fetchAPI('/api/admin/check');
+    },
     async getMetrics() {
       return await fetchAPI('/api/admin/metrics');
+    },
+    async accountAction(action, payload = {}) {
+      return await fetchAPI('/api/admin/account-action', {
+        method: 'POST',
+        body: { action, ...payload }
+      });
+    },
+    async impersonate(targetTenantId) {
+      return await fetchAPI('/api/admin/impersonate', {
+        method: 'POST',
+        body: { targetTenantId }
+      });
+    },
+    async sendImpersonationHeartbeat(targetTenantId) {
+      return await fetchAPI('/api/admin/impersonate-heartbeat', {
+        method: 'POST',
+        body: { targetTenantId }
+      });
+    },
+    async exitImpersonation() {
+      return await fetchAPI('/api/admin/exit-impersonation', {
+        method: 'POST'
+      });
+    },
+    async getAuditLogs(params = {}) {
+      const q = new URLSearchParams(params).toString();
+      return await fetchAPI(`/api/admin/audit-logs${q ? '?' + q : ''}`);
     }
   }
 };

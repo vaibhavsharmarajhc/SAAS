@@ -478,6 +478,9 @@ function setTheme(theme) {
     if (iconLight) iconLight.style.display = 'inline-block';
     if (iconDark) iconDark.style.display = 'none';
   }
+
+  // Dispatch custom themeChanged event for admin SVG repaints
+  window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme } }));
 }
 
 /**
@@ -1487,9 +1490,83 @@ function initGlobalSearch() {
 }
 
 /**
+ * Impersonation Session Banner & 60s Heartbeat Controller
+ */
+function checkImpersonationState() {
+  try {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) return;
+
+    // Decode JWT payload safely without signature verification on client
+    const base64Url = token.split('.')[1];
+    if (!base64Url) return;
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    const payload = JSON.parse(jsonPayload);
+
+    if (payload && payload.impersonatorEmail) {
+      let banner = document.getElementById('impersonation-banner');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'impersonation-banner';
+        banner.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; background: var(--color-warning); color: #000; padding: 6px 16px; font-size: 0.82rem; font-weight: 700; z-index: 999999; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
+        document.body.prepend(banner);
+      }
+
+      banner.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
+          <span>Viewing as Chamber: <u>${payload.email}</u> (Impersonated by ${payload.impersonatorEmail})</span>
+        </div>
+        <button id="btn-exit-impersonation" style="background: #000; color: #fff; border: none; padding: 3px 12px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+          Exit Impersonation
+        </button>
+      `;
+
+      if (typeof window.safeCreateIcons === 'function') window.safeCreateIcons(banner);
+
+      document.getElementById('btn-exit-impersonation')?.addEventListener('click', async () => {
+        try {
+          if (typeof api !== 'undefined' && api.admin && api.admin.exitImpersonation) {
+            const res = await api.admin.exitImpersonation();
+            if (res && res.token) {
+              localStorage.setItem('token', res.token);
+              if (res.adminUser) {
+                localStorage.setItem('currentUser', JSON.stringify(res.adminUser));
+              }
+              window.location.href = '/admin';
+              return;
+            }
+          }
+        } catch (e) {
+          console.error("Exit impersonation error:", e);
+        }
+        localStorage.removeItem('token');
+        window.location.href = '/auth';
+      });
+
+      // 60-second impersonation heartbeat timer
+      if (!window._impersonationHeartbeatTimer) {
+        window._impersonationHeartbeatTimer = setInterval(async () => {
+          try {
+            if (typeof api !== 'undefined' && api.admin && api.admin.sendImpersonationHeartbeat) {
+              await api.admin.sendImpersonationHeartbeat(payload.id);
+            }
+          } catch (err) {
+            console.warn("Impersonation heartbeat warning:", err);
+          }
+        }, 60000);
+      }
+    }
+  } catch (err) {
+    console.warn("checkImpersonationState error:", err);
+  }
+}
+
+/**
  * App Initializer - Failsafe ES Module Bootloader
  */
-async function initApp() {
+export async function initApp() {
   // 1. Initialize Icons
   safeCreateIcons();
 
@@ -1724,10 +1801,11 @@ async function initApp() {
     }
   }
  
-  // 10b. Init Super Admin authorization check (Fail closed by default)
+  // 10b. Init Super Admin authorization check (Fail closed by default) & Impersonation banner
   if (typeof adminModule !== 'undefined' && typeof adminModule.init === 'function') {
     adminModule.init();
   }
+  checkImpersonationState();
  
   // 11. Run router to handle initial page load route
   await router();
