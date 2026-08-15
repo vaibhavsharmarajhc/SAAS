@@ -2553,8 +2553,7 @@ module.exports = {
   forcePasswordResetTenant,
   updateTenantAdminNotes,
   bulkSuspendTenants,
-  checkAndPurgeExpiredAccounts
-};
+  checkAndPurgeExpiredAccounts,
   setTenantResetCode,
   resetTenantPassword,
   createTenant,
