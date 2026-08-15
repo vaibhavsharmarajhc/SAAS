@@ -2000,10 +2000,28 @@ async function getPlatformAdminMetrics() {
   const clientCountMap = new Map();
   const txCountMap = new Map();
   const taskCountMap = new Map();
+  const hearingCountMap = new Map();
+  const lastActivityMap = new Map();
+
+  let totalHearingsCount = 0;
 
   cases.forEach(c => {
-    if (c.tenantId) caseCountMap.set(c.tenantId, (caseCountMap.get(c.tenantId) || 0) + 1);
+    if (c.tenantId) {
+      caseCountMap.set(c.tenantId, (caseCountMap.get(c.tenantId) || 0) + 1);
+      const hCount = Array.isArray(c.hearings) ? c.hearings.length : 0;
+      hearingCountMap.set(c.tenantId, (hearingCountMap.get(c.tenantId) || 0) + hCount);
+      totalHearingsCount += hCount;
+
+      const caseDate = c.updatedAt || c.createdAt || c.filedDate;
+      if (caseDate) {
+        const curLast = lastActivityMap.get(c.tenantId);
+        if (!curLast || new Date(caseDate) > new Date(curLast)) {
+          lastActivityMap.set(c.tenantId, caseDate);
+        }
+      }
+    }
   });
+
   clients.forEach(c => {
     if (c.tenantId) clientCountMap.set(c.tenantId, (clientCountMap.get(c.tenantId) || 0) + 1);
   });
@@ -2014,8 +2032,39 @@ async function getPlatformAdminMetrics() {
     if (t.tenantId) taskCountMap.set(t.tenantId, (taskCountMap.get(t.tenantId) || 0) + 1);
   });
 
+  // Calculate daily signup growth for last 30 days
+  const signupMap = new Map();
+  const now = new Date();
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    signupMap.set(dateStr, 0);
+  }
+
+  tenants.forEach(t => {
+    const createdStr = (t.createdAt || t.onboardingDate || '').split('T')[0];
+    if (createdStr && signupMap.has(createdStr)) {
+      signupMap.set(createdStr, signupMap.get(createdStr) + 1);
+    }
+  });
+
+  const signupsOverTime = Array.from(signupMap.entries()).map(([date, count]) => ({ date, count }));
+
+  let activeChambersCount = 0;
+  let dormantChambersCount = 0;
+
   const chambers = tenants.map(t => {
-    const { passwordHash: _, resetCode: __, ...safeTenant } = t;
+    const casesCount = caseCountMap.get(t.id) || 0;
+    const clientsCount = clientCountMap.get(t.id) || 0;
+    const transactionsCount = txCountMap.get(t.id) || 0;
+    const tasksCount = taskCountMap.get(t.id) || 0;
+    const hearingsCount = hearingCountMap.get(t.id) || 0;
+    const isActive = casesCount > 0 || clientsCount > 0 || transactionsCount > 0;
+
+    if (isActive) activeChambersCount++;
+    else dormantChambersCount++;
+
     return {
       id: t.id,
       email: t.email || 'N/A',
@@ -2023,10 +2072,14 @@ async function getPlatformAdminMetrics() {
       firmName: t.settings?.firmName || t.firmName || 'Chambers Practice',
       phone: t.phone || t.settings?.phone || 'N/A',
       createdAt: t.createdAt || t.onboardingDate || '2026-01-01',
-      casesCount: caseCountMap.get(t.id) || 0,
-      clientsCount: clientCountMap.get(t.id) || 0,
-      transactionsCount: txCountMap.get(t.id) || 0,
-      tasksCount: taskCountMap.get(t.id) || 0,
+      lastLoginAt: t.lastLoginAt || t.updatedAt || t.createdAt || '2026-01-01',
+      lastActivityAt: lastActivityMap.get(t.id) || t.lastLoginAt || t.createdAt || '2026-01-01',
+      casesCount,
+      clientsCount,
+      hearingsCount,
+      transactionsCount,
+      tasksCount,
+      isActive,
       isSuspended: Boolean(t.isSuspended)
     };
   });
@@ -2035,11 +2088,16 @@ async function getPlatformAdminMetrics() {
   chambers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   return {
+    dbStatus: db ? 'MongoDB Cloud Connected' : 'Local File JSON Mode',
     totalChambers: tenants.length,
+    activeChambers: activeChambersCount,
+    dormantChambers: dormantChambersCount,
     totalCases: cases.length,
     totalClients: clients.length,
+    totalHearings: totalHearingsCount,
     totalTransactions: transactions.length,
     totalTasks: tasks.length,
+    signupsOverTime,
     chambers
   };
 }

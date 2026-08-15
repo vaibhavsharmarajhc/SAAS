@@ -1327,6 +1327,26 @@ app.get(['/portal', '/portal/:token'], async (req, res) => {
   res.send(fullHtml);
 });
 
+// Super Admin Platform Metrics Endpoint (Protected by JWT + Server Authorization)
+app.get('/api/admin/metrics', authenticateToken, async (req, res) => {
+  try {
+    const allowedAdmins = (process.env.SUPER_ADMIN_EMAILS || 'vaibhavsharmarajhc@gmail.com')
+      .split(',')
+      .map(e => e.trim().toLowerCase());
+    const userEmail = (req.user && req.user.email) ? req.user.email.toLowerCase().trim() : '';
+
+    if (!userEmail || !allowedAdmins.includes(userEmail)) {
+      return res.status(403).json({ error: "Access denied. Super Admin privileges required." });
+    }
+
+    const metrics = await db.getPlatformAdminMetrics();
+    res.json({ success: true, metrics });
+  } catch (err) {
+    console.error("Super Admin metrics endpoint error:", err);
+    res.status(500).json({ error: "Failed to retrieve platform metrics." });
+  }
+});
+
 // Serve app.html for all application workspace routes and SPA sub-routes
 app.use((req, res, next) => {
   if (req.method !== 'GET') return next();
@@ -1341,6 +1361,7 @@ app.use((req, res, next) => {
     p.startsWith('/share') ||
     p.startsWith('/tasks') ||
     p.startsWith('/settings') ||
+    p.startsWith('/admin') ||
     p.startsWith('/support') ||
     p.startsWith('/help') ||
     p.startsWith('/app') ||

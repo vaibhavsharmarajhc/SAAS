@@ -852,6 +852,7 @@ async function router() {
         else if (path.startsWith('/share-page') || path.startsWith('/share')) targetView = 'share-page';
         else if (path.startsWith('/tasks-page') || path.startsWith('/tasks')) targetView = 'tasks-page';
         else if (path.startsWith('/settings-page') || path.startsWith('/settings')) targetView = 'settings-page';
+        else if (path.startsWith('/admin-metrics-page') || path.startsWith('/admin')) targetView = 'admin-metrics-page';
         
         await switchView(targetView);
       }
@@ -1721,6 +1722,11 @@ async function initApp() {
       await db.resetDB();
       window.history.replaceState({}, '', '/dashboard');
     }
+  }
+ 
+  // 10b. Init Super Admin authorization check (Fail closed by default)
+  if (typeof adminModule !== 'undefined' && typeof adminModule.init === 'function') {
+    adminModule.init();
   }
  
   // 11. Run router to handle initial page load route

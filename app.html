@@ -46,7 +46,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.0.185', { scope: '/' }).then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.186', { scope: '/' }).then(reg => {
           reg.update();
           reg.onupdatefound = () => {
             const installingWorker = reg.installing;
@@ -113,6 +113,9 @@
         </li>
         <li class="menu-item" data-target="settings-page">
           <a href="#"><i data-lucide="settings"></i> System Settings</a>
+        </li>
+        <li class="menu-item" data-target="admin-metrics-page" id="sidebar-menu-admin" style="display: none;">
+          <a href="#"><i data-lucide="shield"></i> Super Admin</a>
         </li>
       </ul>
 
@@ -1135,11 +1138,16 @@
 
       <!-- Public Client Case Access Portal Container -->
       <div id="portal-page" class="page-container">
-          <div id="portal-page-content">
-            <!-- Dynamically rendered by portal.js -->
-          </div>
+        <div id="portal-page-content">
+          <!-- Dynamically rendered by portal.js -->
         </div>
-      </main>
+      </div>
+
+      <!-- Super Admin Monitoring Portal Container -->
+      <div id="admin-metrics-page" class="page-container">
+        <!-- Dynamically rendered by admin.js -->
+      </div>
+    </main>
     </div>
 
   <!-- Global Modal Overlays (Direct Siblings of body for viewport safety) -->
@@ -2103,6 +2111,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 5rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.185"></script>
+  <script type="module" src="js/app.js?v=1.0.186"></script>
 </body>
 </html>
