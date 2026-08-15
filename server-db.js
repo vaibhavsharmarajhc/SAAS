@@ -639,6 +639,27 @@ async function updateHearing(tenantId, caseId, hearingId, hearingData) {
   return null;
 }
 
+async function deleteHearing(tenantId, caseId, hearingId) {
+  const db = await getDb();
+  if (db) {
+    await db.collection('cases').updateOne(
+      { tenantId, _id: caseId },
+      { $pull: { hearings: { id: hearingId } } }
+    );
+    const updated = await db.collection('cases').findOne({ tenantId, _id: caseId });
+    return mapId(updated);
+  }
+
+  const localDb = readDb();
+  const idx = (localDb.cases || []).findIndex(c => c.tenantId === tenantId && c.id === caseId);
+  if (idx !== -1 && localDb.cases[idx].hearings) {
+    localDb.cases[idx].hearings = localDb.cases[idx].hearings.filter(h => h.id !== hearingId);
+    writeDb(localDb);
+    return localDb.cases[idx];
+  }
+  return null;
+}
+
 /**
  * Transaction Management
  */
