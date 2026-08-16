@@ -12,6 +12,9 @@ class LegalDB {
   }
 
   clearCache() {
+    try {
+      sessionStorage.removeItem('bootstrap_preload');
+    } catch (e) {}
     this.cache = {
       user: null,
       settings: {
