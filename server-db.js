@@ -2554,6 +2554,47 @@ async function checkAndPurgeExpiredAccounts() {
   }
 }
 
+async function getTransaction(tenantId, txId) {
+  const db = await getDb();
+  if (db) {
+    const tx = await db.collection('transactions').findOne({ tenantId, _id: txId });
+    return mapId(tx);
+  }
+  const localDb = readDb();
+  return (localDb.transactions || []).find(tr => tr.id === txId && tr.tenantId === tenantId) || null;
+}
+
+async function getAllUsersAdmin() {
+  const metrics = await getPlatformAdminMetrics();
+  return metrics.chambers || [];
+}
+
+async function getUserById(userId) {
+  const db = await getDb();
+  if (db) {
+    const t = await db.collection('tenants').findOne({ id: userId });
+    return mapId(t);
+  }
+  const localDb = readDb();
+  return (localDb.tenants || []).find(t => t.id === userId) || null;
+}
+
+async function setUserSuspended(userId, isSuspended) {
+  return await suspendTenant(userId, isSuspended ? 'Suspended by admin' : 'Reactivated by admin', 'system');
+}
+
+async function deleteUserAccountPermanent(userId) {
+  return await hardDeleteTenant(userId, 'Permanent account deletion request', 'system');
+}
+
+async function getImpersonatedAccountData(userId) {
+  const targetUser = await getUserById(userId);
+  return {
+    user: targetUser,
+    message: "Impersonation session data ready"
+  };
+}
+
 module.exports = {
   getDb,
   initDatabase,
