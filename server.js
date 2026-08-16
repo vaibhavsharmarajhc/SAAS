@@ -1535,6 +1535,13 @@ app.post('/api/admin/impersonate', authenticateToken, async (req, res) => {
       reason: 'Super Admin started impersonation session'
     });
 
+    const cookieOptions = {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production'
+    };
+    res.cookie('session_token', token, cookieOptions);
+
     const { passwordHash: _, ...safeTenant } = targetTenant;
     res.json({
       success: true,
@@ -1580,6 +1587,13 @@ app.post('/api/admin/exit-impersonation', authenticateToken, async (req, res) =>
       JWT_SECRET,
       { expiresIn: '30d' }
     );
+
+    const cookieOptions = {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production'
+    };
+    res.cookie('session_token', adminToken, cookieOptions);
 
     const { passwordHash: _, ...safeAdmin } = adminTenant;
     res.json({
