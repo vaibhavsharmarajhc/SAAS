@@ -5,6 +5,7 @@
  */
 
 import api from './api.js';
+import db from './db.js';
 
 let currentMetricsData = null;
 let currentAuditLogs = [];
@@ -755,6 +756,7 @@ export const adminModule = {
         if (res.impersonatedUser) {
           localStorage.setItem('currentUser', JSON.stringify(res.impersonatedUser));
         }
+        db.clearCache();
         window.location.href = '/dashboard';
       } else {
         throw new Error(res?.error || "Impersonation failed.");

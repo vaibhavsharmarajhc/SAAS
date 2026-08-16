@@ -1534,12 +1534,18 @@ function checkImpersonationState() {
               if (res.adminUser) {
                 localStorage.setItem('currentUser', JSON.stringify(res.adminUser));
               }
+              if (typeof db !== 'undefined' && typeof db.clearCache === 'function') {
+                db.clearCache();
+              }
               window.location.href = '/admin';
               return;
             }
           }
         } catch (e) {
           console.error("Exit impersonation error:", e);
+        }
+        if (typeof db !== 'undefined' && typeof db.clearCache === 'function') {
+          db.clearCache();
         }
         localStorage.removeItem('token');
         window.location.href = '/auth';
