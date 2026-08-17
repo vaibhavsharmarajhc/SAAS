@@ -46,7 +46,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.0.194', { scope: '/' }).then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.195', { scope: '/' }).then(reg => {
           reg.update();
           reg.onupdatefound = () => {
             const installingWorker = reg.installing;
@@ -361,11 +361,10 @@
                   <th>Referrer Name</th>
                   <th>Referred Cases Count</th>
                   <th>Total Revenue Contributed (₹)</th>
-                  <th>Referred Cases List</th>
                 </tr>
               </thead>
               <tbody id="dashboard-referrals-table-body">
-                <tr><td colspan="4" style="text-align:center;" class="text-muted">No referral details logged in system</td></tr>
+                <tr><td colspan="3" style="text-align:center;" class="text-muted">No referral details logged in system</td></tr>
               </tbody>
             </table>
           </div>
@@ -2112,6 +2111,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 5rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.194"></script>
+  <script type="module" src="js/app.js?v=1.0.195"></script>
 </body>
 </html>

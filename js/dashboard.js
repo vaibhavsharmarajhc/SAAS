@@ -441,23 +441,62 @@ const dashboardModule = {
     const referralsList = Object.values(referralsMap).sort((a, b) => b.revenue - a.revenue || b.casesCount - a.casesCount);
 
     if (referralsList.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center;" class="text-muted">No referrals logged.</td></tr>`;
+      tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center;" class="text-muted">No referrals logged.</td></tr>`;
       return;
     }
 
-    referralsList.forEach(item => {
-      const row = document.createElement('tr');
-      // Create comma-separated list of cases or badges
-      const casesListMarkup = item.caseTitles.map(t => `<span class="badge badge-hearing" style="margin-right:4px; display:inline-block; font-size:0.7rem; padding:0.15rem 0.35rem; font-weight:normal; background-color:rgba(59,130,246,0.1); color:#60a5fa; border:1px solid rgba(59,130,246,0.2);">${t}</span>`).join('');
-      
-      row.innerHTML = `
-        <td><strong style="color:var(--text-primary); font-size:0.9rem;">${item.referrer}</strong></td>
+    referralsList.forEach((item, index) => {
+      const rowId = `referral-details-${index}`;
+
+      // Summary row — always visible, 3 data columns + expand chevron
+      const summaryRow = document.createElement('tr');
+      summaryRow.className = 'referral-summary-row';
+      summaryRow.style.cursor = 'pointer';
+      summaryRow.innerHTML = `
+        <td>
+          <span style="display:inline-flex; align-items:center; gap:6px;">
+            <i data-lucide="chevron-down" class="referral-toggle-icon" style="width:14px; height:14px; color:var(--text-muted); transition:transform 0.15s;"></i>
+            <strong style="color:var(--text-primary); font-size:0.9rem;">${item.referrer}</strong>
+          </span>
+        </td>
         <td><span class="badge badge-active" style="padding:0.25rem 0.5rem; font-size:0.75rem;">${item.casesCount} case(s)</span></td>
         <td style="color:var(--color-success); font-weight:600; font-size:0.9rem;">₹${item.revenue.toLocaleString('en-IN')}</td>
-        <td style="max-width:300px; overflow-x:auto; white-space:nowrap;">${casesListMarkup}</td>
       `;
-      tableBody.appendChild(row);
+
+      // Details row — hidden by default, wraps case pills instead of scrolling
+      const detailsRow = document.createElement('tr');
+      detailsRow.id = rowId;
+      detailsRow.className = 'referral-details-row';
+      detailsRow.style.display = 'none';
+      const casesListMarkup = item.caseTitles.map(t =>
+        `<span class="badge badge-hearing" style="display:inline-block; font-size:0.7rem; padding:0.15rem 0.35rem; font-weight:normal; background-color:rgba(59,130,246,0.1); color:#60a5fa; border:1px solid rgba(59,130,246,0.2);">${t}</span>`
+      ).join('');
+      detailsRow.innerHTML = `
+        <td colspan="3" style="background:rgba(255,255,255,0.02); padding:0.75rem 1rem;">
+          <div style="display:flex; flex-wrap:wrap; gap:4px;">${casesListMarkup}</div>
+        </td>
+      `;
+
+      // Toggle interaction — matches existing chevron pattern from js/tasks.js
+      summaryRow.addEventListener('click', () => {
+        const isExpanded = detailsRow.style.display !== 'none';
+        const icon = summaryRow.querySelector('.referral-toggle-icon');
+        if (isExpanded) {
+          detailsRow.style.display = 'none';
+          if (icon) icon.setAttribute('data-lucide', 'chevron-down');
+        } else {
+          detailsRow.style.display = 'table-row';
+          if (icon) icon.setAttribute('data-lucide', 'chevron-up');
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      });
+
+      tableBody.appendChild(summaryRow);
+      tableBody.appendChild(detailsRow);
     });
+
+    // Ensure newly injected chevron icons render
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 };
 
