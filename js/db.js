@@ -31,7 +31,7 @@ class LegalDB {
 
   async loadAll(forceReload = false) {
     if (this.cache.user && !forceReload) {
-      return true; // Instant 0ms memory cache return!
+      return { success: true, fromCache: true };
     }
 
     try {
@@ -48,7 +48,7 @@ class LegalDB {
           if (preloadData.token) {
             localStorage.setItem('token', preloadData.token);
           }
-          return true;
+          return { success: true, fromCache: false };
         }
       }
     } catch (e) {
@@ -67,7 +67,7 @@ class LegalDB {
         ]);
         if (!me || !me.user) {
           this.clearCache();
-          return false;
+          return { success: false, fromCache: false };
         }
         data = {
           user: me.user,
@@ -82,10 +82,10 @@ class LegalDB {
       this.cache.clients = data.clients || [];
       this.cache.cases = data.cases || [];
       this.cache.transactions = data.transactions || [];
-      return true;
+      return { success: true, fromCache: false };
     } catch (e) {
       this.clearCache();
-      return false;
+      return { success: false, fromCache: false };
     }
   }
 

@@ -409,8 +409,8 @@ async function refreshPageView(viewId) {
   // 2. Background session sync & re-render after data load
   try {
     if (!window.isTestAuth && typeof db.loadAll === 'function') {
-      const loaded = await db.loadAll();
-      if (loaded) {
+      const result = await db.loadAll();
+      if (result && result.success && !result.fromCache) {
         updateBrandingHeaders();
         dispatchViewRender(viewId);
       }
@@ -780,7 +780,8 @@ async function router() {
     } else if (path.startsWith('/portal') || path.startsWith('/portal-page')) {
       isAuthenticated = false;
     } else {
-      isAuthenticated = await db.loadAll();
+      const loadRes = await db.loadAll();
+      isAuthenticated = Boolean(loadRes && loadRes.success);
     }
   } catch (err) {
     console.error("Auth check failed:", err);
@@ -1800,8 +1801,8 @@ export async function initApp() {
   // Test hook to clear DB for visual empty state testing
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('reset_test')) {
-    const authOk = await db.loadAll();
-    if (authOk) {
+    const authRes = await db.loadAll();
+    if (authRes && authRes.success) {
       await db.resetDB();
       window.history.replaceState({}, '', '/dashboard');
     }

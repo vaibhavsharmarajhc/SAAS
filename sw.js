@@ -1,9 +1,9 @@
-const CACHE_NAME = 'trackmychambers-cache-v196';
+const CACHE_NAME = 'trackmychambers-cache-v197';
 const ASSETS = [
   '/dashboard',
   '/app.html',
-  '/css/styles.css?v=1.0.196',
-  '/js/app.js?v=1.0.196',
+  '/css/styles.css?v=1.0.197',
+  '/js/app.js?v=1.0.197',
   '/js/vendor/lucide.min.js',
   '/js/vendor/chart.min.js',
   '/js/workers/ledger.worker.js',
@@ -45,8 +45,28 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+const STATIC_ASSET_PATTERN = /\.(ico|png|jpg|jpeg|svg|woff2?|ttf)$/i;
+
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET' || e.request.url.includes('/api/') || e.request.url.includes('/portal')) {
+    return;
+  }
+
+  // Cache-first for static assets that rarely change — avoids repeated
+  // network round-trips for things like favicon.ico on every navigation.
+  if (STATIC_ASSET_PATTERN.test(e.request.url)) {
+    e.respondWith(
+      caches.match(e.request).then((cachedResponse) => {
+        if (cachedResponse) return cachedResponse;
+        return fetch(e.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, responseClone));
+          }
+          return networkResponse;
+        });
+      })
+    );
     return;
   }
 
