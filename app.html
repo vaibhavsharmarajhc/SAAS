@@ -46,7 +46,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.0.195', { scope: '/' }).then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.196', { scope: '/' }).then(reg => {
           reg.update();
           reg.onupdatefound = () => {
             const installingWorker = reg.installing;
@@ -90,17 +90,14 @@
         <li class="menu-item active" data-target="dashboard-page">
           <a href="#"><i data-lucide="layout-dashboard"></i> Dashboard</a>
         </li>
-        <li class="menu-item" data-target="overview-page">
-          <a href="#"><i data-lucide="bar-chart-2"></i> Practice Overview</a>
-        </li>
-        <li class="menu-item" data-target="clients-page">
-          <a href="#"><i data-lucide="users"></i> Clients Onboarding</a>
+        <li class="menu-item" data-target="diary-page">
+          <a href="#"><i data-lucide="calendar"></i> Daily Diary</a>
         </li>
         <li class="menu-item" data-target="cases-page">
           <a href="#"><i data-lucide="briefcase"></i> Case Registry</a>
         </li>
-        <li class="menu-item" data-target="diary-page">
-          <a href="#"><i data-lucide="calendar"></i> Daily Diary</a>
+        <li class="menu-item" data-target="clients-page">
+          <a href="#"><i data-lucide="users"></i> Clients Onboarding</a>
         </li>
         <li class="menu-item" data-target="accounts-page">
           <a href="#"><i data-lucide="wallet"></i> Accounts & Income</a>
@@ -110,6 +107,9 @@
         </li>
         <li class="menu-item" data-target="tasks-page">
           <a href="#"><i data-lucide="check-square"></i> Task Manager</a>
+        </li>
+        <li class="menu-item" data-target="overview-page">
+          <a href="#"><i data-lucide="bar-chart-2"></i> Practice Overview</a>
         </li>
         <li class="menu-item" data-target="settings-page">
           <a href="#"><i data-lucide="settings"></i> System Settings</a>
@@ -2111,6 +2111,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 5rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.195"></script>
+  <script type="module" src="js/app.js?v=1.0.196"></script>
 </body>
 </html>
