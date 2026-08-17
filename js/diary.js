@@ -623,8 +623,35 @@ const diaryModule = {
     if (!listContainer) return;
 
     const cases = db.getCases();
-    // Filter active cases for which nextHearingDate is null or empty
-    const unscheduledCases = cases.filter(c => c.status === 'Active' && !c.nextHearingDate);
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    // Filter active cases for which nextHearingDate or notBeforeDate is missing or has passed
+    const unscheduledCases = cases.filter(c => {
+      if (c.status !== 'Active') return false;
+
+      const hasNextDate = c.nextHearingDate && c.nextHearingDate !== 'Not Scheduled' && String(c.nextHearingDate).trim() !== '';
+      const notBefore = c.notBeforeDate || (c.listingType === 'relative' ? c.nextHearingDate : null);
+      const hasNotBefore = notBefore && notBefore !== 'Not Scheduled' && String(notBefore).trim() !== '';
+
+      if (!hasNextDate && !hasNotBefore) {
+        return true; // No next date or not before date assigned
+      }
+
+      if (c.listingType === 'relative' || hasNotBefore) {
+        if (hasNotBefore && notBefore < todayStr) {
+          return true; // "Not Before" date has passed
+        }
+        if (!hasNextDate) {
+          return true; // Relative listing mode without confirmed fixed date
+        }
+      } else {
+        if (hasNextDate && c.nextHearingDate < todayStr) {
+          return true; // Fixed hearing date has passed without being updated
+        }
+      }
+
+      return false;
+    });
 
     listContainer.innerHTML = '';
 
@@ -632,7 +659,7 @@ const diaryModule = {
       listContainer.innerHTML = `
         <div style="text-align:center; padding:2rem 1rem; color: var(--text-muted);">
           <i data-lucide="check-circle" style="width:28px; height:28px; color:var(--color-success); margin-bottom:0.5rem; display:inline-block;"></i>
-          <p style="font-size:0.8rem; margin:0;">All active cases have next hearing dates scheduled!</p>
+          <p style="font-size:0.8rem; margin:0;">All active cases have upcoming hearing dates scheduled!</p>
         </div>
       `;
       if (window.safeCreateIcons) window.safeCreateIcons(listContainer);
@@ -642,8 +669,33 @@ const diaryModule = {
     unscheduledCases.forEach(c => {
       const client = db.getClient(c.clientId);
       const item = document.createElement('div');
-      item.style.backgroundColor = 'rgba(239, 68, 68, 0.03)';
-      item.style.border = '1px solid rgba(239, 68, 68, 0.15)';
+
+      const notBefore = c.notBeforeDate || (c.listingType === 'relative' ? c.nextHearingDate : null);
+      const hasNotBefore = notBefore && notBefore !== 'Not Scheduled' && String(notBefore).trim() !== '';
+      const hasNextDate = c.nextHearingDate && c.nextHearingDate !== 'Not Scheduled' && String(c.nextHearingDate).trim() !== '';
+
+      let badgeLabel = 'No Next Date';
+      let badgeColor = 'var(--color-danger)';
+      let bgStyle = 'rgba(239, 68, 68, 0.03)';
+      let borderStyle = 'rgba(239, 68, 68, 0.15)';
+      let dateDetailText = 'No next date assigned yet.';
+
+      if ((c.listingType === 'relative' || hasNotBefore) && hasNotBefore && notBefore < todayStr) {
+        badgeLabel = `Not Before Passed (${window.formatDDMMYYYY ? window.formatDDMMYYYY(notBefore) : notBefore})`;
+        badgeColor = '#b45309';
+        bgStyle = 'rgba(217, 119, 6, 0.04)';
+        borderStyle = 'rgba(217, 119, 6, 0.2)';
+        dateDetailText = `⚠️ Not Before date (${window.formatDDMMYYYY ? window.formatDDMMYYYY(notBefore) : notBefore}) has passed — Get matter listed or set fixed date.`;
+      } else if (hasNextDate && c.nextHearingDate < todayStr) {
+        badgeLabel = `Overdue (${window.formatDDMMYYYY ? window.formatDDMMYYYY(c.nextHearingDate) : c.nextHearingDate})`;
+        badgeColor = 'var(--color-danger)';
+        bgStyle = 'rgba(239, 68, 68, 0.05)';
+        borderStyle = 'rgba(239, 68, 68, 0.25)';
+        dateDetailText = `🚨 Hearing date (${window.formatDDMMYYYY ? window.formatDDMMYYYY(c.nextHearingDate) : c.nextHearingDate}) passed — Update diary proceedings or set next date.`;
+      }
+
+      item.style.backgroundColor = bgStyle;
+      item.style.border = `1px solid ${borderStyle}`;
       item.style.borderRadius = 'var(--radius-sm)';
       item.style.padding = '0.75rem';
       item.style.display = 'flex';
@@ -652,9 +704,9 @@ const diaryModule = {
       item.style.cursor = 'pointer';
 
       item.innerHTML = `
-        <div style="font-size:0.7rem; text-transform:uppercase; color:var(--text-muted); font-weight:600; display:flex; justify-content:space-between;">
+        <div style="font-size:0.7rem; text-transform:uppercase; color:var(--text-muted); font-weight:600; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
           <span>${window.sanitizeText(c.caseType)}</span>
-          <span style="color:var(--color-danger); font-weight:700;">No Next Date</span>
+          <span style="color:${badgeColor}; font-weight:700; font-size:0.7rem;">${badgeLabel}</span>
         </div>
         <strong style="font-size:0.85rem; color:var(--text-primary); line-height:1.2; margin-top:0.15rem;">${window.sanitizeText(c.title)}</strong>
         <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.15rem;">
@@ -662,6 +714,9 @@ const diaryModule = {
         </div>
         <div style="font-size:0.75rem; color:var(--text-secondary);">
           Client: ${client ? window.sanitizeText(client.name) : 'Unknown'}
+        </div>
+        <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:0.2rem; font-style:italic;">
+          ${dateDetailText}
         </div>
       `;
 
@@ -673,7 +728,7 @@ const diaryModule = {
 
       listContainer.appendChild(item);
     });
-    
+
     if (window.safeCreateIcons) window.safeCreateIcons(listContainer);
   }
 };

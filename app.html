@@ -46,7 +46,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.0.197', { scope: '/' }).then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.198', { scope: '/' }).then(reg => {
           reg.update();
           reg.onupdatefound = () => {
             const installingWorker = reg.installing;
@@ -601,7 +601,7 @@
           <div class="card" id="diary-unscheduled-cases-card" style="margin-bottom: 0;">
             <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
               <i data-lucide="alert-circle" style="color: var(--color-warning); width: 18px; height: 18px; display: inline-block; vertical-align: middle;"></i>
-              <h3 style="font-size: 1rem; margin: 0; display: inline-block; vertical-align: middle;">Unscheduled Cases</h3>
+              <h3 style="font-size: 1rem; margin: 0; display: inline-block; vertical-align: middle;">Unscheduled & Overdue Cases</h3>
             </div>
             <div id="diary-unscheduled-list" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 520px; overflow-y: auto;">
               <!-- Dynamic List of Unscheduled Cases -->
@@ -2111,6 +2111,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 5rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.197"></script>
+  <script type="module" src="js/app.js?v=1.0.198"></script>
 </body>
 </html>
