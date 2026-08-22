@@ -46,7 +46,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.0.198', { scope: '/' }).then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.199', { scope: '/' }).then(reg => {
           reg.update();
           reg.onupdatefound = () => {
             const installingWorker = reg.installing;
@@ -373,7 +373,7 @@
 
       <!-- Clients Onboarding & Directory View Container -->
       <div id="clients-page" class="page-container">
-        <div class="grid-cols-3" style="grid-template-columns: 1fr 2fr; gap: 2rem;">
+        <div class="clients-layout-grid">
           
           <!-- Onboarding Wizard -->
           <div class="card" style="height: fit-content;">
@@ -393,7 +393,7 @@
                 <h4 style="margin-bottom:1rem; font-size:1rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Client Profile</h4>
                 <div class="form-group">
                   <label class="form-label">Client Full Name *</label>
-                  <input type="text" class="form-control" id="client-name" required placeholder="Rajesh Kumar, Acme Inc, etc.">
+                  <input type="text" class="form-control" id="client-name" required placeholder="Rajesh Kumar, Acme Industries Pvt Ltd">
                 </div>
                 <div class="form-group">
                   <label class="form-label">Client Type</label>
@@ -510,22 +510,34 @@
               </div>
             </div>
 
-            <div class="table-responsive" style="flex: 1; min-height: 400px; max-height: 520px; overflow-y:auto;">
-              <table class="table-custom">
+            <div class="table-responsive" style="flex: 1; min-height: 380px;">
+              <table class="table-custom" id="client-directory-table">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Type</th>
+                    <th class="client-sort-header" data-sort="name" style="cursor:pointer; user-select:none;">
+                      Client <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px; height:12px; margin-left:4px; vertical-align:middle;"></i>
+                    </th>
+                    <th class="client-sort-header" data-sort="type" style="cursor:pointer; user-select:none;">
+                      Type <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px; height:12px; margin-left:4px; vertical-align:middle;"></i>
+                    </th>
                     <th>Contact Info</th>
-                    <th>Onboarded</th>
-                    <th>Outstanding Balance</th>
-                    <th>Actions</th>
+                    <th class="client-sort-header" data-sort="onboardingDate" style="cursor:pointer; user-select:none;">
+                      Onboarded <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px; height:12px; margin-left:4px; vertical-align:middle;"></i>
+                    </th>
+                    <th class="client-sort-header" data-sort="outstanding" style="cursor:pointer; user-select:none;">
+                      Outstanding Balance <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px; height:12px; margin-left:4px; vertical-align:middle;"></i>
+                    </th>
+                    <th style="text-align:right;">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="client-list-table-body">
                   <!-- Javascript updates -->
                 </tbody>
               </table>
+            </div>
+
+            <div id="client-pagination-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; padding-top:0.75rem; border-top:1px solid var(--border-color); font-size:0.8rem; color:var(--text-secondary);">
+              <!-- Pagination controls populated dynamically -->
             </div>
           </div>
         </div>
@@ -2111,6 +2123,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 5rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.198"></script>
+  <script type="module" src="js/app.js?v=1.0.199"></script>
 </body>
 </html>

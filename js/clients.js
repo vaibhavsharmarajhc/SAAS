@@ -10,6 +10,33 @@ import historyManager from './history.js';
 let currentStep = 1;
 
 const clientsModule = {
+  state: {
+    sortColumn: 'name',
+    sortDirection: 'asc',
+    currentPage: 1,
+    pageSize: 10
+  },
+
+  getInitials(name) {
+    if (!name) return 'CL';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  },
+
+  getAvatarColor(str) {
+    const colors = ['#d97706', '#2563eb', '#059669', '#7c3aed', '#db2777', '#0891b2', '#ea580c'];
+    let hash = 0;
+    const s = str || 'Client';
+    for (let i = 0; i < s.length; i++) {
+      hash = s.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
+  },
+
   init() {
     this.setupWizard();
     this.setupSearchAndFilters();
@@ -165,8 +192,30 @@ const clientsModule = {
     const filterType = document.getElementById('client-filter-type');
     const gotoOnboardBtn = document.getElementById('btn-goto-onboarding');
 
-    if (searchInput) searchInput.addEventListener('input', () => this.renderClientList());
-    if (filterType) filterType.addEventListener('change', () => this.renderClientList());
+    if (searchInput) searchInput.addEventListener('input', () => {
+      this.state.currentPage = 1;
+      this.renderClientList();
+    });
+    if (filterType) filterType.addEventListener('change', () => {
+      this.state.currentPage = 1;
+      this.renderClientList();
+    });
+
+    // Header Click Event Listeners for Sorting
+    document.querySelectorAll('#client-directory-table .client-sort-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const col = header.dataset.sort;
+        if (!col) return;
+        if (this.state.sortColumn === col) {
+          this.state.sortDirection = this.state.sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+          this.state.sortColumn = col;
+          this.state.sortDirection = 'asc';
+        }
+        this.state.currentPage = 1;
+        this.renderClientList();
+      });
+    });
 
     if (gotoOnboardBtn) {
       gotoOnboardBtn.addEventListener('click', () => {
@@ -191,46 +240,100 @@ const clientsModule = {
    */
   renderClientList() {
     const clients = db.getClients();
-    const searchVal = document.getElementById('client-search-input').value.toLowerCase();
-    const filterVal = document.getElementById('client-filter-type').value;
+    const searchVal = (document.getElementById('client-search-input')?.value || '').toLowerCase();
+    const filterVal = document.getElementById('client-filter-type')?.value || 'All';
     const tableBody = document.getElementById('client-list-table-body');
+    const paginationBar = document.getElementById('client-pagination-bar');
 
+    if (!tableBody) return;
     tableBody.innerHTML = '';
 
     const filteredClients = clients.filter(c => {
-      // Search matches
-      const matchesSearch = c.name.toLowerCase().includes(searchVal) || 
-                            c.email.toLowerCase().includes(searchVal) || 
-                            c.phone.toLowerCase().includes(searchVal);
-      // Filter matches
+      const nameMatch = (c.name || '').toLowerCase().includes(searchVal);
+      const emailMatch = (c.email || '').toLowerCase().includes(searchVal);
+      const phoneMatch = (c.phone || '').toLowerCase().includes(searchVal);
+      const matchesSearch = nameMatch || emailMatch || phoneMatch;
       const matchesFilter = filterVal === 'All' || c.type === filterVal;
 
       return matchesSearch && matchesFilter;
     });
 
-    if (filteredClients.length === 0) {
+    // Update Header Sort Icons
+    document.querySelectorAll('#client-directory-table .client-sort-header').forEach(header => {
+      const col = header.dataset.sort;
+      const icon = header.querySelector('.sort-icon');
+      if (icon) {
+        if (col === this.state.sortColumn) {
+          icon.setAttribute('data-lucide', this.state.sortDirection === 'asc' ? 'chevron-up' : 'chevron-down');
+          header.style.color = 'var(--color-primary)';
+        } else {
+          icon.setAttribute('data-lucide', 'chevrons-up-down');
+          header.style.color = 'var(--text-muted)';
+        }
+      }
+    });
+
+    // Sort filtered list
+    const mult = this.state.sortDirection === 'asc' ? 1 : -1;
+    filteredClients.sort((a, b) => {
+      if (this.state.sortColumn === 'name') {
+        return (a.name || '').localeCompare(b.name || '') * mult;
+      }
+      if (this.state.sortColumn === 'type') {
+        return (a.type || '').localeCompare(b.type || '') * mult;
+      }
+      if (this.state.sortColumn === 'onboardingDate') {
+        return (a.onboardingDate || '').localeCompare(b.onboardingDate || '') * mult;
+      }
+      if (this.state.sortColumn === 'outstanding') {
+        const balA = db.getClientBalance(a.id).outstanding || 0;
+        const balB = db.getClientBalance(b.id).outstanding || 0;
+        return (balA - balB) * mult;
+      }
+      return 0;
+    });
+
+    const totalItems = filteredClients.length;
+    if (totalItems === 0) {
       tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;" class="text-muted">No clients found matching the criteria.</td></tr>`;
+      if (paginationBar) paginationBar.innerHTML = '';
+      if (window.lucide) window.lucide.createIcons();
       return;
     }
 
-    filteredClients.forEach(c => {
+    const totalPages = Math.ceil(totalItems / this.state.pageSize) || 1;
+    this.state.currentPage = Math.max(1, Math.min(this.state.currentPage, totalPages));
+    const startIndex = (this.state.currentPage - 1) * this.state.pageSize;
+    const pageClients = filteredClients.slice(startIndex, startIndex + this.state.pageSize);
+
+    pageClients.forEach(c => {
       const balance = db.getClientBalance(c.id);
       const row = document.createElement('tr');
       
       const typeBadge = c.type === 'Corporate' ? 'badge-corporate' : 'badge-individual';
       const balanceStyle = balance.outstanding > 0 ? 'color: var(--color-danger); font-weight: 600;' : 'color: var(--color-success); font-weight: 600;';
 
+      const initials = this.getInitials(c.name);
+      const avatarBg = this.getAvatarColor(c.name || c.id);
+
       row.innerHTML = `
-        <td><strong style="color:var(--text-primary);">${c.name}</strong></td>
+        <td>
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <div style="width:26px; height:26px; border-radius:50%; background:${avatarBg}; color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:700; flex-shrink:0; text-transform:uppercase;">
+              ${initials}
+            </div>
+            <strong style="color:var(--text-primary); font-size:0.85rem;">${c.name}</strong>
+          </div>
+        </td>
         <td><span class="badge ${typeBadge}">${c.type}</span></td>
         <td>
-          <div style="font-size:0.8rem;">${c.email}</div>
-          <div style="font-size:0.75rem; color:var(--text-muted);">${c.phone}</div>
+          <div style="font-size:0.8rem;">${c.email || 'N/A'}</div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">${c.phone || ''}</div>
         </td>
         <td>${window.formatDDMMYYYY(c.onboardingDate)}</td>
         <td style="${balanceStyle}">₹${balance.outstanding.toLocaleString('en-IN')}</td>
-        <td>
-          <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:nowrap;">
+        <td style="text-align:right;">
+          <div style="display:flex; align-items:center; justify-content:flex-end; gap:0.4rem; flex-wrap:nowrap;">
             <button class="btn btn-secondary btn-dossier" style="padding:0 0.6rem; height:28px; font-size:0.75rem; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; gap:0.35rem;" data-id="${c.id}"><i data-lucide="folder" style="width:12px; height:12px; flex-shrink:0;"></i> Dossier</button>
             <button class="btn btn-secondary btn-copy-portal" style="padding:0 0.6rem; height:28px; font-size:0.75rem; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; gap:0.35rem;" data-id="${c.id}"><i data-lucide="link" style="width:12px; height:12px; flex-shrink:0;"></i> Copy Link</button>
             <button class="btn btn-danger btn-delete-client" style="padding:0; width:28px; height:28px; font-size:0.75rem; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" data-id="${c.id}" title="Delete Client Profile"><i data-lucide="trash-2" style="width:12px; height:12px;"></i></button>
@@ -246,7 +349,59 @@ const clientsModule = {
       tableBody.appendChild(row);
     });
 
-    lucide.createIcons();
+    // Render Pagination Controls
+    if (paginationBar) {
+      const endItem = Math.min(startIndex + this.state.pageSize, totalItems);
+      paginationBar.innerHTML = `
+        <div>
+          Showing <strong>${startIndex + 1}</strong>-<strong>${endItem}</strong> of <strong>${totalItems}</strong> clients
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+          <select id="client-page-size-select" class="form-control" style="width:auto; padding:0.2rem 0.5rem; font-size:0.75rem; height:28px;">
+            <option value="10" ${this.state.pageSize === 10 ? 'selected' : ''}>10 / page</option>
+            <option value="25" ${this.state.pageSize === 25 ? 'selected' : ''}>25 / page</option>
+            <option value="50" ${this.state.pageSize === 50 ? 'selected' : ''}>50 / page</option>
+          </select>
+          <button class="btn btn-secondary" id="client-prev-page-btn" ${this.state.currentPage === 1 ? 'disabled' : ''} style="padding:0.2rem 0.6rem; height:28px; font-size:0.75rem; display:inline-flex; align-items:center; gap:0.25rem;">
+            <i data-lucide="chevron-left" style="width:12px; height:12px;"></i> Prev
+          </button>
+          <span style="font-weight:600;">Page ${this.state.currentPage} of ${totalPages}</span>
+          <button class="btn btn-secondary" id="client-next-page-btn" ${this.state.currentPage === totalPages ? 'disabled' : ''} style="padding:0.2rem 0.6rem; height:28px; font-size:0.75rem; display:inline-flex; align-items:center; gap:0.25rem;">
+            Next <i data-lucide="chevron-right" style="width:12px; height:12px;"></i>
+          </button>
+        </div>
+      `;
+
+      const pageSizeSelect = document.getElementById('client-page-size-select');
+      const prevBtn = document.getElementById('client-prev-page-btn');
+      const nextBtn = document.getElementById('client-next-page-btn');
+
+      if (pageSizeSelect) {
+        pageSizeSelect.addEventListener('change', (e) => {
+          this.state.pageSize = parseInt(e.target.value, 10) || 10;
+          this.state.currentPage = 1;
+          this.renderClientList();
+        });
+      }
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          if (this.state.currentPage > 1) {
+            this.state.currentPage--;
+            this.renderClientList();
+          }
+        });
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          if (this.state.currentPage < totalPages) {
+            this.state.currentPage++;
+            this.renderClientList();
+          }
+        });
+      }
+    }
+
+    if (window.lucide) window.lucide.createIcons();
   },
 
   copyClientPortalLink(id) {
@@ -344,21 +499,25 @@ const clientsModule = {
     const client = db.getClient(id);
     if (!client) return;
 
-    if (confirm(`Are you sure you want to delete client profile "${client.name}"?`)) {
-      await db.deleteClient(id);
-      this.renderClientList();
+    if (!confirm(`Are you sure you want to delete client profile "${client.name}"?\n\nThis action will delete the client record and cannot be undone.`)) {
+      return;
+    }
 
-      historyManager.push({
-        description: `Client "${client.name}" deleted`,
-        undo: async () => {
-          await db.createClient(client);
-          this.renderClientList();
-        },
-        redo: async () => {
-          await db.deleteClient(id);
-          this.renderClientList();
-        }
-      });
+    await db.deleteClient(id);
+    this.renderClientList();
+
+    historyManager.push({
+      description: `Client "${client.name}" deleted`,
+      undo: async () => {
+        await db.createClient(client);
+        this.renderClientList();
+      },
+      redo: async () => {
+        await db.deleteClient(id);
+        this.renderClientList();
+      }
+    });
+  },
     }
   },
 

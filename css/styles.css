@@ -4308,5 +4308,24 @@ mark.search-highlight {
   color: #0f172a !important;
 }
 
+/* Client Onboarding & Directory Layout */
+.clients-layout-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .clients-layout-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+#header-quick-action-btn {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
 
 
