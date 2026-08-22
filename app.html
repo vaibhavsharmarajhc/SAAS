@@ -46,7 +46,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.0.201', { scope: '/' }).then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.202', { scope: '/' }).then(reg => {
           reg.update();
           reg.onupdatefound = () => {
             const installingWorker = reg.installing;
@@ -538,6 +538,11 @@
 
       <!-- Case Registry View Container -->
       <div id="cases-page" class="page-container">
+        <!-- Quick Stats Strip -->
+        <div style="display:flex; gap:1rem; margin-bottom:1rem; flex-wrap:wrap;" id="case-registry-quick-stats">
+          <!-- Populated dynamically by JS -->
+        </div>
+
         <!-- Toolbar & Filter Options -->
         <div class="card" style="margin-bottom:1.5rem; padding: 1rem;">
           <div class="search-filter-bar" style="margin-bottom: 0; align-items:center;">
@@ -560,6 +565,11 @@
               <option value="Legal Notice">Legal Notice</option>
               <option value="Contracts">Contracts</option>
               <option value="Consultation">Consultation</option>
+            </select>
+            <select class="form-control" id="case-sort-order" style="width:170px;">
+              <option value="hearing-asc">Sort: Hearing (Soonest)</option>
+              <option value="title-asc">Sort: Title (A-Z)</option>
+              <option value="outstanding-desc">Sort: Outstanding (High-Low)</option>
             </select>
             <button class="btn btn-primary" id="btn-add-case"><i data-lucide="plus"></i> Register Case</button>
           </div>
@@ -2116,6 +2126,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 5rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.201"></script>
+  <script type="module" src="js/app.js?v=1.0.202"></script>
 </body>
 </html>

@@ -225,6 +225,8 @@ const casesModule = {
    * Render Cases
    */
   renderCaseGrid() {
+    this.renderQuickStats();
+
     const cases = db.getCases();
     const searchVal = (document.getElementById('case-search-input')?.value || '').toLowerCase();
     const filterStatus = document.getElementById('case-filter-status')?.value || 'All';
@@ -313,6 +315,23 @@ const casesModule = {
       return matchesSearch && matchesStatus && matchesCategory;
     });
 
+    const sortValue = document.getElementById('case-sort-order')?.value || 'hearing-asc';
+    filteredCases.sort((a, b) => {
+      if (sortValue === 'title-asc') {
+        return (a.title || '').localeCompare(b.title || '');
+      }
+      if (sortValue === 'outstanding-desc') {
+        return db.getCaseBalance(b.id).outstanding - db.getCaseBalance(a.id).outstanding;
+      }
+      // Default: hearing-asc — cases with no scheduled hearing sort to the end
+      const dateA = this.getNextHearingDate(a);
+      const dateB = this.getNextHearingDate(b);
+      if (!dateA && !dateB) return 0;
+      if (!dateA) return 1;
+      if (!dateB) return -1;
+      return new Date(dateA) - new Date(dateB);
+    });
+
     if (filteredCases.length === 0) {
       gridContainer.innerHTML = `<div class="card" style="grid-column: 1/-1; text-align:center; padding:3rem;" class="text-muted"><p>No cases registered matching the criteria.</p></div>`;
       return;
@@ -371,7 +390,7 @@ const casesModule = {
           <span style="font-size:0.7rem; text-transform:uppercase; color:${catColor}; font-weight:700; background:${catColor}18; padding:2px 8px; border-radius:4px; border:1px solid ${catColor}40;">${window.sanitizeText(c.caseType)}</span>
           <span class="badge ${badgeStyle}">${c.status}</span>
         </div>
-        <h3 style="font-size:1.15rem; color:var(--text-primary); line-height:1.3; margin-bottom:0.5rem; cursor:pointer;" class="case-title-link" data-id="${c.id}">${window.sanitizeText(c.title)}</h3>
+        <h3 style="font-size:1.15rem; color:var(--text-primary); line-height:1.3; margin-bottom:0.5rem; cursor:pointer; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;" class="case-title-link" data-id="${c.id}" title="${window.sanitizeText(c.title)}">${window.sanitizeText(c.title)}</h3>
         
         <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:1rem; display:flex; flex-direction:column; gap:0.25rem;">
           <div><i data-lucide="user" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> Client: <strong>${client ? window.sanitizeText(client.name) : 'Unknown'}</strong></div>
@@ -379,14 +398,15 @@ const casesModule = {
           <div><i data-lucide="map-pin" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> Court: ${window.sanitizeText(c.court)}</div>
         </div>
 
-        <div style="border-top: 1px solid var(--border-color); padding: 0.75rem 0; margin-bottom:0.5rem; display:flex; justify-content:space-between; font-size:0.8rem;">
-          <div>Stage: <strong style="color:var(--text-primary);">${window.sanitizeText(c.stage)}</strong></div>
-          <div style="${balanceStyle}">O/S: ₹${balance.outstanding.toLocaleString('en-IN')}</div>
+        <div style="border-top: 1px solid var(--border-color); padding: 0.75rem 0; margin-bottom:0.5rem; display:flex; justify-content:space-between; gap:0.5rem; font-size:0.8rem;">
+          <div style="overflow:hidden;">Stage: <strong style="color:var(--text-primary); display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;" title="${window.sanitizeText(c.stage)}">${window.sanitizeText(c.stage)}</strong></div>
+          <div style="${balanceStyle} white-space:nowrap;">O/S: ₹${balance.outstanding.toLocaleString('en-IN')}</div>
         </div>
 
         <div class="next-hearing-pill" style="background-color: ${badgeBg}; padding:0.5rem; border-radius: var(--radius-sm); border:1px solid ${badgeBorder}; margin-bottom:1rem; text-align:center; font-size:0.8rem; cursor:pointer;" title="Click to log or update next hearing date" data-id="${c.id}">
           <span style="color:var(--text-secondary);">${badgeLabel}</span> 
           <strong style="color:${badgeTextColor};">${badgeText}</strong>
+          ${!isRelativeMode && this.getNextHearingDate(c) ? this.getRelativeDateLabel(this.getNextHearingDate(c)) : ''}
           <i data-lucide="edit-2" style="width:12px; height:12px; margin-left:4px; vertical-align:middle; color:var(--text-secondary);"></i>
         </div>
 
