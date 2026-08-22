@@ -142,19 +142,67 @@ const casesModule = {
     const searchInput = document.getElementById('case-search-input');
     const filterStatus = document.getElementById('case-filter-status');
     const filterCategory = document.getElementById('case-filter-category');
+    const sortOrder = document.getElementById('case-sort-order');
+    const perPageSelect = document.getElementById('cases-per-page');
 
-    searchInput.addEventListener('input', () => this.renderCaseGrid());
-    filterStatus.addEventListener('change', () => this.renderCaseGrid());
-    filterCategory.addEventListener('change', () => this.renderCaseGrid());
+    if (searchInput) searchInput.addEventListener('input', () => { this.currentPage = 1; this.renderCaseGrid(); });
+    if (filterStatus) filterStatus.addEventListener('change', () => { this.currentPage = 1; this.renderCaseGrid(); });
+    if (filterCategory) filterCategory.addEventListener('change', () => { this.currentPage = 1; this.renderCaseGrid(); });
+    if (sortOrder) sortOrder.addEventListener('change', () => { this.currentPage = 1; this.renderCaseGrid(); });
+    if (perPageSelect) perPageSelect.addEventListener('change', () => { this.currentPage = 1; this.renderCaseGrid(); });
+
+    // View Mode Toggle
+    this.viewMode = localStorage.getItem('caseRegistryViewMode') || 'card';
+
+    const cardBtn = document.getElementById('case-view-card-btn');
+    const listBtn = document.getElementById('case-view-list-btn');
+    const gridContainer = document.getElementById('cases-grid-list');
+    const tableContainer = document.getElementById('cases-table-container');
+
+    const applyViewMode = () => {
+      const isCard = this.viewMode === 'card';
+      if (gridContainer) gridContainer.style.display = isCard ? 'grid' : 'none';
+      if (tableContainer) tableContainer.style.display = isCard ? 'none' : 'block';
+      if (cardBtn) {
+        cardBtn.classList.toggle('active', isCard);
+        cardBtn.style.background = isCard ? 'var(--color-primary)' : 'transparent';
+        cardBtn.style.color = isCard ? '#fff' : 'var(--text-secondary)';
+      }
+      if (listBtn) {
+        listBtn.classList.toggle('active', !isCard);
+        listBtn.style.background = !isCard ? 'var(--color-primary)' : 'transparent';
+        listBtn.style.color = !isCard ? '#fff' : 'var(--text-secondary)';
+      }
+    };
+
+    if (cardBtn) {
+      cardBtn.addEventListener('click', () => {
+        this.viewMode = 'card';
+        localStorage.setItem('caseRegistryViewMode', 'card');
+        applyViewMode();
+        this.renderCaseGrid();
+      });
+    }
+    if (listBtn) {
+      listBtn.addEventListener('click', () => {
+        this.viewMode = 'list';
+        localStorage.setItem('caseRegistryViewMode', 'list');
+        applyViewMode();
+        this.renderCaseGrid();
+      });
+    }
+    applyViewMode();
 
     // Register Case trigger modal btn
     const registerBtn = document.getElementById('btn-add-case');
     const modal = document.getElementById('add-case-modal');
-    registerBtn.addEventListener('click', () => {
-      this.populateClientDropdowns();
-      this.populateCategoryDropdowns();
-      modal.classList.add('active');
-    });
+    if (registerBtn && modal) {
+      registerBtn.addEventListener('click', () => {
+        this.populateClientDropdowns();
+        this.populateCategoryDropdowns();
+        modal.classList.add('active');
+      });
+    }
   },
 
   /**
@@ -164,6 +212,8 @@ const casesModule = {
     const form = document.getElementById('add-case-form');
     const modal = document.getElementById('add-case-modal');
     const cancelBtn = document.getElementById('add-case-cancel');
+
+    if (!form || !modal || !cancelBtn) return;
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -213,13 +263,12 @@ const casesModule = {
       form.reset();
       modal.classList.remove('active');
       this.render();
-    if (registerBtn && modal) {
-      registerBtn.addEventListener('click', () => {
-        this.populateClientDropdowns();
-        this.populateCategoryDropdowns();
-        modal.classList.add('active');
-      });
-    }
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      form.reset();
+      modal.classList.remove('active');
+    });
   },
 
   getRelativeDateLabel(dateStr) {
