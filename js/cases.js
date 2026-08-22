@@ -213,12 +213,121 @@ const casesModule = {
       form.reset();
       modal.classList.remove('active');
       this.render();
-    });
+    if (registerBtn && modal) {
+      registerBtn.addEventListener('click', () => {
+        this.populateClientDropdowns();
+        this.populateCategoryDropdowns();
+        modal.classList.add('active');
+      });
+    }
+  },
 
-    cancelBtn.addEventListener('click', () => {
-      form.reset();
-      modal.classList.remove('active');
-    });
+  getRelativeDateLabel(dateStr) {
+    if (!dateStr) return '';
+    const target = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    target.setHours(0, 0, 0, 0);
+    const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return `<span style="color:var(--color-danger); font-weight:700; margin-left:4px;">Overdue</span>`;
+    if (diffDays === 0) return `<span style="color:var(--color-danger); font-weight:700; margin-left:4px;">Today</span>`;
+    if (diffDays === 1) return `<span style="color:var(--color-warning); font-weight:700; margin-left:4px;">Tomorrow</span>`;
+    if (diffDays <= 7) return `<span style="color:var(--color-warning); font-weight:600; margin-left:4px;">In ${diffDays} days</span>`;
+    return '';
+  },
+
+  renderQuickStats() {
+    const container = document.getElementById('case-registry-quick-stats');
+    if (!container) return;
+
+    const cases = db.getCases();
+    const activeCases = cases.filter(c => c.status === 'Active');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const weekFromNow = new Date(today);
+    weekFromNow.setDate(weekFromNow.getDate() + 7);
+
+    const hearingsThisWeek = activeCases.filter(c => {
+      const nextDate = this.getNextHearingDate(c);
+      if (!nextDate) return false;
+      const d = new Date(nextDate);
+      return d >= today && d <= weekFromNow;
+    }).length;
+
+    const missingNextDate = activeCases.filter(c => !this.getNextHearingDate(c) && c.listingType !== 'relative').length;
+
+    const statPill = (label, value, color) => `
+      <div style="background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0.5rem 0.9rem; font-size:0.8rem;">
+        <span style="color:var(--text-secondary);">${label}:</span>
+        <strong style="color:${color}; margin-left:4px;">${value}</strong>
+      </div>
+    `;
+
+    container.innerHTML =
+      statPill('Active Cases', activeCases.length, 'var(--text-primary)') +
+      statPill('Hearings This Week', hearingsThisWeek, hearingsThisWeek > 0 ? 'var(--color-warning)' : 'var(--text-primary)') +
+      statPill('Missing Next Date', missingNextDate, missingNextDate > 0 ? 'var(--color-danger)' : 'var(--color-success)');
+  },
+
+  handleCaseCardAction(e) {
+    const titleLink = e.target.closest('.case-title-link');
+    if (titleLink) {
+      const id = titleLink.getAttribute('data-id');
+      if (id) this.showCaseDossier(id);
+      return;
+    }
+
+    const btnLedger = e.target.closest('.btn-case-ledger');
+    if (btnLedger) {
+      const id = btnLedger.getAttribute('data-id');
+      if (id) this.showCaseDossier(id);
+      return;
+    }
+
+    const btnHearing = e.target.closest('.btn-case-hearing');
+    if (btnHearing) {
+      const id = btnHearing.getAttribute('data-id');
+      if (id) this.showAddHearingModal(id);
+      return;
+    }
+
+    const hearingPill = e.target.closest('.next-hearing-pill');
+    if (hearingPill) {
+      const id = hearingPill.getAttribute('data-id');
+      if (id) this.showAddHearingModal(id);
+      return;
+    }
+
+    const btnEdit = e.target.closest('.btn-edit-case');
+    if (btnEdit) {
+      const id = btnEdit.getAttribute('data-id');
+      if (id) this.showEditCaseModal(id);
+      return;
+    }
+
+    const btnLock = e.target.closest('.btn-lock-date');
+    if (btnLock) {
+      const id = btnLock.getAttribute('data-id');
+      if (id) this.showLockDateModal(id);
+      return;
+    }
+
+    const btnToggle = e.target.closest('.btn-case-toggle');
+    if (btnToggle) {
+      const id = btnToggle.getAttribute('data-id');
+      if (id) {
+        const cs = db.getCase(id);
+        if (cs) {
+          const newStatus = cs.status === 'Active' ? 'Closed' : 'Active';
+          db.updateCase(id, { status: newStatus }).then(() => {
+            document.dispatchEvent(new CustomEvent('casesUpdated'));
+            this.render();
+          });
+        }
+      }
+      return;
+    }
   },
 
   /**
@@ -232,72 +341,22 @@ const casesModule = {
     const filterStatus = document.getElementById('case-filter-status')?.value || 'All';
     const filterCategory = document.getElementById('case-filter-category')?.value || 'All';
     const gridContainer = document.getElementById('cases-grid-list');
-    if (!gridContainer) return;
+    const tableContainer = document.getElementById('cases-table-container');
 
-    gridContainer.innerHTML = '';
+    if (!gridContainer || !tableContainer) return;
 
-    // Setup single delegated event listener once
+    // Apply view mode visibility
+    const isCard = (this.viewMode || 'card') === 'card';
+    gridContainer.style.display = isCard ? 'grid' : 'none';
+    tableContainer.style.display = isCard ? 'none' : 'block';
+
     if (!gridContainer.hasAttribute('data-delegated')) {
       gridContainer.setAttribute('data-delegated', 'true');
-      gridContainer.addEventListener('click', (e) => {
-        const titleLink = e.target.closest('.case-title-link');
-        if (titleLink) {
-          const id = titleLink.getAttribute('data-id');
-          if (id) this.showCaseDossier(id);
-          return;
-        }
-
-        const btnLedger = e.target.closest('.btn-case-ledger');
-        if (btnLedger) {
-          const id = btnLedger.getAttribute('data-id');
-          if (id) this.showCaseDossier(id);
-          return;
-        }
-
-        const btnHearing = e.target.closest('.btn-case-hearing');
-        if (btnHearing) {
-          const id = btnHearing.getAttribute('data-id');
-          if (id) this.showAddHearingModal(id);
-          return;
-        }
-
-        const hearingPill = e.target.closest('.next-hearing-pill');
-        if (hearingPill) {
-          const id = hearingPill.getAttribute('data-id');
-          if (id) this.showAddHearingModal(id);
-          return;
-        }
-
-        const btnEdit = e.target.closest('.btn-edit-case');
-        if (btnEdit) {
-          const id = btnEdit.getAttribute('data-id');
-          if (id) this.showEditCaseModal(id);
-          return;
-        }
-
-        const btnLock = e.target.closest('.btn-lock-date');
-        if (btnLock) {
-          const id = btnLock.getAttribute('data-id');
-          if (id) this.showLockDateModal(id);
-          return;
-        }
-
-        const btnToggle = e.target.closest('.btn-case-toggle');
-        if (btnToggle) {
-          const id = btnToggle.getAttribute('data-id');
-          if (id) {
-            const cs = db.getCase(id);
-            if (cs) {
-              const newStatus = cs.status === 'Active' ? 'Closed' : 'Active';
-              db.updateCase(id, { status: newStatus }).then(() => {
-                document.dispatchEvent(new CustomEvent('casesUpdated'));
-                this.render();
-              });
-            }
-          }
-          return;
-        }
-      });
+      gridContainer.addEventListener('click', (e) => this.handleCaseCardAction(e));
+    }
+    if (!tableContainer.hasAttribute('data-delegated')) {
+      tableContainer.setAttribute('data-delegated', 'true');
+      tableContainer.addEventListener('click', (e) => this.handleCaseCardAction(e));
     }
 
     const filteredCases = cases.filter(c => {
@@ -332,7 +391,31 @@ const casesModule = {
       return new Date(dateA) - new Date(dateB);
     });
 
-    if (filteredCases.length === 0) {
+    // Pagination calculations
+    if (typeof this.currentPage !== 'number') this.currentPage = 1;
+    const perPageSelect = document.getElementById('cases-per-page');
+    const perPage = parseInt(perPageSelect?.value || '25', 10);
+    const totalPages = Math.max(1, Math.ceil(filteredCases.length / perPage));
+    if (this.currentPage > totalPages) this.currentPage = totalPages;
+
+    const startIdx = (this.currentPage - 1) * perPage;
+    const paginatedCases = filteredCases.slice(startIdx, startIdx + perPage);
+
+    this.renderPaginationControls(totalPages, filteredCases.length);
+
+    if (this.viewMode === 'list') {
+      this.renderCasesTable(paginatedCases);
+    } else {
+      this.renderCasesCardGrid(paginatedCases);
+    }
+  },
+
+  renderCasesCardGrid(cases) {
+    const gridContainer = document.getElementById('cases-grid-list');
+    if (!gridContainer) return;
+    gridContainer.innerHTML = '';
+
+    if (cases.length === 0) {
       gridContainer.innerHTML = `<div class="card" style="grid-column: 1/-1; text-align:center; padding:3rem;" class="text-muted"><p>No cases registered matching the criteria.</p></div>`;
       return;
     }
@@ -340,7 +423,7 @@ const casesModule = {
     const fragment = document.createDocumentFragment();
     const todayStr = new Date().toISOString().split('T')[0];
 
-    filteredCases.forEach(c => {
+    cases.forEach(c => {
       const client = db.getClient(c.clientId);
       const balance = db.getCaseBalance(c.id);
       const card = document.createElement('div');
@@ -413,7 +496,7 @@ const casesModule = {
         <div style="display:flex; gap:0.35rem;">
           <button class="btn btn-secondary btn-case-ledger" style="flex:1; padding:0.4rem 0.4rem; font-size:0.75rem;" data-id="${c.id}"><i data-lucide="book-open"></i> Ledger</button>
           <button class="btn btn-primary btn-case-hearing" style="flex:1; padding:0.4rem 0.4rem; font-size:0.75rem;" data-id="${c.id}"><i data-lucide="calendar"></i> Hearing</button>
-          ${isRelativeMode ? `<button class="btn btn-warning btn-lock-date" style="padding:0.4rem 0.4rem; font-size:0.75rem; background:rgba(234,179,8,0.15); border:1px solid rgba(234,179,8,0.4); color:#b45309;" data-id="${c.id}" title="Lock confirmed date from Cause List"><i data-lucide="check-circle-2" style="width:13px; height:13px;"></i> Lock</button>` : ''}
+          ${isRelativeMode ? `<button class="btn btn-warning btn-lock-date" style="padding:0.4rem 0.4rem; font-size:0.75rem; background:rgba(234,179,8,0.15); border:1px solid rgba(234,179,8,0.4); color:#b45309;" data-id="${c.id}" title="Lock confirmed date from Cause List"><i data-lucide="check-circle-2" style="width:13px; height:13px;"></i></button>` : ''}
           <button class="btn btn-secondary btn-edit-case" style="padding:0.4rem 0.4rem; font-size:0.75rem;" data-id="${c.id}" title="Edit Case File & Hearing Date"><i data-lucide="edit-3" style="width:13px; height:13px;"></i></button>
           <button class="btn btn-secondary btn-case-toggle" style="padding:0.4rem 0.4rem;" data-id="${c.id}" title="Toggle Case Status (Active/Closed)">
             <i data-lucide="${c.status === 'Active' ? 'check-circle-2' : 'rotate-ccw'}" style="width:13px; height:13px;"></i>
@@ -427,6 +510,119 @@ const casesModule = {
     if (window.safeCreateIcons) {
       window.safeCreateIcons(gridContainer);
     }
+  },
+
+  renderCasesTable(cases) {
+    const tableBody = document.getElementById('cases-table-body');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+
+    if (cases.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center;" class="text-muted">No cases registered matching the criteria.</td></tr>`;
+      return;
+    }
+
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    cases.forEach(c => {
+      const client = db.getClient(c.clientId);
+      const balance = db.getCaseBalance(c.id);
+      const row = document.createElement('tr');
+
+      const catObj = db.getCategoryByName(c.caseType);
+      const catColor = catObj ? catObj.color : '#3b82f6';
+      const badgeStyle = c.status === 'Active' ? 'badge-active' : 'badge-closed';
+      const balanceStyle = balance.outstanding > 0 ? 'color: var(--color-danger); font-weight:700;' : 'color: var(--color-success); font-weight:700;';
+
+      let hearingText = 'Not Scheduled';
+      let hearingColor = 'var(--color-warning)';
+      let isRelativeMode = false;
+      const notBefore = c.notBeforeDate || (c.listingType === 'relative' ? c.nextHearingDate : null);
+
+      if (c.listingType === 'relative' || (notBefore && notBefore !== 'Not Scheduled')) {
+        isRelativeMode = true;
+        if (notBefore && todayStr >= notBefore) {
+          hearingText = `👁️ Not Before ${window.formatDDMMYYYY(notBefore)}`;
+          hearingColor = '#b45309';
+        } else if (notBefore) {
+          hearingText = `Not Before: ${window.formatDDMMYYYY(notBefore)}`;
+          hearingColor = 'var(--color-primary)';
+        }
+      } else {
+        const nextDate = this.getNextHearingDate(c);
+        if (nextDate) {
+          hearingText = window.formatDDMMYYYY(nextDate);
+          hearingColor = 'var(--color-success)';
+        }
+      }
+
+      const relativeLabel = !isRelativeMode && this.getNextHearingDate(c) ? this.getRelativeDateLabel(this.getNextHearingDate(c)) : '';
+
+      row.innerHTML = `
+        <td>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span style="font-size:0.65rem; text-transform:uppercase; color:${catColor}; font-weight:700; background:${catColor}18; padding:2px 6px; border-radius:4px; border:1px solid ${catColor}40; flex-shrink:0;">${window.sanitizeText(c.caseType)}</span>
+            <strong style="font-size:0.85rem; color:var(--text-primary); cursor:pointer;" class="case-title-link" data-id="${c.id}" title="${window.sanitizeText(c.title)}">${window.sanitizeText(c.title)}</strong>
+          </div>
+        </td>
+        <td style="font-size:0.8rem;">${client ? window.sanitizeText(client.name) : 'Unknown'}</td>
+        <td style="font-size:0.8rem; font-family:monospace;">${window.sanitizeText(c.caseNumber)}</td>
+        <td style="font-size:0.8rem;">${window.sanitizeText(c.stage)}</td>
+        <td style="font-size:0.8rem; cursor:pointer;" class="next-hearing-pill" data-id="${c.id}" title="Click to log or update next hearing date">
+          <strong style="color:${hearingColor};">${hearingText}</strong> ${relativeLabel}
+        </td>
+        <td style="${balanceStyle} font-size:0.8rem;">₹${balance.outstanding.toLocaleString('en-IN')}</td>
+        <td><span class="badge ${badgeStyle}">${c.status}</span></td>
+        <td style="text-align:right;">
+          <div style="display:flex; align-items:center; justify-content:flex-end; gap:0.3rem; flex-wrap:nowrap;">
+            <button class="btn btn-secondary btn-case-ledger" style="padding:0; width:28px; height:28px; font-size:0.75rem; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" data-id="${c.id}" title="View Case Ledger & Dossier"><i data-lucide="book-open" style="width:13px; height:13px;"></i></button>
+            <button class="btn btn-primary btn-case-hearing" style="padding:0; width:28px; height:28px; font-size:0.75rem; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" data-id="${c.id}" title="Record Hearing Outcome"><i data-lucide="calendar" style="width:13px; height:13px;"></i></button>
+            ${isRelativeMode ? `<button class="btn btn-warning btn-lock-date" style="padding:0; width:28px; height:28px; font-size:0.75rem; background:rgba(234,179,8,0.15); border:1px solid rgba(234,179,8,0.4); color:#b45309; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" data-id="${c.id}" title="Lock confirmed date from Cause List"><i data-lucide="check-circle-2" style="width:13px; height:13px;"></i></button>` : ''}
+            <button class="btn btn-secondary btn-edit-case" style="padding:0; width:28px; height:28px; font-size:0.75rem; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" data-id="${c.id}" title="Edit Case File & Hearing Date"><i data-lucide="edit-3" style="width:13px; height:13px;"></i></button>
+            <button class="btn btn-secondary btn-case-toggle" style="padding:0; width:28px; height:28px; font-size:0.75rem; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" data-id="${c.id}" title="Toggle Case Status (Active/Closed)">
+              <i data-lucide="${c.status === 'Active' ? 'check-circle-2' : 'rotate-ccw'}" style="width:13px; height:13px;"></i>
+            </button>
+          </div>
+        </td>
+      `;
+
+      tableBody.appendChild(row);
+    });
+
+    if (window.safeCreateIcons) {
+      window.safeCreateIcons(tableBody);
+    } else if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  },
+
+  renderPaginationControls(totalPages, totalCount) {
+    const container = document.getElementById('cases-pagination-controls');
+    if (!container) return;
+
+    container.innerHTML = `
+      <button class="btn btn-secondary" id="cases-prev-page" ${this.currentPage <= 1 ? 'disabled' : ''} style="padding:0.35rem 0.6rem; display:inline-flex; align-items:center;">
+        <i data-lucide="chevron-left" style="width:14px; height:14px;"></i>
+      </button>
+      <span style="font-size:0.8rem; color:var(--text-secondary);">Page <strong>${this.currentPage}</strong> of <strong>${totalPages}</strong> (${totalCount} case${totalCount === 1 ? '' : 's'})</span>
+      <button class="btn btn-secondary" id="cases-next-page" ${this.currentPage >= totalPages ? 'disabled' : ''} style="padding:0.35rem 0.6rem; display:inline-flex; align-items:center;">
+        <i data-lucide="chevron-right" style="width:14px; height:14px;"></i>
+      </button>
+    `;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    document.getElementById('cases-prev-page')?.addEventListener('click', () => {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        this.renderCaseGrid();
+      }
+    });
+    document.getElementById('cases-next-page')?.addEventListener('click', () => {
+      if (this.currentPage < totalPages) {
+        this.currentPage++;
+        this.renderCaseGrid();
+      }
+    });
   },
 
   getNextHearingDate(c) {

@@ -46,7 +46,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.0.202', { scope: '/' }).then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.203', { scope: '/' }).then(reg => {
           reg.update();
           reg.onupdatefound = () => {
             const installingWorker = reg.installing;
@@ -571,13 +571,54 @@
               <option value="title-asc">Sort: Title (A-Z)</option>
               <option value="outstanding-desc">Sort: Outstanding (High-Low)</option>
             </select>
+            <div class="view-toggle-group" style="display:flex; border:1px solid var(--border-color); border-radius:var(--radius-sm); overflow:hidden; flex-shrink:0;">
+              <button type="button" id="case-view-card-btn" class="view-toggle-btn active" title="Card view" style="padding:0.5rem 0.7rem; border:none; background:var(--color-primary); color:#fff; cursor:pointer;">
+                <i data-lucide="layout-grid" style="width:14px; height:14px;"></i>
+              </button>
+              <button type="button" id="case-view-list-btn" class="view-toggle-btn" title="List view" style="padding:0.5rem 0.7rem; border:none; background:transparent; color:var(--text-secondary); cursor:pointer;">
+                <i data-lucide="list" style="width:14px; height:14px;"></i>
+              </button>
+            </div>
             <button class="btn btn-primary" id="btn-add-case"><i data-lucide="plus"></i> Register Case</button>
           </div>
         </div>
 
-        <!-- Cases Grid -->
+        <!-- Cases Grid (Card View) -->
         <div class="grid-cols-3" id="cases-grid-list">
           <!-- Javascript updates -->
+        </div>
+
+        <!-- Cases Table (List View) -->
+        <div id="cases-table-container" style="display:none; overflow-x:auto;">
+          <table class="table-custom" style="width:100%;">
+            <thead>
+              <tr>
+                <th>Case</th>
+                <th>Client</th>
+                <th>CNR/Ref</th>
+                <th>Stage</th>
+                <th>Next Hearing</th>
+                <th>Outstanding</th>
+                <th>Status</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="cases-table-body">
+              <!-- Javascript updates -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Controls Bar -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; flex-wrap:wrap; gap:0.75rem;">
+          <select class="form-control" id="cases-per-page" style="width:140px;">
+            <option value="10">10 per page</option>
+            <option value="25" selected>25 per page</option>
+            <option value="50">50 per page</option>
+          </select>
+          <div id="cases-pagination-controls" style="display:flex; align-items:center; gap:0.5rem;">
+            <!-- Javascript updates -->
+          </div>
         </div>
       </div>
 
@@ -2126,6 +2167,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 5rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.202"></script>
+  <script type="module" src="js/app.js?v=1.0.203"></script>
 </body>
 </html>
