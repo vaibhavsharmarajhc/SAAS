@@ -518,8 +518,6 @@ const clientsModule = {
       }
     });
   },
-    }
-  },
 
   /**
    * Dossier Modal Controllers
