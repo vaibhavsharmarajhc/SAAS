@@ -127,60 +127,80 @@ const clientsModule = {
    * Finalize Onboarding Submission
    */
   async submitOnboarding() {
-    const name = document.getElementById('client-name').value.trim();
-    const type = document.getElementById('client-type').value;
-    const email = document.getElementById('client-email').value.trim();
-    const phone = document.getElementById('client-phone').value.trim();
-    const address = document.getElementById('client-address').value.trim();
-    
-    const caseTitle = document.getElementById('case-title').value.trim();
-    const caseNumber = document.getElementById('case-number').value.trim();
-    const caseCourt = document.getElementById('case-court').value.trim();
-    const caseType = document.getElementById('case-type').value;
-    const caseStage = document.getElementById('case-stage').value.trim();
-    const caseNextDateEl = document.getElementById('case-next-date');
-    const caseNextDate = caseNextDateEl ? caseNextDateEl.value || null : null;
-    const caseReferredBy = document.getElementById('case-referred-by').value.trim() || 'Self';
-    const caseDesc = document.getElementById('case-description').value.trim();
-    
-    const retainerAmount = parseFloat(document.getElementById('billing-amount').value) || 0;
-    const retainerDesc = document.getElementById('billing-desc').value.trim();
-
-    // 1. Create client
-    const newClient = await db.addClient({ name, type, email, phone, address });
-
-    // 2. Create case (if entered)
-    let newCase = null;
-    if (caseTitle) {
-      newCase = await db.addCase({
-        clientId: newClient.id,
-        title: caseTitle,
-        caseNumber: caseNumber || 'Pending',
-        court: caseCourt || 'N/A',
-        caseType,
-        referredBy: caseReferredBy,
-        stage: caseStage || 'Filing',
-        nextHearingDate: caseNextDate,
-        description: caseDesc
-      });
+    const submitBtn = document.querySelector('#wiz-content-3 button[type="submit"]') || document.querySelector('#onboard-client-form button[type="submit"]');
+    if (submitBtn) {
+      if (submitBtn.disabled) return;
+      submitBtn.disabled = true;
+      var originalHtml = submitBtn.innerHTML;
+      submitBtn.innerHTML = `<i data-lucide="loader" class="spin-animation" style="width:16px;height:16px;"></i> Onboarding...`;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    // 3. Log initial transaction (if retainer > 0)
-    if (retainerAmount > 0) {
-      await db.addTransaction({
-        clientId: newClient.id,
-        caseId: newCase ? newCase.id : null,
-        amount: retainerAmount,
-        type: 'Received',
-        description: retainerDesc || 'Advance payment.'
-      });
-    }
+    try {
+      const name = document.getElementById('client-name').value.trim();
+      const type = document.getElementById('client-type').value;
+      const email = document.getElementById('client-email').value.trim();
+      const phone = document.getElementById('client-phone').value.trim();
+      const address = document.getElementById('client-address').value.trim();
+      
+      const caseTitle = document.getElementById('case-title').value.trim();
+      const caseNumber = document.getElementById('case-number').value.trim();
+      const caseCourt = document.getElementById('case-court').value.trim();
+      const caseType = document.getElementById('case-type').value;
+      const caseStage = document.getElementById('case-stage').value.trim();
+      const caseNextDateEl = document.getElementById('case-next-date');
+      const caseNextDate = caseNextDateEl ? caseNextDateEl.value || null : null;
+      const caseReferredBy = document.getElementById('case-referred-by').value.trim() || 'Self';
+      const caseDesc = document.getElementById('case-description').value.trim();
+      
+      const retainerAmount = parseFloat(document.getElementById('billing-amount').value) || 0;
+      const retainerDesc = document.getElementById('billing-desc').value.trim();
 
-    alert(`Client "${name}" onboarded successfully!`);
-    this.resetWizard();
-    this.render();
-    if (caseTitle) {
-      casesModule.populateReferralDatalist();
+      // 1. Create client
+      const newClient = await db.addClient({ name, type, email, phone, address });
+
+      // 2. Create case (if entered)
+      let newCase = null;
+      if (caseTitle) {
+        newCase = await db.addCase({
+          clientId: newClient.id,
+          title: caseTitle,
+          caseNumber: caseNumber || 'Pending',
+          court: caseCourt || 'N/A',
+          caseType,
+          referredBy: caseReferredBy,
+          stage: caseStage || 'Filing',
+          nextHearingDate: caseNextDate,
+          description: caseDesc
+        });
+      }
+
+      // 3. Log initial transaction (if retainer > 0)
+      if (retainerAmount > 0) {
+        await db.addTransaction({
+          clientId: newClient.id,
+          caseId: newCase ? newCase.id : null,
+          amount: retainerAmount,
+          type: 'Received',
+          description: retainerDesc || 'Advance payment.'
+        });
+      }
+
+      alert(`Client "${name}" onboarded successfully!`);
+      this.resetWizard();
+      this.render();
+      if (caseTitle) {
+        casesModule.populateReferralDatalist();
+      }
+    } catch (err) {
+      console.error("Client onboarding error:", err);
+      alert("Failed to onboard client: " + (err.message || err));
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalHtml;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
     }
   },
 
@@ -295,7 +315,7 @@ const clientsModule = {
 
     const totalItems = filteredClients.length;
     if (totalItems === 0) {
-      tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;" class="text-muted">No clients found matching the criteria.</td></tr>`;
+      tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center;" class="text-muted">No clients found matching the criteria.</td></tr>`;
       if (paginationBar) paginationBar.innerHTML = '';
       if (window.lucide) window.lucide.createIcons();
       return;
@@ -310,7 +330,6 @@ const clientsModule = {
       const balance = db.getClientBalance(c.id);
       const row = document.createElement('tr');
       
-      const typeBadge = c.type === 'Corporate' ? 'badge-corporate' : 'badge-individual';
       const balanceStyle = balance.outstanding > 0 ? 'color: var(--color-danger); font-weight: 600;' : 'color: var(--color-success); font-weight: 600;';
 
       const initials = this.getInitials(c.name);
@@ -325,12 +344,6 @@ const clientsModule = {
             <strong style="color:var(--text-primary); font-size:0.85rem;">${c.name}</strong>
           </div>
         </td>
-        <td><span class="badge ${typeBadge}">${c.type}</span></td>
-        <td>
-          <div style="font-size:0.8rem;">${c.email || 'N/A'}</div>
-          <div style="font-size:0.75rem; color:var(--text-muted);">${c.phone || ''}</div>
-        </td>
-        <td>${window.formatDDMMYYYY(c.onboardingDate)}</td>
         <td style="${balanceStyle}">₹${balance.outstanding.toLocaleString('en-IN')}</td>
         <td style="text-align:right;">
           <div style="display:flex; align-items:center; justify-content:flex-end; gap:0.4rem; flex-wrap:nowrap;">
@@ -641,6 +654,7 @@ const clientsModule = {
         <div>
           <h2 style="font-family:'Playfair Display', serif; font-size:1.6rem; color:var(--text-primary);">${client.name}</h2>
           <div class="profile-meta-grid">
+            <div><span>Type:</span> <strong>${client.type || 'Individual'}</strong></div>
             <div><span>Email:</span> <strong>${client.email || 'N/A'}</strong></div>
             <div><span>Phone:</span> <strong>${client.phone || 'N/A'}</strong></div>
             <div><span>Address:</span> <strong>${client.address || 'N/A'}</strong></div>

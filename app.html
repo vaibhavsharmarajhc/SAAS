@@ -46,7 +46,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.0.200', { scope: '/' }).then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.201', { scope: '/' }).then(reg => {
           reg.update();
           reg.onupdatefound = () => {
             const installingWorker = reg.installing;
@@ -516,13 +516,6 @@
                   <tr>
                     <th class="client-sort-header" data-sort="name" style="cursor:pointer; user-select:none;">
                       Client <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px; height:12px; margin-left:4px; vertical-align:middle;"></i>
-                    </th>
-                    <th class="client-sort-header" data-sort="type" style="cursor:pointer; user-select:none;">
-                      Type <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px; height:12px; margin-left:4px; vertical-align:middle;"></i>
-                    </th>
-                    <th>Contact Info</th>
-                    <th class="client-sort-header" data-sort="onboardingDate" style="cursor:pointer; user-select:none;">
-                      Onboarded <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px; height:12px; margin-left:4px; vertical-align:middle;"></i>
                     </th>
                     <th class="client-sort-header" data-sort="outstanding" style="cursor:pointer; user-select:none;">
                       Outstanding Balance <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px; height:12px; margin-left:4px; vertical-align:middle;"></i>
@@ -2123,6 +2116,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 5rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.200"></script>
+  <script type="module" src="js/app.js?v=1.0.201"></script>
 </body>
 </html>
