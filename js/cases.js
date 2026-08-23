@@ -14,6 +14,7 @@ const casesModule = {
     this.setupHearingForm();
     this.setupEditHearingForm();
     this.setupLockDateForm();
+    this.setupCloseCaseForm();
     this.setupCaseDossierEvents();
     this.populateReferralDatalist();
     this.populateCategoryDropdowns();
@@ -369,11 +370,15 @@ const casesModule = {
       if (id) {
         const cs = db.getCase(id);
         if (cs) {
-          const newStatus = cs.status === 'Active' ? 'Closed' : 'Active';
-          db.updateCase(id, { status: newStatus }).then(() => {
-            document.dispatchEvent(new CustomEvent('casesUpdated'));
-            this.render();
-          });
+          if (cs.status === 'Active') {
+            this.showCloseCaseModal(id);
+          } else {
+            // Reopening: instant, no date needed
+            db.updateCase(id, { status: 'Active', disposalDate: null }).then(() => {
+              document.dispatchEvent(new CustomEvent('casesUpdated'));
+              this.render();
+            });
+          }
         }
       }
       return;
@@ -479,10 +484,7 @@ const casesModule = {
       const card = document.createElement('div');
       card.className = 'card';
       
-      const catObj = db.getCategoryByName(c.caseType);
-      const catColor = catObj ? catObj.color : '#3b82f6';
-      const badgeStyle = c.status === 'Active' ? 'badge-active' : 'badge-closed';
-      const balanceStyle = balance.outstanding > 0 ? 'color: var(--color-danger); font-weight:700;' : 'color: var(--color-success); font-weight:700;';
+      const isCaseActive = c.status === 'Active';
       let badgeBg = 'rgba(217, 119, 6, 0.05)';
       let badgeBorder = 'rgba(217, 119, 6, 0.15)';
       let badgeLabel = 'Next Hearing:';
@@ -492,7 +494,22 @@ const casesModule = {
 
       const notBefore = c.notBeforeDate || (c.listingType === 'relative' ? c.nextHearingDate : null);
 
-      if (c.listingType === 'relative' || (notBefore && notBefore !== 'Not Scheduled')) {
+      if (!isCaseActive) {
+        badgeBg = 'var(--bg-hover)';
+        badgeBorder = 'var(--border-color)';
+        if (c.disposalDate) {
+          badgeLabel = 'Closed on:';
+          badgeText = window.formatDDMMYYYY(c.disposalDate);
+        } else if (notBefore) {
+          badgeLabel = 'Last Recorded (Not Before):';
+          badgeText = window.formatDDMMYYYY(notBefore);
+        } else {
+          const nextDate = this.getNextHearingDate(c);
+          badgeLabel = nextDate ? 'Last Hearing:' : 'Next Hearing:';
+          badgeText = nextDate ? window.formatDDMMYYYY(nextDate) : 'Not Scheduled';
+        }
+        badgeTextColor = 'var(--text-secondary)';
+      } else if (c.listingType === 'relative' || (notBefore && notBefore !== 'Not Scheduled')) {
         isRelativeMode = true;
         if (notBefore && todayStr >= notBefore) {
           badgeBg = 'rgba(234, 179, 8, 0.12)';
@@ -584,12 +601,23 @@ const casesModule = {
       const badgeStyle = c.status === 'Active' ? 'badge-active' : 'badge-closed';
       const balanceStyle = balance.outstanding > 0 ? 'color: var(--color-danger); font-weight:700;' : 'color: var(--color-success); font-weight:700;';
 
+      const isCaseActive = c.status === 'Active';
       let hearingText = 'Not Scheduled';
       let hearingColor = 'var(--color-warning)';
       let isRelativeMode = false;
       const notBefore = c.notBeforeDate || (c.listingType === 'relative' ? c.nextHearingDate : null);
 
-      if (c.listingType === 'relative' || (notBefore && notBefore !== 'Not Scheduled')) {
+      if (!isCaseActive) {
+        hearingColor = 'var(--text-secondary)';
+        if (c.disposalDate) {
+          hearingText = `Closed on: ${window.formatDDMMYYYY(c.disposalDate)}`;
+        } else if (notBefore) {
+          hearingText = `Last Recorded: ${window.formatDDMMYYYY(notBefore)}`;
+        } else {
+          const nextDate = this.getNextHearingDate(c);
+          hearingText = nextDate ? window.formatDDMMYYYY(nextDate) : 'Not Scheduled';
+        }
+      } else if (c.listingType === 'relative' || (notBefore && notBefore !== 'Not Scheduled')) {
         isRelativeMode = true;
         if (notBefore && todayStr >= notBefore) {
           hearingText = `👁️ Not Before ${window.formatDDMMYYYY(notBefore)}`;
@@ -772,6 +800,10 @@ const casesModule = {
         if (listingContainer) listingContainer.style.display = 'block';
         if (transferWrap) transferWrap.style.display = 'none';
         if (disposalWrap) disposalWrap.style.display = 'none';
+        const dateLbl = document.getElementById('add-hearing-date-label');
+        if (dateLbl) {
+          dateLbl.innerHTML = `Hearing Date <span style="font-weight: 400; color: var(--text-muted); font-size: 0.75rem;">(Optional - Leave blank if first listing)</span>`;
+        }
       });
 
       if (btnTransferred) {
@@ -783,6 +815,10 @@ const casesModule = {
           if (listingContainer) listingContainer.style.display = 'block';
           if (transferWrap) transferWrap.style.display = 'block';
           if (disposalWrap) disposalWrap.style.display = 'none';
+          const dateLbl = document.getElementById('add-hearing-date-label');
+          if (dateLbl) {
+            dateLbl.innerHTML = `Hearing Date <span style="font-weight: 400; color: var(--text-muted); font-size: 0.75rem;">(Optional - Leave blank if first listing)</span>`;
+          }
         });
       }
 
@@ -794,6 +830,10 @@ const casesModule = {
         if (listingContainer) listingContainer.style.display = 'none';
         if (transferWrap) transferWrap.style.display = 'none';
         if (disposalWrap) disposalWrap.style.display = 'block';
+        const dateLbl = document.getElementById('add-hearing-date-label');
+        if (dateLbl) {
+          dateLbl.innerHTML = `Date of Disposal / Closure * <span style="font-weight: 600; color: var(--color-danger); font-size: 0.75rem;">(Required - Date of Disposal/Closure)</span>`;
+        }
       });
     }
 
@@ -871,6 +911,10 @@ const casesModule = {
       }
 
       if (isDisposed) {
+        if (!date) {
+          alert("Please enter the Date of Disposal / Closure before marking this case as finally disposed.");
+          return;
+        }
         const disposalType = document.getElementById('add-hearing-disposal-type').value;
         const disposalRemarks = document.getElementById('add-hearing-disposal-remarks').value.trim();
         finalStage = `${stageInput} (Disposed: ${disposalType})`;
@@ -1010,6 +1054,54 @@ const casesModule = {
 
       alert("Confirmed listing date locked.");
       modal.classList.remove('active');
+      this.render();
+    });
+
+    const hide = () => modal.classList.remove('active');
+    if (closeBtn) closeBtn.addEventListener('click', hide);
+    if (cancelBtn) cancelBtn.addEventListener('click', hide);
+  },
+
+  showCloseCaseModal(caseId) {
+    const cs = db.getCase(caseId);
+    if (!cs) return;
+    document.getElementById('close-case-id').value = caseId;
+    document.getElementById('close-case-title-text').textContent = `Closing: ${cs.title}`;
+
+    // Default suggestion: most recent hearing date on record, else today
+    const hearings = cs.hearings || [];
+    const lastHearingDate = hearings.length > 0
+      ? hearings.reduce((latest, h) => (h.date && h.date > latest ? h.date : latest), hearings[0].date || '')
+      : null;
+    const defaultDate = lastHearingDate || new Date().toISOString().split('T')[0];
+    document.getElementById('close-case-date-input').value = defaultDate;
+
+    const modal = document.getElementById('close-case-modal');
+    if (modal) modal.classList.add('active');
+  },
+
+  setupCloseCaseForm() {
+    const form = document.getElementById('close-case-form');
+    const modal = document.getElementById('close-case-modal');
+    const closeBtn = document.getElementById('close-case-modal-close');
+    const cancelBtn = document.getElementById('close-case-cancel');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const caseId = document.getElementById('close-case-id').value;
+      const closureDate = document.getElementById('close-case-date-input').value;
+      if (!caseId || !closureDate) return;
+
+      await db.updateCase(caseId, {
+        status: 'Closed',
+        disposalDate: closureDate,
+        nextHearingDate: null,
+        listingType: 'disposed',
+        notBeforeDate: null
+      });
+      modal.classList.remove('active');
+      document.dispatchEvent(new CustomEvent('casesUpdated'));
       this.render();
     });
 

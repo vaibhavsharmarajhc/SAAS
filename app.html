@@ -46,7 +46,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.0.206', { scope: '/' }).then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.207', { scope: '/' }).then(reg => {
           reg.update();
           reg.onupdatefound = () => {
             const installingWorker = reg.installing;
@@ -1352,7 +1352,7 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Hearing Date <span style="font-weight: 400; color: var(--text-muted); font-size: 0.75rem;">(Optional - Leave blank if first listing)</span></label>
+              <label class="form-label" id="add-hearing-date-label">Hearing Date <span style="font-weight: 400; color: var(--text-muted); font-size: 0.75rem;">(Optional - Leave blank if first listing)</span></label>
               <input type="date" class="form-control" id="add-hearing-date">
             </div>
             <div class="form-group">
@@ -1445,6 +1445,31 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" id="lock-date-cancel">Cancel</button>
           <button type="submit" class="btn btn-primary"><i data-lucide="check"></i> Confirm Listing Date</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mark Case as Closed Modal -->
+  <div id="close-case-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width:420px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Mark Case as Closed</h3>
+        <button class="modal-close" id="close-case-modal-close">&times;</button>
+      </div>
+      <form id="close-case-form">
+        <input type="hidden" id="close-case-id">
+        <div class="modal-body">
+          <p id="close-case-title-text" style="margin-bottom:1rem; color:var(--text-secondary); font-size:0.9rem;"></p>
+          <div class="form-group">
+            <label class="form-label">Date of Closure / Disposal *</label>
+            <input type="date" class="form-control" id="close-case-date-input" required>
+            <span style="font-size:0.75rem; color:var(--text-muted); display:block; margin-top:0.3rem;">Defaults to the last recorded hearing date. Change it if the actual disposal/closure date is different.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close-case-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary">Confirm Closure</button>
         </div>
       </form>
     </div>
@@ -2167,6 +2192,6 @@
   <div id="notification-toast-container" style="position: fixed; bottom: 5rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 10000; pointer-events: none;"></div>
 
   <!-- Entry Script Modules -->
-  <script type="module" src="js/app.js?v=1.0.206"></script>
+  <script type="module" src="js/app.js?v=1.0.207"></script>
 </body>
 </html>
