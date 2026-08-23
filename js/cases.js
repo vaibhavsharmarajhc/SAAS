@@ -959,12 +959,19 @@ const casesModule = {
 
     document.getElementById('add-hearing-case-id').value = caseId;
     
-    // Use the case's scheduled listing date if available (e.g. 2026-07-25), else fallback to today
-    const listedDate = (cs.nextHearingDate && cs.nextHearingDate !== 'Not Scheduled') 
-      ? cs.nextHearingDate 
-      : new Date().toISOString().split('T')[0];
+    // Only pre-fill Hearing Date when the case had a genuinely FIXED listing
+    // that has already arrived (today or earlier) — meaning a real hearing
+    // likely took place. Tentative/relative "Not Before" dates that were
+    // never actually listed, and fixed dates still in the future, must NOT
+    // be pre-filled, or submitting this form silently creates a phantom
+    // historical hearing record dated on a day nothing actually happened
+    // (see calendar bug: old tentative date lingers alongside new fixed date).
+    const todayStr = new Date().toISOString().split('T')[0];
+    const hadGenuineFixedHearing = cs.listingType === 'fixed' &&
+      cs.nextHearingDate && cs.nextHearingDate !== 'Not Scheduled' &&
+      cs.nextHearingDate <= todayStr;
 
-    document.getElementById('add-hearing-date').value = listedDate;
+    document.getElementById('add-hearing-date').value = hadGenuineFixedHearing ? cs.nextHearingDate : '';
     document.getElementById('add-hearing-stage').value = cs.stage || '';
     document.getElementById('add-hearing-next-date').value = '';
     document.getElementById('add-hearing-notes').value = '';
