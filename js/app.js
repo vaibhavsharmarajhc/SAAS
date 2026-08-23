@@ -676,6 +676,23 @@ async function router() {
   const path = window.location.pathname;
   console.log("Routing to path:", path);
 
+  // Auto-redirect already-authenticated users away from public entry routes
+  // (homepage, login, register) straight to the dashboard, instead of always
+  // showing marketing/login content regardless of an existing valid session.
+  const authEntryRoutes = ['/', '/index.html', '/login', '/register'];
+  const existingToken = localStorage.getItem('token') || sessionStorage.getItem('token');
+  if (existingToken && authEntryRoutes.includes(path)) {
+    try {
+      const isAuthenticated = await db.loadAll();
+      if (isAuthenticated) {
+        window.history.replaceState({}, '', '/dashboard');
+        return router();
+      }
+    } catch (err) {
+      console.warn("Session check on entry route failed, showing public page:", err);
+    }
+  }
+
   const marketingNav = document.getElementById('marketing-nav');
   const marketingPage = document.getElementById('marketing-page');
   const authPage = document.getElementById('auth-page');
