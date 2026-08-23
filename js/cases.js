@@ -271,8 +271,9 @@ const casesModule = {
     });
   },
 
-  getRelativeDateLabel(dateStr) {
+  getRelativeDateLabel(dateStr, status) {
     if (!dateStr) return '';
+    if (status !== 'Active') return ''; // Closed/disposed cases: no urgency labeling, it's historical
     const target = new Date(dateStr);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -538,7 +539,7 @@ const casesModule = {
         <div class="next-hearing-pill" style="background-color: ${badgeBg}; padding:0.5rem; border-radius: var(--radius-sm); border:1px solid ${badgeBorder}; margin-bottom:1rem; text-align:center; font-size:0.8rem; cursor:pointer;" title="Click to log or update next hearing date" data-id="${c.id}">
           <span style="color:var(--text-secondary);">${badgeLabel}</span> 
           <strong style="color:${badgeTextColor};">${badgeText}</strong>
-          ${!isRelativeMode && this.getNextHearingDate(c) ? this.getRelativeDateLabel(this.getNextHearingDate(c)) : ''}
+          ${!isRelativeMode && this.getNextHearingDate(c) ? this.getRelativeDateLabel(this.getNextHearingDate(c), c.status) : ''}
           <i data-lucide="edit-2" style="width:12px; height:12px; margin-left:4px; vertical-align:middle; color:var(--text-secondary);"></i>
         </div>
 
@@ -605,7 +606,7 @@ const casesModule = {
         }
       }
 
-      const relativeLabel = !isRelativeMode && this.getNextHearingDate(c) ? this.getRelativeDateLabel(this.getNextHearingDate(c)) : '';
+      const relativeLabel = !isRelativeMode && this.getNextHearingDate(c) ? this.getRelativeDateLabel(this.getNextHearingDate(c), c.status) : '';
 
       row.innerHTML = `
         <td>
