@@ -553,6 +553,9 @@ const diaryModule = {
       });
     }
 
+    document.getElementById('day-details-modal').classList.add('active');
+  },
+
   /**
    * Builds a lookup index in a single pass over all active cases, so that
    * rendering N calendar cells doesn't require N separate full scans of the
