@@ -163,19 +163,19 @@ const diaryModule = {
 
     const cases = db.getCases();
     const todayStr = new Date().toISOString().split('T')[0];
+    const hearingsIndex = this.buildHearingsIndex(cases); // built ONCE per render, not per cell
 
     // 1. Render previous month padding cells
     for (let i = firstDayIndex - 1; i >= 0; i--) {
       const prevDay = prevMonthTotalDays - i;
       const prevMonthDateStr = this.formatDateStr(year, month - 1, prevDay);
-      gridHtml += this.generateDayCellMarkup(prevDay, prevMonthDateStr, true, cases, todayStr);
+      gridHtml += this.generateDayCellMarkup(prevDay, prevMonthDateStr, true, todayStr, hearingsIndex);
     }
 
     // 2. Render current month cells
     for (let day = 1; day <= totalDays; day++) {
       const currentMonthDateStr = this.formatDateStr(year, month, day);
-      const isToday = currentMonthDateStr === todayStr;
-      gridHtml += this.generateDayCellMarkup(day, currentMonthDateStr, false, cases, todayStr);
+      gridHtml += this.generateDayCellMarkup(day, currentMonthDateStr, false, todayStr, hearingsIndex);
     }
 
     // 3. Render next month padding cells
@@ -183,7 +183,7 @@ const diaryModule = {
     const remainingCells = 42 - totalRenderedCells; // 6 rows * 7 days = 42 cells
     for (let day = 1; day <= remainingCells; day++) {
       const nextMonthDateStr = this.formatDateStr(year, month + 1, day);
-      gridHtml += this.generateDayCellMarkup(day, nextMonthDateStr, true, cases, todayStr);
+      gridHtml += this.generateDayCellMarkup(day, nextMonthDateStr, true, todayStr, hearingsIndex);
     }
 
     gridHtml += `</div>`;
@@ -198,14 +198,14 @@ const diaryModule = {
     });
   },
 
-  generateDayCellMarkup(dayNumber, dateStr, isOtherMonth, cases, todayStr) {
+  generateDayCellMarkup(dayNumber, dateStr, isOtherMonth, todayStr, hearingsIndex) {
     const isToday = dateStr === todayStr;
     const classNames = ['day-cell'];
     if (isOtherMonth) classNames.push('other-month');
     if (isToday) classNames.push('today');
 
-    // Filter hearings on this day (both upcoming and past history)
-    const hearings = this.getHearingsForDate(dateStr);
+    // Filter hearings on this day (both upcoming and past history) using indexed O(1) lookup
+    const hearings = this.getHearingsForDateIndexed(dateStr, todayStr, hearingsIndex);
 
     let eventsHtml = '';
     hearings.slice(0, 3).forEach(h => {
@@ -247,6 +247,7 @@ const diaryModule = {
     let weekHtml = `<div class="week-grid">`;
     const cases = db.getCases();
     const todayStr = new Date().toISOString().split('T')[0];
+    const hearingsIndex = this.buildHearingsIndex(cases);
 
     for (let i = 0; i < 7; i++) {
       const currentDay = new Date(startOfWeek);
@@ -257,7 +258,7 @@ const diaryModule = {
       const dayNum = currentDay.getDate();
       const dayName = currentDay.toLocaleDateString('en-US', { weekday: 'short' });
       
-      const hearings = this.getHearingsForDate(dateStr);
+      const hearings = this.getHearingsForDateIndexed(dateStr, todayStr, hearingsIndex);
       
       let eventsHtml = '';
       if (hearings.length === 0) {
@@ -552,7 +553,104 @@ const diaryModule = {
       });
     }
 
-    document.getElementById('day-details-modal').classList.add('active');
+  /**
+   * Builds a lookup index in a single pass over all active cases, so that
+   * rendering N calendar cells doesn't require N separate full scans of the
+   * case list. Preserves the exact same date-matching semantics as
+   * getHearingsForDate(): for today/future dates, only a case's current
+   * nextHearingDate counts; for past dates, both recorded hearing history
+   * AND a (possibly overdue) nextHearingDate count.
+   */
+  buildHearingsIndex(cases) {
+    const nextDateMap = new Map();      // dateStr -> array of cases whose nextHearingDate matches
+    const historicalMap = new Map();    // dateStr -> array of { case, hearingEntry }
+
+    cases.forEach(c => {
+      if (c.status !== 'Active') return;
+
+      if (c.nextHearingDate) {
+        const arr = nextDateMap.get(c.nextHearingDate) || [];
+        arr.push(c);
+        nextDateMap.set(c.nextHearingDate, arr);
+      }
+
+      (c.hearings || []).forEach(h => {
+        if (!h || !h.date) return;
+        const arr = historicalMap.get(h.date) || [];
+        arr.push({ case: c, hearingEntry: h });
+        historicalMap.set(h.date, arr);
+      });
+    });
+
+    return { nextDateMap, historicalMap };
+  },
+
+  /**
+   * O(1)-lookup equivalent of getHearingsForDate(), using a pre-built index
+   * instead of re-scanning the full case list. Must produce identical output
+   * shape/content to getHearingsForDate() for the same inputs.
+   */
+  getHearingsForDateIndexed(dateStr, todayStr, index) {
+    const list = [];
+    const { nextDateMap, historicalMap } = index;
+
+    if (dateStr >= todayStr) {
+      const matchingCases = nextDateMap.get(dateStr) || [];
+      matchingCases.forEach(c => {
+        const pastHearings = c.hearings || [];
+        const matchingHearing = pastHearings.find(h => h && h.date === dateStr);
+        list.push({
+          id: c.id,
+          title: c.title,
+          court: c.court,
+          caseNumber: c.caseNumber,
+          clientId: c.clientId,
+          caseType: c.caseType,
+          status: c.status,
+          stage: matchingHearing ? matchingHearing.stage : c.stage,
+          notes: matchingHearing ? (matchingHearing.notes || 'Hearing proceedings recorded.') : 'Upcoming scheduled hearing.',
+          isUpcoming: true
+        });
+      });
+    } else {
+      const seen = new Set();
+      const historicalEntries = historicalMap.get(dateStr) || [];
+      historicalEntries.forEach(({ case: c, hearingEntry }) => {
+        if (seen.has(c.id)) return;
+        seen.add(c.id);
+        list.push({
+          id: c.id,
+          title: c.title,
+          court: c.court,
+          caseNumber: c.caseNumber,
+          clientId: c.clientId,
+          caseType: c.caseType,
+          status: c.status,
+          stage: hearingEntry.stage,
+          notes: hearingEntry.notes || 'Hearing proceedings recorded.',
+          isUpcoming: false
+        });
+      });
+      const nextDateCases = nextDateMap.get(dateStr) || [];
+      nextDateCases.forEach(c => {
+        if (seen.has(c.id)) return;
+        seen.add(c.id);
+        list.push({
+          id: c.id,
+          title: c.title,
+          court: c.court,
+          caseNumber: c.caseNumber,
+          clientId: c.clientId,
+          caseType: c.caseType,
+          status: c.status,
+          stage: c.stage,
+          notes: 'Past scheduled hearing.',
+          isUpcoming: false
+        });
+      });
+    }
+
+    return list;
   },
 
   getHearingsForDate(dateStr) {
