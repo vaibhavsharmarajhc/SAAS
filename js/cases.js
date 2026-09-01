@@ -1129,29 +1129,261 @@ const casesModule = {
     const modal = document.getElementById('edit-hearing-modal');
     const closeBtn = document.getElementById('edit-hearing-close');
     const cancelBtn = document.getElementById('edit-hearing-cancel');
+    const deleteBtn = document.getElementById('edit-hearing-delete-btn');
+
+    if (!form || !modal) return;
+
+    const btnFixed = document.getElementById('btn-edit-mode-fixed');
+    const btnRelative = document.getElementById('btn-edit-mode-relative');
+    const btnContinued = document.getElementById('btn-edit-outcome-continued');
+    const btnTransferred = document.getElementById('btn-edit-outcome-transferred');
+    const btnDisposed = document.getElementById('btn-edit-outcome-disposed');
+
+    const fixedWrap = document.getElementById('edit-hearing-fixed-date-wrap');
+    const relativeWrap = document.getElementById('edit-hearing-relative-date-wrap');
+    const listingContainer = document.getElementById('edit-next-listing-container');
+    const transferWrap = document.getElementById('edit-hearing-transfer-wrap');
+    const disposalWrap = document.getElementById('edit-hearing-disposal-wrap');
+
+    const modeInput = document.getElementById('edit-hearing-listing-mode');
+    const outcomeInput = document.getElementById('edit-hearing-outcome-status');
+    const modeLbl = document.getElementById('edit-hearing-mode-lbl');
+    const previewTxt = document.getElementById('edit-relative-preview-text');
+
+    let calculatedRelativeDate = null;
+
+    if (btnContinued && btnDisposed) {
+      btnContinued.addEventListener('click', () => {
+        btnContinued.classList.add('active');
+        if (btnTransferred) btnTransferred.classList.remove('active');
+        btnDisposed.classList.remove('active');
+        if (outcomeInput) outcomeInput.value = 'continued';
+        if (listingContainer) listingContainer.style.display = 'block';
+        if (transferWrap) transferWrap.style.display = 'none';
+        if (disposalWrap) disposalWrap.style.display = 'none';
+        const dateLbl = document.getElementById('edit-hearing-date-label');
+        if (dateLbl) {
+          dateLbl.innerHTML = `Hearing Date <span style="font-weight: 400; color: var(--text-muted); font-size: 0.75rem;">(Optional)</span>`;
+        }
+      });
+
+      if (btnTransferred) {
+        btnTransferred.addEventListener('click', () => {
+          btnTransferred.classList.add('active');
+          btnContinued.classList.remove('active');
+          btnDisposed.classList.remove('active');
+          if (outcomeInput) outcomeInput.value = 'transferred';
+          if (listingContainer) listingContainer.style.display = 'block';
+          if (transferWrap) transferWrap.style.display = 'block';
+          if (disposalWrap) disposalWrap.style.display = 'none';
+          const dateLbl = document.getElementById('edit-hearing-date-label');
+          if (dateLbl) {
+            dateLbl.innerHTML = `Hearing Date <span style="font-weight: 400; color: var(--text-muted); font-size: 0.75rem;">(Optional)</span>`;
+          }
+        });
+      }
+
+      btnDisposed.addEventListener('click', () => {
+        btnDisposed.classList.add('active');
+        btnContinued.classList.remove('active');
+        if (btnTransferred) btnTransferred.classList.remove('active');
+        if (outcomeInput) outcomeInput.value = 'disposed';
+        if (listingContainer) listingContainer.style.display = 'none';
+        if (transferWrap) transferWrap.style.display = 'none';
+        if (disposalWrap) disposalWrap.style.display = 'block';
+        const dateLbl = document.getElementById('edit-hearing-date-label');
+        if (dateLbl) {
+          dateLbl.innerHTML = `Date of Disposal / Closure * <span style="font-weight: 600; color: var(--color-danger); font-size: 0.75rem;">(Required - Date of Disposal/Closure)</span>`;
+        }
+      });
+    }
+
+    if (btnFixed && btnRelative) {
+      btnFixed.addEventListener('click', () => {
+        btnFixed.classList.add('active');
+        btnRelative.classList.remove('active');
+        if (fixedWrap) fixedWrap.style.display = 'block';
+        if (relativeWrap) relativeWrap.style.display = 'none';
+        if (modeInput) modeInput.value = 'fixed';
+        if (modeLbl) modeLbl.textContent = 'Fixed Calendar Date';
+      });
+
+      btnRelative.addEventListener('click', () => {
+        btnRelative.classList.add('active');
+        btnFixed.classList.remove('active');
+        if (fixedWrap) fixedWrap.style.display = 'none';
+        if (relativeWrap) relativeWrap.style.display = 'block';
+        if (modeInput) modeInput.value = 'relative';
+        if (modeLbl) modeLbl.textContent = 'High Court Relative (Not Before)';
+      });
+    }
+
+    // Relative Presets Click Handlers
+    modal.querySelectorAll('.edit-rel-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        modal.querySelectorAll('.edit-rel-preset-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const baseDateStr = document.getElementById('edit-hearing-date').value || new Date().toISOString().split('T')[0];
+        const dt = new Date(baseDateStr);
+
+        const weeks = btn.getAttribute('data-weeks');
+        const months = btn.getAttribute('data-months');
+
+        if (weeks) {
+          dt.setDate(dt.getDate() + (parseInt(weeks) * 7));
+        } else if (months) {
+          dt.setMonth(dt.getMonth() + parseInt(months));
+        }
+
+        calculatedRelativeDate = dt.toISOString().split('T')[0];
+        if (previewTxt) {
+          const formatted = dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+          previewTxt.textContent = `Not Before: ${calculatedRelativeDate} (${formatted})`;
+        }
+      });
+    });
+
+    // Delete hearing button handler
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', async () => {
+        const caseId = document.getElementById('edit-hearing-case-id').value;
+        const hearingId = document.getElementById('edit-hearing-id').value;
+        if (!caseId || !hearingId) return;
+
+        if (confirm("Are you sure you want to delete this hearing entry from history?")) {
+          await db.deleteHearing(caseId, hearingId);
+          modal.classList.remove('active');
+          form.reset();
+          calculatedRelativeDate = null;
+
+          const dossierOverlay = document.getElementById('case-dossier-overlay');
+          if (dossierOverlay && dossierOverlay.classList.contains('active')) {
+            this.showCaseDossier(caseId);
+          }
+          document.dispatchEvent(new CustomEvent('casesUpdated'));
+          this.render();
+        }
+      });
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const caseId = document.getElementById('edit-hearing-case-id').value;
       const hearingId = document.getElementById('edit-hearing-id').value;
-      const date = document.getElementById('edit-hearing-date').value;
-      const stage = document.getElementById('edit-hearing-stage').value.trim();
-      const notes = document.getElementById('edit-hearing-notes').value.trim();
+      const rawHearingDate = document.getElementById('edit-hearing-date').value;
+      const date = rawHearingDate && rawHearingDate.trim() !== '' ? rawHearingDate : null;
+      const stageInput = document.getElementById('edit-hearing-stage').value.trim();
+      const isDisposed = outcomeInput ? outcomeInput.value === 'disposed' : false;
+      const isTransferred = outcomeInput ? outcomeInput.value === 'transferred' : false;
 
-      await db.updateHearing(caseId, hearingId, { date, stage, notes });
+      let nextHearingDate = null;
+      let notBeforeDate = null;
+      let listingMode = modeInput ? modeInput.value : 'fixed';
+      let finalStage = stageInput;
+      let finalNotes = document.getElementById('edit-hearing-notes').value.trim();
+      let newCourt = null;
+      let disposalType = null;
+      let disposalRemarks = null;
 
-      alert("Hearing entry updated.");
+      if (isTransferred) {
+        const courtInput = document.getElementById('edit-hearing-new-court');
+        newCourt = courtInput ? courtInput.value.trim() : '';
+        if (!newCourt) {
+          alert("Please enter the New Transferred Court / Forum name.");
+          return;
+        }
+        finalStage = stageInput ? `Transferred to ${newCourt} (${stageInput})` : `Transferred to ${newCourt}`;
+        finalNotes = finalNotes ? `${finalNotes}\n[Transferred to Court: ${newCourt}]` : `[Transferred to Court: ${newCourt}]`;
+      }
+
+      if (isDisposed) {
+        if (!date) {
+          alert("Please enter the Date of Disposal / Closure before marking this case as finally disposed.");
+          return;
+        }
+        disposalType = document.getElementById('edit-hearing-disposal-type').value;
+        disposalRemarks = document.getElementById('edit-hearing-disposal-remarks').value.trim();
+        finalStage = `${stageInput} (Disposed: ${disposalType})`;
+        if (disposalRemarks) {
+          finalNotes = finalNotes ? `${finalNotes}\n[Disposal Remarks: ${disposalRemarks}]` : `[Disposal Remarks: ${disposalRemarks}]`;
+        }
+        listingMode = 'disposed';
+      } else {
+        if (listingMode === 'relative') {
+          notBeforeDate = calculatedRelativeDate || document.getElementById('edit-hearing-next-date').value || null;
+          nextHearingDate = notBeforeDate;
+        } else {
+          nextHearingDate = document.getElementById('edit-hearing-next-date').value || null;
+        }
+      }
+
+      const cs = db.getCase(caseId);
+      const hearings = cs ? (cs.hearings || []) : [];
+      const isLatestHearing = hearings.length === 0 || hearings[hearings.length - 1].id === hearingId;
+
+      const updateCaseFields = {};
+      if (isTransferred) {
+        updateCaseFields.court = newCourt;
+        if (isLatestHearing) {
+          updateCaseFields.stage = finalStage;
+          updateCaseFields.nextHearingDate = nextHearingDate;
+          updateCaseFields.listingType = listingMode;
+          updateCaseFields.notBeforeDate = notBeforeDate;
+        }
+      } else if (isDisposed) {
+        updateCaseFields.status = 'Closed';
+        updateCaseFields.stage = `Disposed (${disposalType})`;
+        updateCaseFields.nextHearingDate = null;
+        updateCaseFields.listingType = 'disposed';
+        updateCaseFields.notBeforeDate = null;
+        updateCaseFields.disposalType = disposalType;
+        updateCaseFields.disposalRemarks = disposalRemarks;
+        updateCaseFields.disposalDate = date;
+      } else if (isLatestHearing && nextHearingDate) {
+        updateCaseFields.stage = finalStage;
+        updateCaseFields.nextHearingDate = nextHearingDate;
+        updateCaseFields.listingType = listingMode;
+        updateCaseFields.notBeforeDate = notBeforeDate;
+      }
+
+      await db.updateHearing(caseId, hearingId, {
+        date: date || new Date().toISOString().split('T')[0],
+        stage: finalStage,
+        notes: finalNotes,
+        nextHearingDate,
+        listingType: listingMode,
+        notBeforeDate,
+        court: newCourt,
+        outcomeStatus: isDisposed ? 'disposed' : (isTransferred ? 'transferred' : 'continued'),
+        disposalType,
+        disposalRemarks,
+        updateCaseFields: Object.keys(updateCaseFields).length > 0 ? updateCaseFields : undefined
+      });
+
+      if (Object.keys(updateCaseFields).length > 0) {
+        await db.updateCase(caseId, updateCaseFields);
+      }
+
+      alert("Hearing entry updated successfully.");
       form.reset();
       modal.classList.remove('active');
+      calculatedRelativeDate = null;
 
       // Refresh dossier
-      this.showCaseDossier(caseId);
+      const dossierOverlay = document.getElementById('case-dossier-overlay');
+      if (dossierOverlay && dossierOverlay.classList.contains('active')) {
+        this.showCaseDossier(caseId);
+      }
+
+      document.dispatchEvent(new CustomEvent('casesUpdated'));
       this.render();
     });
 
     const hide = () => {
       form.reset();
       modal.classList.remove('active');
+      calculatedRelativeDate = null;
     };
     closeBtn.addEventListener('click', hide);
     cancelBtn.addEventListener('click', hide);
@@ -1165,12 +1397,70 @@ const casesModule = {
 
     document.getElementById('edit-hearing-case-id').value = caseId;
     document.getElementById('edit-hearing-id').value = hearingId;
-    document.getElementById('edit-hearing-date').value = hearing.date;
-    document.getElementById('edit-hearing-stage').value = hearing.stage || '';
-    document.getElementById('edit-hearing-notes').value = hearing.notes || '';
+    document.getElementById('edit-hearing-date').value = hearing.date || '';
+    
+    // Clean stage text if it contained appended metadata
+    let cleanStage = hearing.stage || '';
+    if (cleanStage.includes(' (Disposed:')) {
+      cleanStage = cleanStage.split(' (Disposed:')[0];
+    } else if (cleanStage.startsWith('Transferred to ') && cleanStage.includes('(')) {
+      cleanStage = cleanStage.split('(')[1].replace(/\)$/, '');
+    }
+    document.getElementById('edit-hearing-stage').value = cleanStage;
+    
+    // Clean notes text if it contained appended metadata
+    let cleanNotes = hearing.notes || '';
+    cleanNotes = cleanNotes.replace(/\n?\[Transferred to Court:[^\]]+\]/g, '')
+                           .replace(/\n?\[Disposal Remarks:[^\]]+\]/g, '')
+                           .trim();
+    document.getElementById('edit-hearing-notes').value = cleanNotes;
+    
+    document.getElementById('edit-hearing-next-date').value = hearing.nextHearingDate || cs.nextHearingDate || '';
+    document.getElementById('edit-hearing-new-court').value = hearing.court || cs.court || '';
+    document.getElementById('edit-hearing-disposal-remarks').value = hearing.disposalRemarks || cs.disposalRemarks || '';
+    if (hearing.disposalType || cs.disposalType) {
+      document.getElementById('edit-hearing-disposal-type').value = hearing.disposalType || cs.disposalType;
+    }
+
+    // Determine outcome status toggle
+    const isDisposed = hearing.listingType === 'disposed' ||
+                       hearing.outcomeStatus === 'disposed' ||
+                       (hearing.stage && hearing.stage.includes('Disposed:')) ||
+                       Boolean(hearing.disposalType);
+
+    const isTransferred = hearing.outcomeStatus === 'transferred' ||
+                          (hearing.stage && hearing.stage.startsWith('Transferred to')) ||
+                          (hearing.notes && hearing.notes.includes('[Transferred to Court:'));
+
+    if (isDisposed) {
+      const btnDisposed = document.getElementById('btn-edit-outcome-disposed');
+      if (btnDisposed) btnDisposed.click();
+    } else if (isTransferred) {
+      const btnTransferred = document.getElementById('btn-edit-outcome-transferred');
+      if (btnTransferred) btnTransferred.click();
+    } else {
+      const btnContinued = document.getElementById('btn-edit-outcome-continued');
+      if (btnContinued) btnContinued.click();
+    }
+
+    // Determine listing mode
+    if (hearing.listingType === 'relative' || cs.listingType === 'relative') {
+      const btnRelative = document.getElementById('btn-edit-mode-relative');
+      if (btnRelative) btnRelative.click();
+      const previewTxt = document.getElementById('edit-relative-preview-text');
+      if (previewTxt && (hearing.notBeforeDate || cs.notBeforeDate)) {
+        previewTxt.textContent = `Not Before: ${hearing.notBeforeDate || cs.notBeforeDate}`;
+      }
+    } else {
+      const btnFixed = document.getElementById('btn-edit-mode-fixed');
+      if (btnFixed) btnFixed.click();
+    }
 
     const modal = document.getElementById('edit-hearing-modal');
-    modal.classList.add('active');
+    if (modal) {
+      modal.classList.add('active');
+      if (window.safeCreateIcons) window.safeCreateIcons(modal);
+    }
   },
 
   /**

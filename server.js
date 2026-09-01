@@ -885,6 +885,19 @@ app.put('/api/cases/:id/hearings/:hearingId', authenticateToken, async (req, res
   }
 });
 
+app.delete('/api/cases/:id/hearings/:hearingId', authenticateToken, async (req, res) => {
+  try {
+    const updatedCase = await db.deleteHearing(req.user.id, req.params.id, req.params.hearingId);
+    if (!updatedCase) {
+      return res.status(404).json({ error: "Case or hearing not found or access denied." });
+    }
+    res.json(updatedCase);
+  } catch (err) {
+    console.error("Delete hearing error:", err);
+    res.status(500).json({ error: "Failed to delete case hearing entry." });
+  }
+});
+
 /**
  * Transactions API Endpoints
  */

@@ -604,14 +604,26 @@ async function updateHearing(tenantId, caseId, hearingId, hearingData) {
     if (idx !== -1) {
       hearings[idx] = {
         ...hearings[idx],
-        date: hearingData.date || hearings[idx].date,
-        stage: hearingData.stage || hearings[idx].stage,
-        notes: hearingData.notes !== undefined ? hearingData.notes : hearings[idx].notes
+        date: hearingData.date !== undefined ? hearingData.date : hearings[idx].date,
+        stage: hearingData.stage !== undefined ? hearingData.stage : hearings[idx].stage,
+        notes: hearingData.notes !== undefined ? hearingData.notes : hearings[idx].notes,
+        nextHearingDate: hearingData.nextHearingDate !== undefined ? hearingData.nextHearingDate : hearings[idx].nextHearingDate,
+        listingType: hearingData.listingType !== undefined ? hearingData.listingType : hearings[idx].listingType,
+        notBeforeDate: hearingData.notBeforeDate !== undefined ? hearingData.notBeforeDate : hearings[idx].notBeforeDate,
+        court: hearingData.court !== undefined ? hearingData.court : hearings[idx].court,
+        outcomeStatus: hearingData.outcomeStatus !== undefined ? hearingData.outcomeStatus : hearings[idx].outcomeStatus,
+        disposalType: hearingData.disposalType !== undefined ? hearingData.disposalType : hearings[idx].disposalType,
+        disposalRemarks: hearingData.disposalRemarks !== undefined ? hearingData.disposalRemarks : hearings[idx].disposalRemarks
       };
+
+      const setFields = { hearings };
+      if (hearingData.updateCaseFields && typeof hearingData.updateCaseFields === 'object') {
+        Object.assign(setFields, hearingData.updateCaseFields);
+      }
 
       await db.collection('cases').updateOne(
         { tenantId, _id: caseId },
-        { $set: { hearings } }
+        { $set: setFields }
       );
       
       const updated = await db.collection('cases').findOne({ tenantId, _id: caseId });
@@ -628,10 +640,20 @@ async function updateHearing(tenantId, caseId, hearingId, hearingData) {
     if (hIdx !== -1) {
       localDb.cases[idx].hearings[hIdx] = {
         ...localDb.cases[idx].hearings[hIdx],
-        date: hearingData.date || localDb.cases[idx].hearings[hIdx].date,
-        stage: hearingData.stage || localDb.cases[idx].hearings[hIdx].stage,
-        notes: hearingData.notes !== undefined ? hearingData.notes : localDb.cases[idx].hearings[hIdx].notes
+        date: hearingData.date !== undefined ? hearingData.date : localDb.cases[idx].hearings[hIdx].date,
+        stage: hearingData.stage !== undefined ? hearingData.stage : localDb.cases[idx].hearings[hIdx].stage,
+        notes: hearingData.notes !== undefined ? hearingData.notes : localDb.cases[idx].hearings[hIdx].notes,
+        nextHearingDate: hearingData.nextHearingDate !== undefined ? hearingData.nextHearingDate : localDb.cases[idx].hearings[hIdx].nextHearingDate,
+        listingType: hearingData.listingType !== undefined ? hearingData.listingType : localDb.cases[idx].hearings[hIdx].listingType,
+        notBeforeDate: hearingData.notBeforeDate !== undefined ? hearingData.notBeforeDate : localDb.cases[idx].hearings[hIdx].notBeforeDate,
+        court: hearingData.court !== undefined ? hearingData.court : localDb.cases[idx].hearings[hIdx].court,
+        outcomeStatus: hearingData.outcomeStatus !== undefined ? hearingData.outcomeStatus : localDb.cases[idx].hearings[hIdx].outcomeStatus,
+        disposalType: hearingData.disposalType !== undefined ? hearingData.disposalType : localDb.cases[idx].hearings[hIdx].disposalType,
+        disposalRemarks: hearingData.disposalRemarks !== undefined ? hearingData.disposalRemarks : localDb.cases[idx].hearings[hIdx].disposalRemarks
       };
+      if (hearingData.updateCaseFields && typeof hearingData.updateCaseFields === 'object') {
+        Object.assign(localDb.cases[idx], hearingData.updateCaseFields);
+      }
       writeDb(localDb);
       return localDb.cases[idx];
     }

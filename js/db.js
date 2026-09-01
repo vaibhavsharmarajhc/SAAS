@@ -304,6 +304,25 @@ class LegalDB {
     return updatedCase;
   }
 
+  async deleteHearing(caseId, hearingId) {
+    let updatedCase;
+    try {
+      updatedCase = await api.cases.deleteHearing(caseId, hearingId);
+    } catch (e) {
+      console.warn("api.cases.deleteHearing error, updating local cache:", e);
+    }
+    const idx = this.cache.cases.findIndex(c => c.id === caseId);
+    if (idx !== -1) {
+      if (updatedCase) {
+        this.cache.cases[idx] = updatedCase;
+      } else {
+        this.cache.cases[idx].hearings = (this.cache.cases[idx].hearings || []).filter(h => h.id !== hearingId);
+      }
+      document.dispatchEvent(new CustomEvent('casesUpdated'));
+    }
+    return this.cache.cases[idx] || updatedCase;
+  }
+
   // --- TRANSACTIONS & FINANCES ---
   getTransactions() {
     return this.cache.transactions;

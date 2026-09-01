@@ -217,6 +217,12 @@ const api = {
         method: 'PUT',
         body: hearingData
       });
+    },
+
+    async deleteHearing(caseId, hearingId) {
+      return await fetchAPI(`/api/cases/${caseId}/hearings/${hearingId}`, {
+        method: 'DELETE'
+      });
     }
   },
 
