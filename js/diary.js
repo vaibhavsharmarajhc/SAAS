@@ -209,17 +209,10 @@ const diaryModule = {
 
     let eventsHtml = '';
     hearings.slice(0, 3).forEach(h => {
-      let badgeClass = 'event-other';
-      const cType = h.caseType;
-      if (cType === 'Civil') badgeClass = 'event-civil';
-      else if (cType === 'Criminal') badgeClass = 'event-criminal';
-      else if (cType === 'Matrimonial') badgeClass = 'event-matrimonial';
-      else if (cType === 'Consumer') badgeClass = 'event-consumer';
-      else if (cType === 'Service') badgeClass = 'event-service';
-      else if (cType === 'Legal Notice') badgeClass = 'event-notice';
-      else if (cType === 'Contracts') badgeClass = 'event-contracts';
-      else if (cType === 'Consultation') badgeClass = 'event-consultation';
-      
+      // Color by listing certainty, not case type: tentative/unconfirmed
+      // listings (relative "Not Before" dates) are yellow; fixed, confirmed
+      // dates are green.
+      const badgeClass = h.listingType === 'relative' ? 'event-tentative' : 'event-confirmed';
       eventsHtml += `<div class="event-badge ${badgeClass}" title="${h.title}">${h.title}</div>`;
     });
 
@@ -265,8 +258,17 @@ const diaryModule = {
         eventsHtml = `<span style="font-size:0.8rem;" class="text-muted">No hearings listed.</span>`;
       } else {
         hearings.forEach(h => {
+          const isTentative = h.isRelative || h.listingType === 'relative' || h.listingType === 'tentative' || (h.notBeforeDate && h.notBeforeDate !== 'Not Scheduled');
+          const badgeBg = isTentative ? 'rgba(245, 158, 11, 0.12)' : 'rgba(16, 185, 129, 0.12)';
+          const badgeBorder = isTentative ? 'rgba(245, 158, 11, 0.35)' : 'rgba(16, 185, 129, 0.35)';
+          const badgeText = isTentative ? '#d97706' : '#10b981';
+          const typeLabel = isTentative ? 'Tentative / Not Before' : 'Fixed Date';
+
           eventsHtml += `
-            <div class="week-event-card" style="cursor:pointer;" data-case-id="${h.id}">
+            <div class="week-event-card" style="cursor:pointer; border-left:3px solid ${badgeText};" data-case-id="${h.id}">
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.25rem;">
+                <span class="badge" style="background:${badgeBg}; color:${badgeText}; border:1px solid ${badgeBorder}; font-size:0.65rem; padding:0.1rem 0.35rem; font-weight:600;">${typeLabel}</span>
+              </div>
               <div style="font-weight:600; color:var(--text-primary); word-break:break-word; white-space:normal;">${h.title}</div>
               <div style="color:var(--text-secondary); font-size:0.7rem; word-break:break-word; white-space:normal;">Court: ${h.court}</div>
               <div style="color:var(--color-primary); font-size:0.65rem; margin-top:0.25rem; word-break:break-word; white-space:normal;">Stage: ${h.stage}</div>
@@ -320,11 +322,20 @@ const diaryModule = {
     } else {
       hearings.forEach(h => {
         const client = db.getClient(h.clientId);
+        const isTentative = h.isRelative || h.listingType === 'relative' || h.listingType === 'tentative' || (h.notBeforeDate && h.notBeforeDate !== 'Not Scheduled');
+        const borderIndicatorColor = isTentative ? '#d97706' : 'var(--color-success)';
+        const listingBadgeBg = isTentative ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)';
+        const listingBadgeColor = isTentative ? '#d97706' : '#10b981';
+        const listingBadgeLabel = isTentative ? 'Tentative / Not Before' : 'Fixed Date';
+
         dayHtml += `
-          <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:1.25rem; border-left:4px solid ${h.isUpcoming ? 'var(--color-primary)' : 'var(--text-muted)'}; opacity: ${h.isUpcoming ? '1' : '0.85'};">
+          <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:1.25rem; border-left:4px solid ${borderIndicatorColor}; opacity: ${h.isUpcoming ? '1' : '0.85'};">
             <div>
-              <div style="display:flex; align-items:center; gap:0.5rem;">
+              <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
                 <h3 style="font-size:1.15rem; color:var(--text-primary); cursor:pointer;" class="case-link" data-id="${h.id}">${h.title}</h3>
+                <span class="badge" style="font-size:0.65rem; padding:0.15rem 0.4rem; background-color:${listingBadgeBg}; color:${listingBadgeColor}; border:1px solid ${listingBadgeColor}40; font-weight:600;">
+                  ${listingBadgeLabel}
+                </span>
                 <span class="badge" style="font-size:0.65rem; padding:0.15rem 0.35rem; background-color:${h.isUpcoming ? 'rgba(217, 119, 6, 0.15)' : 'rgba(255, 255, 255, 0.05)'}; color:${h.isUpcoming ? '#d97706' : 'var(--text-secondary)'};">
                   ${h.isUpcoming ? 'Upcoming' : 'Past Outcome'}
                 </span>
@@ -520,18 +531,30 @@ const diaryModule = {
     } else {
       hearings.forEach(h => {
         const client = db.getClient(h.clientId);
+        const isTentative = h.isRelative || h.listingType === 'relative' || h.listingType === 'tentative' || (h.notBeforeDate && h.notBeforeDate !== 'Not Scheduled');
+        const badgeBg = isTentative ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)';
+        const badgeBorder = isTentative ? 'rgba(245, 158, 11, 0.35)' : 'rgba(16, 185, 129, 0.35)';
+        const badgeColor = isTentative ? '#d97706' : '#10b981';
+        const typeLabel = isTentative ? 'Tentative / Not Before' : 'Fixed Date';
+
         const item = document.createElement('div');
         item.style.padding = '0.75rem';
         item.style.border = '1px solid var(--border-color)';
+        item.style.borderLeft = `4px solid ${badgeColor}`;
         item.style.borderRadius = 'var(--radius-md)';
         item.style.marginBottom = '0.5rem';
         item.style.backgroundColor = 'rgba(255,255,255,0.02)';
         item.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem;">
             <strong style="color:var(--text-primary); font-size:0.95rem; cursor:pointer;" class="popup-case-link" data-id="${h.id}">${h.title}</strong>
-            <span class="badge" style="background-color: ${h.isUpcoming ? 'var(--color-primary-bg)' : 'rgba(255,255,255,0.06)'}; color: ${h.isUpcoming ? 'var(--color-primary)' : 'var(--text-secondary)'}; font-size:0.7rem; padding:0.15rem 0.35rem; border-radius:4px;">
-              ${h.stage}
-            </span>
+            <div style="display:flex; gap:0.35rem; align-items:center; flex-wrap:wrap;">
+              <span class="badge" style="background-color: ${badgeBg}; color: ${badgeColor}; border:1px solid ${badgeBorder}; font-size:0.68rem; padding:0.15rem 0.4rem; border-radius:4px; font-weight:600;">
+                ${typeLabel}
+              </span>
+              <span class="badge" style="background-color: ${h.isUpcoming ? 'var(--color-primary-bg)' : 'rgba(255,255,255,0.06)'}; color: ${h.isUpcoming ? 'var(--color-primary)' : 'var(--text-secondary)'}; font-size:0.68rem; padding:0.15rem 0.35rem; border-radius:4px;">
+                ${h.stage}
+              </span>
+            </div>
           </div>
           <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem;">
             Court: ${h.court} | Client: ${client ? client.name : 'Unknown'}
@@ -612,7 +635,8 @@ const diaryModule = {
           status: c.status,
           stage: matchingHearing ? matchingHearing.stage : c.stage,
           notes: matchingHearing ? (matchingHearing.notes || 'Hearing proceedings recorded.') : 'Upcoming scheduled hearing.',
-          isUpcoming: true
+          isUpcoming: true,
+          listingType: c.listingType || 'fixed'
         });
       });
     } else {
@@ -631,7 +655,8 @@ const diaryModule = {
           status: c.status,
           stage: hearingEntry.stage,
           notes: hearingEntry.notes || 'Hearing proceedings recorded.',
-          isUpcoming: false
+          isUpcoming: false,
+          listingType: hearingEntry.listingType || c.listingType || 'fixed'
         });
       });
       const nextDateCases = nextDateMap.get(dateStr) || [];
@@ -648,7 +673,8 @@ const diaryModule = {
           status: c.status,
           stage: c.stage,
           notes: 'Past scheduled hearing.',
-          isUpcoming: false
+          isUpcoming: false,
+          listingType: c.listingType || 'fixed'
         });
       });
     }
@@ -682,7 +708,8 @@ const diaryModule = {
             status: c.status,
             stage: matchingHearing ? matchingHearing.stage : c.stage,
             notes: matchingHearing ? (matchingHearing.notes || 'Hearing proceedings recorded.') : 'Upcoming scheduled hearing.',
-            isUpcoming: true
+            isUpcoming: true,
+            listingType: c.listingType || 'fixed'
           });
         }
       } else {
@@ -698,7 +725,8 @@ const diaryModule = {
             status: c.status,
             stage: matchingHearing ? matchingHearing.stage : c.stage,
             notes: matchingHearing ? (matchingHearing.notes || 'Hearing proceedings recorded.') : 'Past scheduled hearing.',
-            isUpcoming: false
+            isUpcoming: false,
+            listingType: matchingHearing ? (matchingHearing.listingType || c.listingType || 'fixed') : (c.listingType || 'fixed')
           });
         }
       }

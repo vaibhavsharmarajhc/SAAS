@@ -63,7 +63,7 @@ import historyManager from './history.js';
 import dashboard from './dashboard.js';
 import clients from './clients.js';
 import cases from './cases.js';
-import diary from './diary.js';
+import diary from './diary.js?v=1.0.212';
 import accounts from './accounts.js';
 import share from './share.js';
 import tasks from './tasks.js';
