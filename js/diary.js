@@ -620,7 +620,7 @@ const diaryModule = {
     const list = [];
     const { nextDateMap, historicalMap } = index;
 
-    if (dateStr >= todayStr) {
+    if (dateStr > todayStr) {
       const matchingCases = nextDateMap.get(dateStr) || [];
       matchingCases.forEach(c => {
         const pastHearings = c.hearings || [];
@@ -639,7 +639,48 @@ const diaryModule = {
           listingType: c.listingType || 'fixed'
         });
       });
+    } else if (dateStr === todayStr) {
+      const seen = new Set();
+      // Hearings actually logged today take priority.
+      const historicalEntries = historicalMap.get(dateStr) || [];
+      historicalEntries.forEach(({ case: c, hearingEntry }) => {
+        if (seen.has(c.id)) return;
+        seen.add(c.id);
+        list.push({
+          id: c.id,
+          title: c.title,
+          court: c.court,
+          caseNumber: c.caseNumber,
+          clientId: c.clientId,
+          caseType: c.caseType,
+          status: c.status,
+          stage: hearingEntry.stage,
+          notes: hearingEntry.notes || 'Hearing proceedings recorded.',
+          isUpcoming: false,
+          listingType: hearingEntry.listingType || c.listingType || 'fixed'
+        });
+      });
+      // Cases still pending today (not yet logged).
+      const nextDateCases = nextDateMap.get(dateStr) || [];
+      nextDateCases.forEach(c => {
+        if (seen.has(c.id)) return;
+        seen.add(c.id);
+        list.push({
+          id: c.id,
+          title: c.title,
+          court: c.court,
+          caseNumber: c.caseNumber,
+          clientId: c.clientId,
+          caseType: c.caseType,
+          status: c.status,
+          stage: c.stage,
+          notes: 'Upcoming scheduled hearing.',
+          isUpcoming: true,
+          listingType: c.listingType || 'fixed'
+        });
+      });
     } else {
+      // Strictly past: unchanged from existing behavior.
       const seen = new Set();
       const historicalEntries = historicalMap.get(dateStr) || [];
       historicalEntries.forEach(({ case: c, hearingEntry }) => {
@@ -694,9 +735,8 @@ const diaryModule = {
       const matchingHearing = pastHearings.find(h => h && h.date === dateStr);
       const isListedOnDate = (c.nextHearingDate === dateStr);
 
-      // On today or future dates: case is listed ONLY if its active nextHearingDate is on this date!
-      // Once an advocate logs today's hearing and moves nextHearingDate to a future date, it's no longer pending for today.
-      if (dateStr >= todayStr) {
+      if (dateStr > todayStr) {
+        // Strictly future: only a pending nextHearingDate counts.
         if (isListedOnDate) {
           list.push({
             id: c.id,
@@ -712,8 +752,42 @@ const diaryModule = {
             listingType: c.listingType || 'fixed'
           });
         }
+      } else if (dateStr === todayStr) {
+        // Today: could be a hearing already logged today (show as completed),
+        // OR still the pending date if not yet logged (show as upcoming).
+        // Check the actually-logged hearing first — that takes priority, since
+        // once logged, today is no longer "pending," it's "done."
+        if (matchingHearing) {
+          list.push({
+            id: c.id,
+            title: c.title,
+            court: c.court,
+            caseNumber: c.caseNumber,
+            clientId: c.clientId,
+            caseType: c.caseType,
+            status: c.status,
+            stage: matchingHearing.stage,
+            notes: matchingHearing.notes || 'Hearing proceedings recorded.',
+            isUpcoming: false,
+            listingType: matchingHearing.listingType || c.listingType || 'fixed'
+          });
+        } else if (isListedOnDate) {
+          list.push({
+            id: c.id,
+            title: c.title,
+            court: c.court,
+            caseNumber: c.caseNumber,
+            clientId: c.clientId,
+            caseType: c.caseType,
+            status: c.status,
+            stage: c.stage,
+            notes: 'Upcoming scheduled hearing.',
+            isUpcoming: true,
+            listingType: c.listingType || 'fixed'
+          });
+        }
       } else {
-        // Historical date lookup (past calendar dates): show recorded hearing proceedings or historical listing
+        // Strictly past: unchanged from existing behavior.
         if (matchingHearing || isListedOnDate) {
           list.push({
             id: c.id,
