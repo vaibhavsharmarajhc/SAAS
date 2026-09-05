@@ -932,7 +932,9 @@ const casesModule = {
       }
 
       // Register Hearing (if date is provided or notes/outcome entered)
-      if (date || finalNotes || isDisposed || isTransferred) {
+      if (date || isDisposed || isTransferred) {
+        // A genuine hearing date was provided, or the case is being disposed/
+        // transferred — these are real events worth logging in history.
         await db.addHearing(caseId, { 
           date: date || new Date().toISOString().split('T')[0], 
           stage: finalStage, 
@@ -941,12 +943,20 @@ const casesModule = {
           notBeforeDate, 
           notes: finalNotes 
         });
-      } else if (nextHearingDate) {
+        // A genuine hearing was logged — clear any stale "upcoming listing" notes
+        // from before, since they're now superseded by this real history entry.
+        await db.updateCase(caseId, { nextListingNotes: null });
+      } else if (nextHearingDate || finalNotes) {
+        // No hearing date given: nothing actually happened today. Any notes here
+        // describe the upcoming/tentative listing itself (e.g. cause-list item
+        // number), not a past event — attach them to the case's pending listing,
+        // do NOT create a dated history entry for today.
         await db.updateCase(caseId, {
           stage: finalStage,
           nextHearingDate,
           listingType: listingMode,
-          notBeforeDate
+          notBeforeDate,
+          nextListingNotes: finalNotes || null
         });
       }
 
@@ -970,7 +980,8 @@ const casesModule = {
           notBeforeDate: null,
           disposalType,
           disposalRemarks,
-          disposalDate: date
+          disposalDate: date,
+          nextListingNotes: null
         });
         alert(`Case marked as Finally Disposed (${disposalType}). File closed.`);
       } else {
@@ -1098,7 +1109,8 @@ const casesModule = {
         disposalDate: closureDate,
         nextHearingDate: null,
         listingType: 'disposed',
-        notBeforeDate: null
+        notBeforeDate: null,
+        nextListingNotes: null
       });
       modal.classList.remove('active');
       document.dispatchEvent(new CustomEvent('casesUpdated'));
@@ -1586,6 +1598,7 @@ const casesModule = {
           <div style="font-size:0.75rem; color:#f59e0b; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.15rem;">Upcoming Scheduled</div>
           <div style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">${window.formatDDMMYYYY(cs.nextHearingDate)}</div>
           <div style="font-size:0.9rem; font-weight:600; color:var(--text-primary); margin-top:0.15rem;">Stage: ${cs.stage}</div>
+          ${cs.nextListingNotes ? `<p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem; white-space: pre-wrap;">${window.sanitizeText(cs.nextListingNotes)}</p>` : ''}
         </div>
       `;
     }
