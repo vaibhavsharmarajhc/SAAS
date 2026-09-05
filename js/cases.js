@@ -13,6 +13,7 @@ const casesModule = {
     this.setupRegisterCaseForm();
     this.setupHearingForm();
     this.setupEditHearingForm();
+    this.setupEditUpcomingForm();
     this.setupLockDateForm();
     this.setupCloseCaseForm();
     this.setupCaseDossierEvents();
@@ -1043,6 +1044,54 @@ const casesModule = {
     modal.classList.add('active');
   },
 
+  showEditUpcomingModal(caseId) {
+    const cs = db.getCase(caseId);
+    if (!cs) return;
+    document.getElementById('edit-upcoming-case-id').value = caseId;
+    document.getElementById('edit-upcoming-date-input').value = cs.nextHearingDate || '';
+    document.getElementById('edit-upcoming-stage-input').value = cs.stage || '';
+    document.getElementById('edit-upcoming-notes-input').value = cs.nextListingNotes || '';
+    const modal = document.getElementById('edit-upcoming-modal');
+    if (modal) modal.classList.add('active');
+  },
+
+  setupEditUpcomingForm() {
+    const form = document.getElementById('edit-upcoming-form');
+    const modal = document.getElementById('edit-upcoming-modal');
+    const closeBtn = document.getElementById('edit-upcoming-close');
+    const cancelBtn = document.getElementById('edit-upcoming-cancel');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const caseId = document.getElementById('edit-upcoming-case-id').value;
+      const newDate = document.getElementById('edit-upcoming-date-input').value;
+      const newStage = document.getElementById('edit-upcoming-stage-input').value.trim();
+      const newNotes = document.getElementById('edit-upcoming-notes-input').value.trim();
+      if (!caseId || !newDate || !newStage) return;
+
+      // Editing here only corrects the pending listing's details — it does
+      // NOT change listingType (relative vs fixed). If the case is currently
+      // in tentative/relative mode, editing the date here just updates the
+      // tentative date; converting it to a genuinely confirmed fixed date
+      // should still go through the existing "Lock" button/flow.
+      await db.updateCase(caseId, {
+        nextHearingDate: newDate,
+        stage: newStage,
+        nextListingNotes: newNotes || null
+      });
+
+      modal.classList.remove('active');
+      document.dispatchEvent(new CustomEvent('casesUpdated'));
+      if (typeof this.showCaseDossier === 'function') this.showCaseDossier(caseId);
+      this.render();
+    });
+
+    const hide = () => modal.classList.remove('active');
+    if (closeBtn) closeBtn.addEventListener('click', hide);
+    if (cancelBtn) cancelBtn.addEventListener('click', hide);
+  },
+
   setupLockDateForm() {
     const form = document.getElementById('lock-date-form');
     const modal = document.getElementById('lock-hearing-date-modal');
@@ -1595,8 +1644,13 @@ const casesModule = {
         <div style="border-left: 2px dashed #f59e0b; padding-left: 1.25rem; position: relative; margin-bottom: 1.25rem;">
           <!-- timeline dot pointer -->
           <div style="width: 10px; height: 10px; border-radius:50%; background-color:#f59e0b; border: 2px solid var(--bg-sidebar); position: absolute; left: -6px; top: 4px;"></div>
-          <div style="font-size:0.75rem; color:#f59e0b; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.15rem;">Upcoming Scheduled</div>
-          <div style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">${window.formatDDMMYYYY(cs.nextHearingDate)}</div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:0.75rem; color:#f59e0b; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">Upcoming Scheduled</div>
+            <button class="btn btn-secondary btn-edit-upcoming" data-case-id="${cs.id}" style="padding: 2px 6px; font-size: 0.65rem; border-radius: var(--radius-xs); line-height: 1;" title="Edit Upcoming Listing Details">
+              <i data-lucide="pencil" style="width:10px; height:10px;"></i> Edit
+            </button>
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-secondary); font-weight:600; margin-top:0.15rem;">${window.formatDDMMYYYY(cs.nextHearingDate)}</div>
           <div style="font-size:0.9rem; font-weight:600; color:var(--text-primary); margin-top:0.15rem;">Stage: ${cs.stage}</div>
           ${cs.nextListingNotes ? `<p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem; white-space: pre-wrap;">${window.sanitizeText(cs.nextListingNotes)}</p>` : ''}
         </div>
@@ -1707,6 +1761,15 @@ const casesModule = {
     // Event listener to open Log Transaction modal pre-filled
     body.querySelector('#case-ledger-log-tx-btn').addEventListener('click', () => {
       accountsModule.showLogTransactionModal(cs.clientId, cs.id);
+    });
+
+    // Event listeners to edit upcoming listing
+    body.querySelectorAll('.btn-edit-upcoming').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const caseId = btn.getAttribute('data-case-id');
+        this.showEditUpcomingModal(caseId);
+      });
     });
 
     // Event listeners to edit specific past hearings
