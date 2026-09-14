@@ -121,13 +121,15 @@ const accountsModule = {
         <td style="font-weight:500;">${t.debitVal}</td>
         <td style="${creditColorStyle} font-weight:500;">${t.creditVal}</td>
         <td>
-          <div style="display:flex; gap:0.4rem;">
+          <div style="display:flex; gap:0.4rem; align-items:center;">
+            <button class="btn btn-secondary btn-edit-tx" style="padding:0.25rem 0.4rem;" data-id="${t.id}" title="Edit Transaction Entry"><i data-lucide="pencil" style="width:12px; height:12px;"></i></button>
             <button class="btn btn-secondary btn-invoice" style="padding:0.25rem 0.4rem;" data-id="${t.id}" title="Print Invoice/Receipt"><i data-lucide="printer" style="width:12px; height:12px;"></i></button>
             <button class="btn btn-danger btn-delete-tx" style="padding:0.25rem 0.4rem;" data-id="${t.id}" title="Delete Transaction"><i data-lucide="trash-2" style="width:12px; height:12px;"></i></button>
           </div>
         </td>
       `;
 
+      row.querySelector('.btn-edit-tx').addEventListener('click', () => this.showEditTransaction(t.id));
       row.querySelector('.btn-invoice').addEventListener('click', () => this.showInvoice(t.id));
       row.querySelector('.btn-delete-tx').addEventListener('click', () => this.deleteTransaction(t.id));
 
@@ -327,11 +329,21 @@ const accountsModule = {
       this.render();
     });
 
-    cancelBtn.addEventListener('click', () => {
+    const hideModal = () => {
       form.reset();
+      const editInput = document.getElementById('log-tx-edit-id');
+      const titleEl = document.getElementById('log-tx-title');
+      const submitBtn = document.getElementById('log-tx-submit-btn');
+      if (editInput) editInput.value = '';
+      if (titleEl) titleEl.textContent = 'Log Financial Transaction';
+      if (submitBtn) submitBtn.textContent = 'Save Entry';
       caseSelect.innerHTML = '<option value="">Standalone Client billing (No Case link)</option>';
       modal.classList.remove('active');
-    });
+    };
+
+    const closeBtn = document.getElementById('log-tx-close');
+    if (cancelBtn) cancelBtn.addEventListener('click', hideModal);
+    if (closeBtn) closeBtn.addEventListener('click', hideModal);
   },
 
   showLogTransactionModal(clientId, caseId) {
@@ -339,6 +351,16 @@ const accountsModule = {
     const modal = document.getElementById('log-tx-modal');
     const clientSelect = document.getElementById('log-tx-client-id');
     const caseSelect = document.getElementById('log-tx-case-id');
+    const editInput = document.getElementById('log-tx-edit-id');
+    const titleEl = document.getElementById('log-tx-title');
+    const submitBtn = document.getElementById('log-tx-submit-btn');
+
+    if (editInput) editInput.value = '';
+    if (titleEl) titleEl.textContent = 'Log Financial Transaction';
+    if (submitBtn) submitBtn.textContent = 'Save Entry';
+
+    document.getElementById('log-tx-amount').value = '';
+    document.getElementById('log-tx-desc').value = '';
 
     if (clientId) {
       clientSelect.value = clientId;
@@ -418,10 +440,10 @@ const accountsModule = {
         <td style="font-weight:500;">${debitVal}</td>
         <td style="${creditColorStyle} font-weight:500;">${creditVal}</td>
         <td>
-          <div style="display:flex; gap:0.35rem; align-items:center;">
-            <button class="btn btn-secondary btn-edit-tx" style="padding:0; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" data-id="${t.id}" title="Edit Transaction Entry"><i data-lucide="edit-3" style="width:12px; height:12px;"></i></button>
-            <button class="btn btn-secondary btn-invoice" style="padding:0; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" data-id="${t.id}" title="Print Invoice/Receipt"><i data-lucide="printer" style="width:12px; height:12px;"></i></button>
-            <button class="btn btn-danger btn-delete-tx" style="padding:0; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" data-id="${t.id}" title="Delete Transaction"><i data-lucide="trash-2" style="width:12px; height:12px;"></i></button>
+          <div style="display:flex; gap:0.4rem; align-items:center;">
+            <button class="btn btn-secondary btn-edit-tx" style="padding:0.25rem 0.4rem;" data-id="${t.id}" title="Edit Transaction Entry"><i data-lucide="pencil" style="width:12px; height:12px;"></i></button>
+            <button class="btn btn-secondary btn-invoice" style="padding:0.25rem 0.4rem;" data-id="${t.id}" title="Print Invoice/Receipt"><i data-lucide="printer" style="width:12px; height:12px;"></i></button>
+            <button class="btn btn-danger btn-delete-tx" style="padding:0.25rem 0.4rem;" data-id="${t.id}" title="Delete Transaction"><i data-lucide="trash-2" style="width:12px; height:12px;"></i></button>
           </div>
         </td>
       `;
