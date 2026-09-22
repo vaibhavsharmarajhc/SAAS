@@ -3,8 +3,36 @@
  * Interacts with the backend REST APIs.
  */
 
+function isTokenValid(token) {
+  if (!token || typeof token !== 'string') return false;
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    const payload = JSON.parse(jsonPayload);
+    if (!payload) return false;
+    if (payload.exp && (payload.exp * 1000) < Date.now()) {
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 async function fetchAPI(url, options = {}) {
-  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  let token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  if (token && !isTokenValid(token)) {
+    try {
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
+      localStorage.removeItem('currentUser');
+      sessionStorage.removeItem('currentUser');
+    } catch (e) {}
+    token = null;
+  }
   
   // Set JSON & Auth headers by default
   options.headers = {
@@ -21,6 +49,14 @@ async function fetchAPI(url, options = {}) {
   const response = await fetch(url, options);
   
   if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      try {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        localStorage.removeItem('currentUser');
+        sessionStorage.removeItem('currentUser');
+      } catch (e) {}
+    }
     let errorMsg = 'An error occurred on the server.';
     try {
       const errData = await response.json();

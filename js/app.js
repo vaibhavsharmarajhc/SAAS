@@ -62,8 +62,8 @@ import api from './api.js';
 import historyManager from './history.js';
 import dashboard from './dashboard.js';
 import clients from './clients.js';
-import cases from './cases.js?v=1.0.217';
-import diary from './diary.js?v=1.0.217';
+import cases from './cases.js?v=1.0.218';
+import diary from './diary.js?v=1.0.218';
 import accounts from './accounts.js';
 import share from './share.js';
 import tasks from './tasks.js';
@@ -670,19 +670,45 @@ function showAuthView(viewName) {
   }
 }
 
-let appInitialized = false;
+function isTokenValid(token) {
+  if (!token || typeof token !== 'string') return false;
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    const payload = JSON.parse(jsonPayload);
+    if (!payload) return false;
+    if (payload.exp && (payload.exp * 1000) < Date.now()) {
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
 async function router() {
   const path = window.location.pathname;
   console.log("Routing to path:", path);
 
   // Auto-redirect already-authenticated users away from public entry routes
-  // (homepage, login, register) straight to the dashboard immediately based on token presence.
+  // (homepage, login, register) straight to the dashboard immediately based on VALID token presence.
   const authEntryRoutes = ['/', '/index.html', '/login', '/register'];
   const existingToken = localStorage.getItem('token') || sessionStorage.getItem('token');
-  if (existingToken && authEntryRoutes.includes(path)) {
-    window.location.href = '/dashboard';
-    return;
+  if (existingToken) {
+    if (!isTokenValid(existingToken)) {
+      try {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        localStorage.removeItem('currentUser');
+        sessionStorage.removeItem('currentUser');
+      } catch (e) {}
+    } else if (authEntryRoutes.includes(path)) {
+      window.location.href = '/dashboard';
+      return;
+    }
   }
 
   const marketingNav = document.getElementById('marketing-nav');
@@ -826,6 +852,15 @@ async function router() {
     }
   } else {
     if (!isAuthenticated) {
+      try {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        localStorage.removeItem('currentUser');
+        sessionStorage.removeItem('currentUser');
+      } catch (e) {}
+      if (typeof db !== 'undefined' && typeof db.clearCache === 'function') {
+        db.clearCache();
+      }
       window.history.pushState({}, '', '/login');
       router();
     } else {

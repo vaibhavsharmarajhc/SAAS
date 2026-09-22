@@ -5,6 +5,7 @@
 
 import db from './db.js';
 import casesModule from './cases.js';
+import accountsModule from './accounts.js';
 import historyManager from './history.js';
 
 let currentStep = 1;
@@ -633,7 +634,7 @@ const clientsModule = {
     // Compile transactions markup
     let txsMarkup = '';
     if (txs.length === 0) {
-      txsMarkup = `<tr><td colspan="4" style="text-align:center;" class="text-muted">No accounting transactions logged</td></tr>`;
+      txsMarkup = `<tr><td colspan="5" style="text-align:center;" class="text-muted">No accounting transactions logged</td></tr>`;
     } else {
       txs.forEach(t => {
         const typeStyle = t.type === 'Billed' ? 'color: var(--color-warning);' : 
@@ -644,6 +645,13 @@ const clientsModule = {
             <td>${t.description}</td>
             <td style="${typeStyle} font-weight:600;">${t.type}</td>
             <td>₹${t.amount.toLocaleString('en-IN')}</td>
+            <td>
+              <div style="display:flex; gap:0.4rem; align-items:center;">
+                <button class="btn btn-secondary btn-edit-tx" style="padding:0.25rem 0.4rem;" data-id="${t.id}" title="Edit Financial Entry"><i data-lucide="pencil" style="width:12px; height:12px;"></i></button>
+                <button class="btn btn-secondary btn-invoice" style="padding:0.25rem 0.4rem;" data-id="${t.id}" title="Print Invoice/Receipt"><i data-lucide="printer" style="width:12px; height:12px;"></i></button>
+                <button class="btn btn-danger btn-delete-tx" style="padding:0.25rem 0.4rem;" data-id="${t.id}" title="Delete Transaction"><i data-lucide="trash-2" style="width:12px; height:12px;"></i></button>
+              </div>
+            </td>
           </tr>
         `;
       });
@@ -728,7 +736,12 @@ const clientsModule = {
 
       <!-- Financial Ledger -->
       <div class="card" style="padding:1.25rem;">
-        <h3 style="font-size:1.05rem; margin-bottom:1rem; border-bottom:1px solid var(--border-color); padding-bottom:0.4rem;">Statement Ledger Entries</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border-color); padding-bottom:0.4rem;">
+          <h3 style="font-size:1.05rem; margin:0;">Statement Ledger Entries (${txs.length})</h3>
+          <button class="btn btn-primary" id="client-dossier-log-tx-btn" style="font-size:0.75rem; padding:0.3rem 0.6rem;">
+            <i data-lucide="plus-circle" style="width:12px; height:12px; margin-right:4px;"></i> Log Financial Entry
+          </button>
+        </div>
         <div class="table-responsive" style="max-height: 250px;">
           <table class="table-custom">
             <thead>
@@ -737,6 +750,7 @@ const clientsModule = {
                 <th>Description</th>
                 <th>Category</th>
                 <th>Amount (₹)</th>
+                <th style="width:110px;">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -746,6 +760,34 @@ const clientsModule = {
         </div>
       </div>
     `;
+
+    const logTxBtn = body.querySelector('#client-dossier-log-tx-btn');
+    if (logTxBtn) {
+      logTxBtn.addEventListener('click', () => {
+        accountsModule.showLogTransactionModal(id, null);
+      });
+    }
+
+    body.querySelectorAll('.btn-edit-tx').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const txId = btn.getAttribute('data-id');
+        accountsModule.showEditTransaction(txId);
+      });
+    });
+
+    body.querySelectorAll('.btn-invoice').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const txId = btn.getAttribute('data-id');
+        accountsModule.showInvoice(txId);
+      });
+    });
+
+    body.querySelectorAll('.btn-delete-tx').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const txId = btn.getAttribute('data-id');
+        accountsModule.deleteTransaction(txId);
+      });
+    });
 
     const writeOffBtn = body.querySelector('#client-dossier-writeoff-btn');
     if (writeOffBtn) {

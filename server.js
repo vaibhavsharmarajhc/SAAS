@@ -124,7 +124,7 @@ async function authenticateToken(req, res, next) {
     next();
   } catch (err) {
     res.clearCookie('session_token');
-    return res.status(403).json({ error: "Invalid or expired session. Please log in again." });
+    return res.status(401).json({ error: "Invalid or expired session. Please log in again." });
   }
 }
 

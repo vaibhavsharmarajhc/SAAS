@@ -382,20 +382,17 @@ const accountsModule = {
   pageSize: 50,
 
   /**
-   * Render ledger list with 50-row pagination and DocumentFragment batching
+   * Render ledger list fallback (when Worker is unavailable) with 50-row pagination and DocumentFragment batching
    */
-  renderLedgerTable() {
-    const txs = db.getTransactions();
-    const filterClient = document.getElementById('ledger-filter-client').value;
-    const filterType = document.getElementById('ledger-filter-type').value;
+  renderLedgerTableFallback(txs, filterClient, filterType) {
     const tableBody = document.getElementById('ledger-table-body');
     if (!tableBody) return;
 
     tableBody.innerHTML = '';
 
-    const filteredTxs = txs.filter(t => {
-      const matchesClient = filterClient === 'All' || t.clientId === filterClient;
-      const matchesType = filterType === 'All' || t.type === filterType;
+    const filteredTxs = (txs || db.getTransactions()).filter(t => {
+      const matchesClient = !filterClient || filterClient === 'All' || t.clientId === filterClient;
+      const matchesType = !filterType || filterType === 'All' || t.type === filterType;
       return matchesClient && matchesType;
     })
     .sort((a, b) => new Date(b.date) - new Date(a.date)); // Newest first
@@ -406,7 +403,7 @@ const accountsModule = {
       return;
     }
 
-    const totalPages = Math.ceil(filteredTxs.length / this.pageSize);
+    const totalPages = Math.ceil(filteredTxs.length / this.pageSize) || 1;
     if (this.currentPage > totalPages) this.currentPage = 1;
 
     const startIdx = (this.currentPage - 1) * this.pageSize;
@@ -430,7 +427,7 @@ const accountsModule = {
       const creditColorStyle = t.type === 'WrittenOff' ? 'color: var(--text-secondary); text-decoration: line-through;' : 'color: var(--color-success);';
 
       row.innerHTML = `
-        <td>${t.date}</td>
+        <td>${window.formatDDMMYYYY(t.date)}</td>
         <td>
           <div style="font-weight:600; color:var(--text-primary);">${client ? client.name : 'Unknown'}</div>
           ${linkedCase ? `<div style="font-size:0.75rem; color:var(--color-primary); cursor:pointer; text-decoration:underline;" onclick="viewCaseDetails('${t.caseId}')">${linkedCase.title}</div>` : `<div style="font-size:0.75rem; color:var(--text-muted);">Standalone account</div>`}
@@ -496,7 +493,7 @@ const accountsModule = {
       prevBtn.onclick = () => {
         if (this.currentPage > 1) {
           this.currentPage--;
-          this.renderLedgerTable();
+          this.processAndRenderLedger();
         }
       };
     }
@@ -504,7 +501,7 @@ const accountsModule = {
       nextBtn.onclick = () => {
         if (this.currentPage < totalPages) {
           this.currentPage++;
-          this.renderLedgerTable();
+          this.processAndRenderLedger();
         }
       };
     }
@@ -512,7 +509,11 @@ const accountsModule = {
 
   async deleteTransaction(id) {
     if (confirm("Are you sure you want to delete this accounting transaction? Outstanding balance will recalculate.")) {
+      const tx = db.getTransactions().find(t => t.id === id);
       await db.deleteTransaction(id);
+      if (tx) {
+        document.dispatchEvent(new CustomEvent('transactionLogged', { detail: { clientId: tx.clientId, caseId: tx.caseId } }));
+      }
       this.render();
     }
   },

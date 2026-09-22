@@ -58,17 +58,22 @@ class LegalDB {
     try {
       let data = await api.auth.bootstrap();
       if (!data || !data.user) {
-        // Fallback to parallel requests
-        const [me, clients, cases, transactions] = await Promise.all([
-          api.auth.me(),
-          api.clients.getAll(),
-          api.cases.getAll(),
-          api.transactions.getAll()
-        ]);
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) {
+          this.clearCache();
+          return { success: false, fromCache: false };
+        }
+        // Fallback to me() check before firing collection requests
+        const me = await api.auth.me();
         if (!me || !me.user) {
           this.clearCache();
           return { success: false, fromCache: false };
         }
+        const [clients, cases, transactions] = await Promise.all([
+          api.clients.getAll(),
+          api.cases.getAll(),
+          api.transactions.getAll()
+        ]);
         data = {
           user: me.user,
           clients: clients || [],

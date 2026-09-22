@@ -29,6 +29,9 @@ export const adminModule = {
       // Fail closed
       sidebarLink.style.display = 'none';
 
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) return;
+
       try {
         const res = await api.admin.check();
         if (res && res.success && res.isAdmin) {

@@ -1630,6 +1630,37 @@ const casesModule = {
       });
     }
 
+    // Compile case transactions markup
+    const caseTxs = db.getTransactionsForCase(cs.id).sort((a, b) => new Date(b.date) - new Date(a.date));
+    let caseTxsMarkup = '';
+    if (caseTxs.length === 0) {
+      caseTxsMarkup = `<tr><td colspan="5" style="text-align:center;" class="text-muted">No financial entries logged for this case yet.</td></tr>`;
+    } else {
+      caseTxs.forEach(t => {
+        const typeStyle = t.type === 'Billed' ? 'color: var(--color-warning);' : 
+                          t.type === 'Received' ? 'color: var(--color-success);' : 
+                          t.type === 'WrittenOff' ? 'color: var(--text-secondary); text-decoration: line-through;' : 'color: var(--color-danger);';
+        const typeBadge = t.type === 'Received' ? 'badge-active' :
+                          t.type === 'Disbursed' ? 'badge-closed' :
+                          t.type === 'WrittenOff' ? 'badge-danger' : 'badge-pending';
+        caseTxsMarkup += `
+          <tr>
+            <td>${window.formatDDMMYYYY(t.date)}</td>
+            <td>${t.description}</td>
+            <td><span class="badge ${typeBadge}">${t.type}</span></td>
+            <td style="${typeStyle} font-weight:600;">₹${t.amount.toLocaleString('en-IN')}</td>
+            <td>
+              <div style="display:flex; gap:0.4rem; align-items:center;">
+                <button class="btn btn-secondary btn-edit-tx" style="padding:0.25rem 0.4rem;" data-id="${t.id}" title="Edit Financial Entry"><i data-lucide="pencil" style="width:12px; height:12px;"></i></button>
+                <button class="btn btn-secondary btn-invoice" style="padding:0.25rem 0.4rem;" data-id="${t.id}" title="Print Invoice/Receipt"><i data-lucide="printer" style="width:12px; height:12px;"></i></button>
+                <button class="btn btn-danger btn-delete-tx" style="padding:0.25rem 0.4rem;" data-id="${t.id}" title="Delete Transaction"><i data-lucide="trash-2" style="width:12px; height:12px;"></i></button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
     body.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem; border-bottom:1px solid var(--border-color); padding-bottom:1rem;">
         <div>
@@ -1707,11 +1738,61 @@ const casesModule = {
           </div>
         </div>
       </div>
+
+      <!-- Case Financial Ledger & Transaction History -->
+      <div class="card" style="margin-top:1.5rem; padding:1.25rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border-color); padding-bottom:0.4rem;">
+          <h3 style="font-size:1.05rem; margin:0;">Case Financial Ledger (${caseTxs.length})</h3>
+          <button class="btn btn-primary" id="case-dossier-add-tx-btn" style="font-size:0.75rem; padding:0.3rem 0.6rem;">
+            <i data-lucide="plus-circle" style="width:12px; height:12px; margin-right:4px;"></i> Log Financial Entry
+          </button>
+        </div>
+        <div class="table-responsive" style="max-height: 250px;">
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Amount (₹)</th>
+                <th style="width:110px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${caseTxsMarkup}
+            </tbody>
+          </table>
+        </div>
+      </div>
     `;
 
     // Event listener to open Log Transaction modal pre-filled
-    body.querySelector('#case-ledger-log-tx-btn').addEventListener('click', () => {
+    const openLogTx = () => {
       accountsModule.showLogTransactionModal(cs.clientId, cs.id);
+    };
+    body.querySelector('#case-ledger-log-tx-btn')?.addEventListener('click', openLogTx);
+    body.querySelector('#case-dossier-add-tx-btn')?.addEventListener('click', openLogTx);
+
+    // Event listeners for transaction row actions
+    body.querySelectorAll('.btn-edit-tx').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const txId = btn.getAttribute('data-id');
+        accountsModule.showEditTransaction(txId);
+      });
+    });
+
+    body.querySelectorAll('.btn-invoice').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const txId = btn.getAttribute('data-id');
+        accountsModule.showInvoice(txId);
+      });
+    });
+
+    body.querySelectorAll('.btn-delete-tx').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const txId = btn.getAttribute('data-id');
+        accountsModule.deleteTransaction(txId);
+      });
     });
 
     // Event listeners to edit upcoming listing (opens full Record Hearing modal)
