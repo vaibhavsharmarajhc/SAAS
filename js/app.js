@@ -62,8 +62,8 @@ import api from './api.js';
 import historyManager from './history.js';
 import dashboard from './dashboard.js';
 import clients from './clients.js';
-import cases from './cases.js?v=1.0.218';
-import diary from './diary.js?v=1.0.218';
+import cases from './cases.js?v=1.0.219';
+import diary from './diary.js?v=1.0.219';
 import accounts from './accounts.js';
 import share from './share.js';
 import tasks from './tasks.js';
@@ -669,6 +669,8 @@ function showAuthView(viewName) {
     }
   }
 }
+
+let appInitialized = false;
 
 function isTokenValid(token) {
   if (!token || typeof token !== 'string') return false;
