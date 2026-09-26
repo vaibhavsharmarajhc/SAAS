@@ -481,6 +481,10 @@ const casesModule = {
     cases.forEach(c => {
       const client = db.getClient(c.clientId);
       const balance = db.getCaseBalance(c.id);
+      const catObj = db.getCategoryByName(c.caseType);
+      const catColor = catObj ? catObj.color : '#3b82f6';
+      const badgeStyle = c.status === 'Active' ? 'badge-active' : 'badge-closed';
+      const balanceStyle = balance.outstanding > 0 ? 'color: var(--color-danger); font-weight:700;' : 'color: var(--color-success); font-weight:700;';
       const card = document.createElement('div');
       card.className = 'card';
       
