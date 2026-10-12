@@ -116,7 +116,7 @@ const accountsModule = {
           <div style="font-weight:600; color:var(--text-primary);">${client ? client.name : 'Unknown'}</div>
           ${linkedCase ? `<div style="font-size:0.75rem; color:var(--color-primary); cursor:pointer; text-decoration:underline;" onclick="viewCaseDetails('${t.caseId}')">${linkedCase.title}</div>` : `<div style="font-size:0.75rem; color:var(--text-muted);">Standalone account</div>`}
         </td>
-        <td>${t.description}</td>
+        <td>${t.description ? window.sanitizeText ? window.sanitizeText(t.description) : t.description : '<span class="text-muted">—</span>'}</td>
         <td><span class="badge ${t.typeBadgeClass}">${t.type}</span></td>
         <td style="font-weight:500;">${t.debitVal}</td>
         <td style="${creditColorStyle} font-weight:500;">${t.creditVal}</td>
@@ -432,7 +432,7 @@ const accountsModule = {
           <div style="font-weight:600; color:var(--text-primary);">${client ? client.name : 'Unknown'}</div>
           ${linkedCase ? `<div style="font-size:0.75rem; color:var(--color-primary); cursor:pointer; text-decoration:underline;" onclick="viewCaseDetails('${t.caseId}')">${linkedCase.title}</div>` : `<div style="font-size:0.75rem; color:var(--text-muted);">Standalone account</div>`}
         </td>
-        <td>${t.description}</td>
+        <td>${t.description ? window.sanitizeText ? window.sanitizeText(t.description) : t.description : '<span class="text-muted">—</span>'}</td>
         <td><span class="badge ${typeBadgeClass}">${t.type}</span></td>
         <td style="font-weight:500;">${debitVal}</td>
         <td style="${creditColorStyle} font-weight:500;">${creditVal}</td>
@@ -588,7 +588,7 @@ const accountsModule = {
           <tbody>
             <tr>
               <td style="padding:1rem 0.75rem; border:1px solid #e2e8f0; color:#334155; font-size:0.85rem;">
-                ${tx.description}
+                ${tx.description || (tx.type === 'Received' ? 'Payment received' : 'Professional services')}
               </td>
               <td style="padding:1rem 0.75rem; border:1px solid #e2e8f0; text-align:right; color:#475569;">
                 ${tx.type}

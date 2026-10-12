@@ -642,7 +642,7 @@ const clientsModule = {
         txsMarkup += `
           <tr>
             <td>${window.formatDDMMYYYY(t.date)}</td>
-            <td>${t.description}</td>
+            <td>${t.description || '<span class="text-muted">—</span>'}</td>
             <td style="${typeStyle} font-weight:600;">${t.type}</td>
             <td>₹${t.amount.toLocaleString('en-IN')}</td>
             <td>

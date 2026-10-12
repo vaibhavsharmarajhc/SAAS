@@ -1650,7 +1650,7 @@ const casesModule = {
         caseTxsMarkup += `
           <tr>
             <td>${window.formatDDMMYYYY(t.date)}</td>
-            <td>${t.description}</td>
+            <td>${t.description || '<span class="text-muted">—</span>'}</td>
             <td><span class="badge ${typeBadge}">${t.type}</span></td>
             <td style="${typeStyle} font-weight:600;">₹${t.amount.toLocaleString('en-IN')}</td>
             <td>
