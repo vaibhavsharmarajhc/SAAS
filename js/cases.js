@@ -5,6 +5,7 @@
 
 import db from './db.js';
 import accountsModule from './accounts.js';
+import shareModule from './share.js';
 import historyManager from './history.js';
 
 const casesModule = {
@@ -992,6 +993,16 @@ const casesModule = {
         alert("Hearing proceedings & listing recorded successfully.");
       }
 
+      // Capture what was just recorded so the client update reflects it
+      const clientUpdateOpts = {
+        date: date || null,
+        stage: finalStage,
+        isDisposed,
+        isTransferred,
+        newCourt,
+        disposalType: isDisposed ? document.getElementById('add-hearing-disposal-type').value : null
+      };
+
       form.reset();
       modal.classList.remove('active');
       calculatedRelativeDate = null;
@@ -1004,6 +1015,9 @@ const casesModule = {
 
       document.dispatchEvent(new CustomEvent('casesUpdated'));
       this.render();
+
+      // Ask whether to send the case status to the client
+      shareModule.promptClientUpdate(caseId, clientUpdateOpts);
     });
 
     cancelBtn.addEventListener('click', () => {

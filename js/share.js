@@ -207,6 +207,141 @@ Best regards,
         alert("Failed to copy. Please manually select the text area and copy.");
       }
     });
+  },
+
+  /**
+   * Builds the case-status message sent to a client right after a hearing is recorded.
+   * Deliberately limited to case status (no fee/financial details); the advocate can
+   * still edit the text in the prompt before sending.
+   */
+  buildHearingUpdateMessage(caseId, opts = {}) {
+    const cs = db.getCase(caseId);
+    if (!cs) return '';
+    const client = db.getClient(cs.clientId);
+    const settings = db.getSettings();
+    const fmt = (d) => (d ? window.formatDDMMYYYY(d) : '');
+
+    const lines = [];
+    lines.push(`*${settings.firmName || 'Track My Chambers'} - Case Update*`);
+    lines.push('');
+    lines.push(`Dear *${client ? client.name : 'Client'}*,`);
+    lines.push('');
+    lines.push(`Please find below the latest update regarding your matter, *${cs.title}*:`);
+    lines.push('');
+    lines.push(`*Case Reference:* ${cs.caseNumber || 'N/A'}`);
+    lines.push(`*Court Forum:* ${cs.court || 'N/A'}`);
+    if (opts.date) lines.push(`*Hearing Date:* ${fmt(opts.date)}`);
+
+    const stage = opts.stage || cs.stage;
+    if (stage) lines.push(`*Proceedings / Stage:* ${stage}`);
+
+    if (opts.isDisposed || cs.status === 'Closed') {
+      lines.push(`*Status:* Disposed${opts.disposalType ? ' (' + opts.disposalType + ')' : ''} - file closed.`);
+    } else if (opts.isTransferred && opts.newCourt) {
+      lines.push(`*Status:* Transferred to ${opts.newCourt}.`);
+      lines.push(`*Next Date:* ${cs.nextHearingDate ? fmt(cs.nextHearingDate) : 'To be notified'}`);
+    } else if (cs.nextHearingDate) {
+      const tentative = cs.listingType === 'relative' || (cs.notBeforeDate && cs.notBeforeDate !== 'Not Scheduled');
+      lines.push(`*Next Date:* ${fmt(cs.nextHearingDate)}${tentative ? ' (tentative / not before - exact listing date to be confirmed)' : ''}`);
+    } else {
+      lines.push(`*Next Date:* To be notified`);
+    }
+
+    lines.push('');
+    lines.push('Please contact the chamber if you have any questions or require further clarification.');
+    lines.push('');
+    lines.push('Best regards,');
+    lines.push('');
+    lines.push(`*${settings.lawyerName || 'Adv. Vaibhav Sharma'}*`);
+    lines.push(`*${settings.firmName || 'Track My Chambers'}*`);
+    return lines.join('\n');
+  },
+
+  /**
+   * Asks whether a status update should be sent to the client after a hearing is recorded.
+   * Shows an editable preview with WhatsApp / Email / Copy options, or "Not now" to skip.
+   */
+  promptClientUpdate(caseId, opts = {}) {
+    const cs = db.getCase(caseId);
+    if (!cs) return;
+    const client = db.getClient(cs.clientId);
+    const settings = db.getSettings();
+    const message = this.buildHearingUpdateMessage(caseId, opts);
+
+    let overlay = document.getElementById('client-update-prompt-modal');
+    if (overlay) overlay.remove();
+
+    overlay = document.createElement('div');
+    overlay.id = 'client-update-prompt-modal';
+    overlay.className = 'modal-overlay active';
+    overlay.style.zIndex = '10050';
+    overlay.innerHTML = `
+      <div class="modal-container" style="max-width:560px;">
+        <div class="modal-header">
+          <h3 class="modal-title">Send update to client?</h3>
+          <button class="modal-close" id="client-update-close" type="button">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:0.75rem;">
+            Hearing recorded for <strong id="client-update-case-title"></strong>.
+            Would you like to share the case status with <strong id="client-update-client-name"></strong>?
+          </p>
+          <label class="form-label" for="client-update-text">Message preview (editable)</label>
+          <textarea id="client-update-text" class="form-control" rows="12" style="font-family:inherit; font-size:0.82rem; line-height:1.4;"></textarea>
+          <div id="client-update-note" style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;"></div>
+        </div>
+        <div class="modal-footer" style="display:flex; flex-wrap:wrap; gap:0.5rem; justify-content:flex-end;">
+          <button type="button" class="btn btn-secondary" id="client-update-skip">Not now</button>
+          <button type="button" class="btn btn-secondary" id="client-update-copy">Copy</button>
+          <button type="button" class="btn btn-secondary" id="client-update-email">Email</button>
+          <button type="button" class="btn btn-primary" id="client-update-whatsapp">Yes, send via WhatsApp</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const q = (id) => overlay.querySelector('#' + id);
+    q('client-update-case-title').textContent = cs.title;
+    q('client-update-client-name').textContent = client ? client.name : 'the client';
+    const textarea = q('client-update-text');
+    textarea.value = message;
+
+    const missing = [];
+    if (!client || !client.phone) missing.push('phone number');
+    if (!client || !client.email) missing.push('email');
+    if (missing.length) {
+      q('client-update-note').textContent = `Note: no ${missing.join(' / ')} saved for this client — you can pick the recipient manually.`;
+    }
+
+    const close = () => overlay.remove();
+    q('client-update-close').addEventListener('click', close);
+    q('client-update-skip').addEventListener('click', close);
+
+    q('client-update-whatsapp').addEventListener('click', () => {
+      let cleanPhone = client && client.phone ? client.phone.replace(/[^0-9+]/g, '') : '';
+      if (cleanPhone && !cleanPhone.startsWith('+') && cleanPhone.length === 10) cleanPhone = '91' + cleanPhone;
+      const url = `https://api.whatsapp.com/send?${cleanPhone ? 'phone=' + cleanPhone + '&' : ''}text=${encodeURIComponent(textarea.value)}`;
+      window.open(url, '_blank', 'noopener');
+      close();
+    });
+
+    q('client-update-email').addEventListener('click', () => {
+      const subject = encodeURIComponent(`${settings.firmName || 'Track My Chambers'} Case Status Update - ${cs.title}`);
+      const body = encodeURIComponent(textarea.value.replace(/\*/g, ''));
+      window.location.href = `mailto:${client && client.email ? client.email : ''}?subject=${subject}&body=${body}`;
+      close();
+    });
+
+    q('client-update-copy').addEventListener('click', async () => {
+      const btn = q('client-update-copy');
+      try {
+        await navigator.clipboard.writeText(textarea.value);
+        btn.textContent = 'Copied!';
+      } catch (err) {
+        textarea.select();
+        btn.textContent = 'Select & copy manually';
+      }
+    });
   }
 };
 
