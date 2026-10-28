@@ -965,6 +965,21 @@ const casesModule = {
         });
       }
 
+      // The Diary and dashboard only show Active cases. If a new listing date is being
+      // recorded on a Closed case (and it isn't being disposed again), offer to reopen it
+      // — otherwise the date is saved but never appears in the Daily Diary.
+      const caseBeforeUpdate = db.getCase(caseId);
+      if (caseBeforeUpdate && caseBeforeUpdate.status === 'Closed' && !isDisposed && nextHearingDate) {
+        if (confirm("This case is currently marked Closed, so it will not appear in the Daily Diary.\n\nReopen the case so the new listing date shows in the Diary?")) {
+          await db.updateCase(caseId, {
+            status: 'Active',
+            disposalDate: null,
+            disposalType: null,
+            disposalRemarks: null
+          });
+        }
+      }
+
       if (isTransferred) {
         await db.updateCase(caseId, {
           court: newCourt,
