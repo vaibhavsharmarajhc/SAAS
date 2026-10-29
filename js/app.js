@@ -62,14 +62,15 @@ import api from './api.js';
 import historyManager from './history.js';
 import dashboard from './dashboard.js';
 import clients from './clients.js';
-import cases from './cases.js?v=1.0.223';
-import diary from './diary.js?v=1.0.223';
+import cases from './cases.js?v=1.0.224';
+import diary from './diary.js?v=1.0.224';
 import accounts from './accounts.js';
 import share from './share.js';
 import tasks from './tasks.js';
 import notificationsModule from './notifications.js';
 import adminModule from './admin.js';
 import portalModule from './portal.js';
+import { enhanceSelects } from './searchable-select.js';
 window.tasksModule = tasks;
 window.notificationsModule = notificationsModule;
 window.casesModule = cases;
@@ -887,6 +888,7 @@ async function router() {
           share.init();
           tasks.init();
           notificationsModule.init();
+          enhanceSelects(['ledger-filter-client', 'log-tx-client-id', 'log-tx-case-id', 'share-client-select', 'share-case-select', 'add-case-client-id']);
           appInitialized = true;
         }
 
